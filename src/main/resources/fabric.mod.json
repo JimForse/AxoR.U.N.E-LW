@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "axorunelostworlds",
+	"version": "1.0",
+	"name": "AR: Lost Worlds",
+	"description": "Mod created specially for minecraft project: 'AxoRune'",
+	"authors": [
+		"JimForse",
+		"FIRrICE"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/JimForse/AxoR.U.N.E-LW"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/axorunelostworlds/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"rw.modden.Axorunelostworlds"
+		],
+		"fabric-datagen": [
+			"rw.modden.AxorunelostworldsDataGenerator"
+		],
+		"cardinal-components-entity": [
+			"rw.modden.components.ModEntityComponents"
+		]
+	},
+	"mixins": [
+		"axorunelostworlds.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.13",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
