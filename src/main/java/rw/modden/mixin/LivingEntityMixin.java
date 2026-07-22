@@ -76,14 +76,14 @@ public class LivingEntityMixin {
         if (battle) {
             doesDie = false;
             healReserve = ModComponents.CHARACTERS.get(player).getCharacter(characterName).getHealReserve(); // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
-            healRegen = ModComponents.CHARACTERS.get(player).getCharacter(characterName).getHealRegen(); // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя}
+            healRegen = ModComponents.CHARACTERS.get(player).getCharacter(characterName).getHealRegen(); // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
 
             if (currentHeal < healReserve) {
                 if (currentHeal <= 0) {
                     doesDie = true;
                     info.cancel();
                 } else {
-                    newHeal = currentHeal + (healReserve * healRegen); // TODO: исправить, когда будет выполнено задание #Tech.14
+                    newHeal = currentHeal + (healReserve * healRegen); // TODO: исправить, когда будет выполнено задание #Tech.17
                     currentHeal = newHeal;
                 }
             }

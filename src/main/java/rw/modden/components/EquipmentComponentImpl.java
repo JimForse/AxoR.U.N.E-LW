@@ -1,12 +1,24 @@
 package rw.modden.components;
 
+import net.minecraft.server.network.ServerPlayerEntity;
 import rw.modden.characters.CharacterName;
 import rw.modden.items.Equipment;
 
 public class EquipmentComponentImpl implements EquipmentComponent{
     @Override
-    public int getSlot(CharacterName character, int number) {
-        return 0;
+    public Equipment getSlot(CharacterName character, int number, ServerPlayerEntity player) {
+        Equipment slot = null;
+//        switch (number) {
+//            case 1 -> slot = ModComponents.CHARACTERS.get(player).getCharacter(character).getHead();
+//            case 2 -> slot = ;
+//            case 3 -> slot = ;
+//            case 4 -> slot = ;
+//            case 5 -> slot = ;
+//            case 6 -> slot = ;
+//            case 7 -> slot = ;
+//        }
+        // TODO: реализовать, как только будет выполнено задание Equipment.6
+        return slot;
     }
 
     @Override
