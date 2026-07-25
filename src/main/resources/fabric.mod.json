@@ -24,6 +24,9 @@
 		],
 		"cardinal-components-entity": [
 			"rw.modden.components.ModEntityComponents"
+		],
+		"cardinal-components-item": [
+			"rw.modden.components.ModItemComponents"
 		]
 	},
 	"mixins": [

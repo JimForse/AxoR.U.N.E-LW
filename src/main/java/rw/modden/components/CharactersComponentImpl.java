@@ -1,5 +1,6 @@
 package rw.modden.components;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -22,6 +23,11 @@ public class CharactersComponentImpl implements CharactersComponent {
     private final Map<CharacterName, Character> characters = new HashMap<>();
     private final Map<String, ArrayList<CharacterName>> charactersGroups = new HashMap<>();
     private final ArrayList<String> groupsList = new ArrayList<>();
+    private final PlayerEntity player;
+
+    public CharactersComponentImpl(PlayerEntity player) {
+        this.player = player;
+    }
 
     @Override
     public Character getCharacter(CharacterName name) {

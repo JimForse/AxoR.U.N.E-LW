@@ -8,5 +8,6 @@ public class ModEntityComponents implements EntityComponentInitializer {
     @Override
     public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
         registry.registerFor(PlayerEntity.class, ModComponents.BATTLE_STATE, (player -> new BattleStateComponentImpl(player)));
+        registry.registerFor(PlayerEntity.class, ModComponents.CHARACTERS, (player -> new CharactersComponentImpl(player)));
     }
 }

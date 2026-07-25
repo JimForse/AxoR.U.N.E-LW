@@ -1,10 +1,18 @@
 package rw.modden.components;
 
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import rw.modden.characters.CharacterName;
 import rw.modden.items.Equipment;
 
 public class EquipmentComponentImpl implements EquipmentComponent{
+    private final PlayerEntity player;
+
+    public EquipmentComponentImpl(PlayerEntity player) {
+        this.player = player;
+    }
+
     @Override
     public Equipment getSlot(CharacterName character, int number, ServerPlayerEntity player) {
         Equipment slot = null;
@@ -38,6 +46,16 @@ public class EquipmentComponentImpl implements EquipmentComponent{
 
     @Override
     public void removeItem(CharacterName character, Equipment item) {
+
+    }
+
+    @Override
+    public void readFromNbt(NbtCompound tag) {
+
+    }
+
+    @Override
+    public void writeToNbt(NbtCompound tag) {
 
     }
 }
