@@ -58,20 +58,16 @@ public class Battle {
             if (hasBuff) {
                 for(String s: (ArrayList<String>) map.get("buffes"))
                     buffes.add(new EffectsFactory().getVanillaEffects(s));
-                buffes.stream().forEach(x -> {
-                    player.addStatusEffect(
-                            new StatusEffectInstance(x, 48000, 0, false, false, false),
-                            player);
-                });
+                buffes.forEach(x -> player.addStatusEffect(
+                        new StatusEffectInstance(x, 48000, 0, false, false, false),
+                        player));
             }
             if (hasDebuff) {
                 for (String s: (ArrayList<String>) map.get("de_buffes"))
                     de_buffes.add(new EffectsFactory().getVanillaEffects(s));
-                de_buffes.stream().forEach(x -> {
-                    player.addStatusEffect(
-                            new StatusEffectInstance(x, 48000, 0, false, false, false),
-                            player);
-                });
+                de_buffes.forEach(x -> player.addStatusEffect(
+                        new StatusEffectInstance(x, 48000, 0, false, false, false),
+                        player));
             }
 
             player.teleport(world, position.get(0), position.get(1), position.get(2),
