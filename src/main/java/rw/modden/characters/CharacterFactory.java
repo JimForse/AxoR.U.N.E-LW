@@ -3,7 +3,6 @@ package rw.modden.characters;
 import rw.modden.characters.characterList.FIRrICECharacter;
 import rw.modden.characters.characterList.Kllima777Character;
 import rw.modden.combat.path.Path;
-import rw.modden.items.Equipment;
 
 public class CharacterFactory {
     private Character character;

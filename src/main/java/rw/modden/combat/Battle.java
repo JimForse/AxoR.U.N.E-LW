@@ -33,7 +33,7 @@ public class Battle {
             CharacterName character = group.get(0);
             characterName = character; // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
             new RealizingCharacters().realizingCharacterForPlayer(character, player);
-            new ActiveBattle().staminaExpense(player);
+            new ActiveBattle().staminaExpense(player); // TODO исправить заглушку
         }
     }
 

@@ -5,16 +5,14 @@ import net.minecraft.nbt.NbtString;
 import rw.modden.combat.path.Path;
 import rw.modden.combat.path.PathFactory;
 import rw.modden.combat.path.PathesName;
-import rw.modden.items.ArmorsEnum;
-import rw.modden.items.ItemsEnum;
 
 public abstract class ABCharacter implements Character {
     private int stars, strength, defence;
     private float healReserve, staminaRegen, stamina, healRegen;
     private Path pathID;
     private CharacterName name;
-    private ArmorsEnum head, chest, legs, boots;
-    private ItemsEnum slot1, slot2, slot3;
+//    private ArmorsEnum head, chest, legs, boots;
+//    private ItemsEnum slot1, slot2, slot3;
 
     public ABCharacter (float healReserve, int stars, float stamina, int strength, float staminaRegen, float healRegen, int defence, Path pathID, CharacterName name) {
         this.healReserve = healReserve;
@@ -64,34 +62,34 @@ public abstract class ABCharacter implements Character {
     public int getDefence() {
         return defence;
     }
-    @Override
-    public ArmorsEnum getHead() {
-        return head;
-    }
-    @Override
-    public ArmorsEnum getChest() {
-        return chest;
-    }
-    @Override
-    public ArmorsEnum getLegs() {
-        return legs;
-    }
-    @Override
-    public ArmorsEnum getBoots() {
-        return boots;
-    }
-    @Override
-    public ItemsEnum getFirstSlot() {
-        return slot1;
-    }
-    @Override
-    public ItemsEnum getSecondSlot() {
-        return slot2;
-    }
-    @Override
-    public ItemsEnum getThirdSlot() {
-        return slot3;
-    }
+//    @Override
+//    public ArmorsEnum getHead() {
+//        return head;
+//    }
+//    @Override
+//    public ArmorsEnum getChest() {
+//        return chest;
+//    }
+//    @Override
+//    public ArmorsEnum getLegs() {
+//        return legs;
+//    }
+//    @Override
+//    public ArmorsEnum getBoots() {
+//        return boots;
+//    }
+//    @Override
+//    public ItemsEnum getFirstSlot() {
+//        return slot1;
+//    }
+//    @Override
+//    public ItemsEnum getSecondSlot() {
+//        return slot2;
+//    }
+//    @Override
+//    public ItemsEnum getThirdSlot() {
+//        return slot3;
+//    }
 
     @Override
     public void setHealReserve(float value) {
@@ -125,32 +123,32 @@ public abstract class ABCharacter implements Character {
     public void setPath(Path pathID) {
         this.pathID = pathID;
     }
-    @Override
-    public void setHead(ArmorsEnum armor) {
-        this.head = armor;
-    }
-    @Override
-    public void setChest(ArmorsEnum armor) {
-        this.chest = armor;
-    }
-    @Override
-    public void setLegs(ArmorsEnum armor) {
-        this.legs = armor;
-    }
-    @Override
-    public void setBoots(ArmorsEnum armor) {
-        this.boots = armor;
-    }
-    @Override
-    public void setFirstSlot(ItemsEnum item) {
-        this.slot1 = item;
-    }
-    public void setSecondSlot(ItemsEnum item) {
-        this.slot2 = item;
-    }
-    public void setThirdSlot(ItemsEnum item) {
-        this.slot3 = item;
-    }
+//    @Override
+//    public void setHead(ArmorsEnum armor) {
+//        this.head = armor;
+//    }
+//    @Override
+//    public void setChest(ArmorsEnum armor) {
+//        this.chest = armor;
+//    }
+//    @Override
+//    public void setLegs(ArmorsEnum armor) {
+//        this.legs = armor;
+//    }
+//    @Override
+//    public void setBoots(ArmorsEnum armor) {
+//        this.boots = armor;
+//    }
+//    @Override
+//    public void setFirstSlot(ItemsEnum item) {
+//        this.slot1 = item;
+//    }
+//    public void setSecondSlot(ItemsEnum item) {
+//        this.slot2 = item;
+//    }
+//    public void setThirdSlot(ItemsEnum item) {
+//        this.slot3 = item;
+//    }
 
     @Override
     public void readFromNbt(NbtCompound nbt) {
@@ -165,13 +163,13 @@ public abstract class ABCharacter implements Character {
         this.pathID = PathFactory.get(
                 PathesName.valueOf(nbt.getString(name.name() + "_path"))
         );
-        this.head = ArmorsEnum.valueOf(nbt.getString(name.name()+"_head"));
-        this.chest = ArmorsEnum.valueOf(nbt.getString(name.name()+"_chest"));
-        this.legs = ArmorsEnum.valueOf(nbt.getString(name.name()+"_legs"));
-        this.boots = ArmorsEnum.valueOf(nbt.getString(name.name()+"_boots"));
-        this.slot1 = ItemsEnum.valueOf(nbt.getString(name.name()+"_slot1"));
-        this.slot2 = ItemsEnum.valueOf(nbt.getString(name.name()+"_slot2"));
-        this.slot3 = ItemsEnum.valueOf(nbt.getString(name.name()+"_slot3"));
+//        this.head = ArmorsEnum.valueOf(nbt.getString(name.name()+"_head"));
+//        this.chest = ArmorsEnum.valueOf(nbt.getString(name.name()+"_chest"));
+//        this.legs = ArmorsEnum.valueOf(nbt.getString(name.name()+"_legs"));
+//        this.boots = ArmorsEnum.valueOf(nbt.getString(name.name()+"_boots"));
+//        this.slot1 = ItemsEnum.valueOf(nbt.getString(name.name()+"_slot1"));
+//        this.slot2 = ItemsEnum.valueOf(nbt.getString(name.name()+"_slot2"));
+//        this.slot3 = ItemsEnum.valueOf(nbt.getString(name.name()+"_slot3"));
     }
 
     @Override
@@ -184,13 +182,13 @@ public abstract class ABCharacter implements Character {
         nbt.putFloat(name.name()+"_healRegen", healRegen);
         nbt.putInt(name.name()+"_defence", defence);
         nbt.put(name.name()+"_path", NbtString.of(pathID.getPath().name()));
-        nbt.putString(name.name()+"_head", head.name());
-        nbt.putString(name.name()+"_chest", chest.name());
-        nbt.putString(name.name()+"_legs", legs.name());
-        nbt.putString(name.name()+"_boots", boots.name());
-        nbt.putString(name.name()+"_slot1", slot1.name());
-        nbt.putString(name.name()+"_slot2", slot2.name());
-        nbt.putString(name.name()+"_slot3", slot3.name());
+//        nbt.putString(name.name()+"_head", head.name());
+//        nbt.putString(name.name()+"_chest", chest.name());
+//        nbt.putString(name.name()+"_legs", legs.name());
+//        nbt.putString(name.name()+"_boots", boots.name());
+//        nbt.putString(name.name()+"_slot1", slot1.name());
+//        nbt.putString(name.name()+"_slot2", slot2.name());
+//        nbt.putString(name.name()+"_slot3", slot3.name());
         nbt.putString("name", name.name());
     }
 }

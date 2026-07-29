@@ -1,4 +1,4 @@
 package rw.modden.items;
 
-public enum ItemsEnum {
+public class ABEquip {
 }

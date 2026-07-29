@@ -4,7 +4,6 @@ import rw.modden.characters.ABCharacter;
 import rw.modden.characters.CharacterName;
 import rw.modden.combat.path.CreatePath;
 import rw.modden.combat.path.Path;
-import rw.modden.items.Equipment;
 
 public class FIRrICECharacter extends ABCharacter {
     public FIRrICECharacter() {

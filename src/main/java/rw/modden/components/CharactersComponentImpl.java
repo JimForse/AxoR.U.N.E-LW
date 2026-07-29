@@ -13,7 +13,6 @@ import rw.modden.characters.RealizingCharacters;
 import rw.modden.combat.path.Path;
 import rw.modden.combat.path.PathFactory;
 import rw.modden.combat.path.PathesName;
-import rw.modden.items.Equipment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
