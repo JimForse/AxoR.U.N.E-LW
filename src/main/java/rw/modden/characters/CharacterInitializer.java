@@ -24,11 +24,16 @@ public class CharacterInitializer {
         CharacterName characterName = null;
 
         switch (name) {
-            case "FIRRICE" -> characterName = CharacterName.FIRRICE;
-            case "KLLIMA777" -> characterName = CharacterName.KLLIMA777;
-            case "THE_LOST" -> characterName = CharacterName.THE_LOST;
-            case "WAFEN" -> characterName = CharacterName.WAFEN;
-            case "SPECTORPROFM" -> characterName = CharacterName.SPECTORPROFM;
+            case "FIRRICE" ->          characterName = CharacterName.FIRRICE;
+            case "KLLIMA777" ->        characterName = CharacterName.KLLIMA777;
+            case "WAFFENTRAGER_109" -> characterName = CharacterName.WAFEN;
+            case "SPECTORPROFM" ->     characterName = CharacterName.SPECTORPROFM;
+            case "VLAD8822" ->         characterName = CharacterName.VLAD;
+            case "THE_LOST321" ->      characterName = CharacterName.THE_LOST;
+            case "OMFAS" ->            characterName = CharacterName.OMFAS;
+            case "GVALL_" ->           characterName = CharacterName.GVALL;
+            case "MATSVEI_V222" ->     characterName = CharacterName.MATSVEI;
+            case "KEEPFEE3215" ->      characterName = CharacterName.KEEPFEE;
         }
 
         return characterName;

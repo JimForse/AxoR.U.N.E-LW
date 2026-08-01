@@ -5,5 +5,10 @@ public enum CharacterName {
     KLLIMA777,
     THE_LOST,
     WAFEN,
+    GVALL,
+    MATSVEI,
+    OMFAS,
+    VLAD,
+    KEEPFEE,
     SPECTORPROFM;
 }

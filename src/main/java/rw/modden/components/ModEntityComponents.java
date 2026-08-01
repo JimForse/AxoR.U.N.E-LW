@@ -9,5 +9,6 @@ public class ModEntityComponents implements EntityComponentInitializer {
     public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
         registry.registerFor(PlayerEntity.class, ModComponents.BATTLE_STATE, (player -> new BattleStateComponentImpl(player)));
         registry.registerFor(PlayerEntity.class, ModComponents.CHARACTERS, (player -> new CharactersComponentImpl(player)));
+        registry.registerFor(PlayerEntity.class, ModComponents.EQUIPMENT, (player -> new EquipmentComponentImpl(player)));
     }
 }

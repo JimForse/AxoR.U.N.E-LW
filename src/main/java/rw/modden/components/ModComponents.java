@@ -10,4 +10,6 @@ public class ModComponents {
         ComponentRegistry.getOrCreate(Identifier.of(Axorunelostworlds.MOD_ID, "battle_state"), BattleStateComponent.class);
     public static final ComponentKey<CharactersComponent> CHARACTERS =
         ComponentRegistry.getOrCreate(Identifier.of(Axorunelostworlds.MOD_ID, "characters"), CharactersComponent.class);
+    public static final ComponentKey<EquipmentComponent> EQUIPMENT =
+        ComponentRegistry.getOrCreate(Identifier.of(Axorunelostworlds.MOD_ID, "equipment"), EquipmentComponent.class);
 }

@@ -34,6 +34,10 @@ public class Axorunelostworlds implements ModInitializer {
 	public static final String MOD_ID = "axorunelostworlds";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	public String getUniqueItemID() {
+		return UUID.randomUUID().toString();
+	}
+
 	@Override
 	public void onInitialize() {
 		LOGGER.info("Hello Gods Axo- worlds!");
