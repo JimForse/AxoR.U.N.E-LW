@@ -90,7 +90,7 @@ public class CharacterCommands {
     private static int setCharacter(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         String argument = StringArgumentType.getString(ctx, "character");
         ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        ModComponents.CHARACTERS.get(player).setCharacter(CharacterName.valueOf(argument), player);
+        ModComponents.CHARACTERS.get(player).setCharacter(CharacterName.valueOf(argument));
         return 1;
     }
 

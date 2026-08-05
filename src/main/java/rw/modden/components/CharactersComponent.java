@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface CharactersComponent extends Component {
     Character getCharacter(CharacterName name);
-    void setCharacter(CharacterName character, ServerPlayerEntity player);
+    void setCharacter(CharacterName character);
     void addCharacter(CharacterName character);
     Map<CharacterName, Character> getCharacters();
     boolean hasCharacter(CharacterName name);
@@ -18,7 +18,7 @@ public interface CharactersComponent extends Component {
 
     Map<String, ArrayList<CharacterName>> getAllCharactersGroups();
     ArrayList<CharacterName> getCharactersGroup(String groupName);
-    int addCharacterToGroup(String groupName, CharacterName characterName, ServerPlayerEntity player);
+    int addCharacterToGroup(String groupName, CharacterName characterName);
 
     ArrayList<String> getGroupsList();
     void addGroupToGroupsList(String groupName);

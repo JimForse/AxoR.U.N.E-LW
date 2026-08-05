@@ -4,11 +4,11 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public class ABEquip {
-    private String id, itemID;
+    private String uniqueID, itemID;
     private float healReserveBonus, healRegenBonus, damageBonus, defenceBonus;
 
     public ABEquip (String uniqueID, String itemID, float healReserveBonus, float healRegenBonus, float damageBonus, float defenceBonus) {
-        this.id = uniqueID;
+        this.uniqueID = uniqueID;
         this.itemID = itemID;
         this.damageBonus = damageBonus;
         this.defenceBonus = defenceBonus;
@@ -31,12 +31,12 @@ public class ABEquip {
     public String getItemID() {
         return itemID;
     }
-    public String getId() {
-        return id;
+    public String getUniqueID() {
+        return uniqueID;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setUniqueID(String id) {
+        this.uniqueID = id;
     }
     public void setHealReserveBonus(float healReserveBonus) {
         this.healReserveBonus = healReserveBonus;
@@ -55,20 +55,20 @@ public class ABEquip {
     }
 
     public void readFromNbt(NbtCompound nbt) {
-        this.itemID = nbt.getString("unique_id"); // first line
-        this.healReserveBonus = nbt.getFloat("healReserveBonus"+itemID);
-        this.healRegenBonus = nbt.getFloat("healRegenBonus"+itemID);
-        this.defenceBonus = nbt.getFloat("defenceBonus"+itemID);
-        this.damageBonus = nbt.getFloat("damageBonus"+itemID);
-        this.id = nbt.getString("item_id"+itemID);
+        this.uniqueID         = nbt.getString("unique_id"); // first line
+        this.healReserveBonus = nbt.getFloat( "healReserveBonus" + uniqueID);
+        this.healRegenBonus   = nbt.getFloat( "healRegenBonus"   + uniqueID);
+        this.defenceBonus     = nbt.getFloat( "defenceBonus"     + uniqueID);
+        this.damageBonus      = nbt.getFloat( "damageBonus"      + uniqueID);
+        this.itemID           = nbt.getString("item_id"          + uniqueID);
     }
 
     public void writeToNbt(NbtCompound nbt) {
-        nbt.putString("item_id: "+itemID, id);
-        nbt.putFloat("healReserveBonus"+itemID, healReserveBonus);
-        nbt.putFloat("healRegenBonus"+itemID, healRegenBonus);
-        nbt.putFloat("damageBonus"+itemID, damageBonus);
-        nbt.putFloat("defenceBonus"+itemID, defenceBonus);
+        nbt.putFloat ("healReserveBonus" + itemID, healReserveBonus);
+        nbt.putFloat ("healRegenBonus"   + itemID, healRegenBonus);
+        nbt.putFloat ("damageBonus"      + itemID, damageBonus);
+        nbt.putFloat ("defenceBonus"     + itemID, defenceBonus);
+        nbt.putString("item_id: "  + itemID, uniqueID);
         nbt.putString("unique_id", itemID); // last line
     }
 }

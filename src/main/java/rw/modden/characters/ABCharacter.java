@@ -5,14 +5,19 @@ import net.minecraft.nbt.NbtString;
 import rw.modden.combat.path.Path;
 import rw.modden.combat.path.PathFactory;
 import rw.modden.combat.path.PathesName;
+import rw.modden.items.ABEquip;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class ABCharacter implements Character {
     private int stars, strength, defence;
     private float healReserve, staminaRegen, stamina, healRegen;
     private Path pathID;
     private CharacterName name;
-//    private ArmorsEnum head, chest, legs, boots;
-//    private ItemsEnum slot1, slot2, slot3;
+    private ABEquip head, chest, legs, boots, slot1, slot2, slot3;
+    private Map<String, ABEquip> equipMap = new HashMap<>();
 
     public ABCharacter (float healReserve, int stars, float stamina, int strength, float staminaRegen, float healRegen, int defence, Path pathID, CharacterName name) {
         this.healReserve = healReserve;
@@ -62,34 +67,34 @@ public abstract class ABCharacter implements Character {
     public int getDefence() {
         return defence;
     }
-//    @Override
-//    public ArmorsEnum getHead() {
-//        return head;
-//    }
-//    @Override
-//    public ArmorsEnum getChest() {
-//        return chest;
-//    }
-//    @Override
-//    public ArmorsEnum getLegs() {
-//        return legs;
-//    }
-//    @Override
-//    public ArmorsEnum getBoots() {
-//        return boots;
-//    }
-//    @Override
-//    public ItemsEnum getFirstSlot() {
-//        return slot1;
-//    }
-//    @Override
-//    public ItemsEnum getSecondSlot() {
-//        return slot2;
-//    }
-//    @Override
-//    public ItemsEnum getThirdSlot() {
-//        return slot3;
-//    }
+    @Override
+    public ABEquip getHead() {
+        return head;
+    }
+    @Override
+    public ABEquip getChest() {
+        return chest;
+    }
+    @Override
+    public ABEquip getLegs() {
+        return legs;
+    }
+    @Override
+    public ABEquip getBoots() {
+        return boots;
+    }
+    @Override
+    public ABEquip getFirstSlot() {
+        return slot1;
+    }
+    @Override
+    public ABEquip getSecondSlot() {
+        return slot2;
+    }
+    @Override
+    public ABEquip getThirdSlot() {
+        return slot3;
+    }
 
     @Override
     public void setHealReserve(float value) {
@@ -123,72 +128,140 @@ public abstract class ABCharacter implements Character {
     public void setPath(Path pathID) {
         this.pathID = pathID;
     }
-//    @Override
-//    public void setHead(ArmorsEnum armor) {
-//        this.head = armor;
-//    }
-//    @Override
-//    public void setChest(ArmorsEnum armor) {
-//        this.chest = armor;
-//    }
-//    @Override
-//    public void setLegs(ArmorsEnum armor) {
-//        this.legs = armor;
-//    }
-//    @Override
-//    public void setBoots(ArmorsEnum armor) {
-//        this.boots = armor;
-//    }
-//    @Override
-//    public void setFirstSlot(ItemsEnum item) {
-//        this.slot1 = item;
-//    }
-//    public void setSecondSlot(ItemsEnum item) {
-//        this.slot2 = item;
-//    }
-//    public void setThirdSlot(ItemsEnum item) {
-//        this.slot3 = item;
-//    }
+    @Override
+    public void setHead(ABEquip armor) {
+        if (this.head != null)
+            removeItem(this.head);
+        this.head = armor;
+        addItem(armor);
+    }
+    @Override
+    public void setChest(ABEquip armor) {
+        if (this.chest != null)
+            removeItem(this.chest);
+        this.chest = armor;
+        addItem(armor);
+    }
+    @Override
+    public void setLegs(ABEquip armor) {
+        if (this.legs != null)
+            removeItem(this.legs);
+        this.legs = armor;
+        addItem(armor);
+    }
+    @Override
+    public void setBoots(ABEquip armor) {
+        if (this.boots != null)
+            removeItem(this.boots);
+        this.boots = armor;
+        addItem(armor);
+    }
+    @Override
+    public void setFirstSlot(ABEquip item) {
+        if (this.slot1 != null)
+            removeItem(this.slot1);
+        this.slot1 = item;
+        addItem(item);
+    }
+    @Override
+    public void setSecondSlot(ABEquip item) {
+        if (this.slot2 != null)
+            removeItem(this.slot2);
+        this.slot2 = item;
+        addItem(item);
+    }
+    @Override
+    public void setThirdSlot(ABEquip item) {
+        if (this.slot3 != null)
+            removeItem(this.slot3);
+        this.slot3 = item;
+        addItem(item);
+    }
+
+    private void addItem(ABEquip item) {
+        equipMap.put(item.getUniqueID(), item);
+    }
+    private void removeItem(ABEquip item) {
+        equipMap.remove(item.getUniqueID());
+    }
+    @Override
+    public boolean hasItem(ABEquip item) {
+        return hasItem(item.getUniqueID());
+    }
+    @Override
+    public boolean hasItem(String uniqueID) {
+        return equipMap.containsKey(uniqueID);
+    }
+    @Override
+    public ABEquip getItem(String uniqueID) {
+        return equipMap.get(uniqueID);
+    }
 
     @Override
     public void readFromNbt(NbtCompound nbt) {
-        this.name = CharacterName.valueOf(nbt.getString("name"));
-        this.healReserve = nbt.getFloat(name.name() + "_healReserve");
-        this.stars = nbt.getInt(name.name() + "_stars");
-        this.stamina = nbt.getFloat(name.name() + "_stamina");
-        this.strength = nbt.getInt(name.name() + "_strength");
+        this.name = CharacterName.valueOf(nbt.getString("name")); // first line
+        this.defence      = nbt.getInt(  name.name() + "_defence");
+        this.stars        = nbt.getInt(  name.name() + "_stars");
+        this.strength     = nbt.getInt(  name.name() + "_strength");
+        this.healReserve  = nbt.getFloat(name.name() + "_healReserve");
+        this.stamina      = nbt.getFloat(name.name() + "_stamina");
         this.staminaRegen = nbt.getFloat(name.name() + "_staminaRegen");
-        this.healRegen = nbt.getFloat(name.name() + "_healRegen");
-        this.defence = nbt.getInt(name.name() + "_defence");
+        this.healRegen    = nbt.getFloat(name.name() + "_healRegen");
         this.pathID = PathFactory.get(
                 PathesName.valueOf(nbt.getString(name.name() + "_path"))
         );
-//        this.head = ArmorsEnum.valueOf(nbt.getString(name.name()+"_head"));
-//        this.chest = ArmorsEnum.valueOf(nbt.getString(name.name()+"_chest"));
-//        this.legs = ArmorsEnum.valueOf(nbt.getString(name.name()+"_legs"));
-//        this.boots = ArmorsEnum.valueOf(nbt.getString(name.name()+"_boots"));
-//        this.slot1 = ItemsEnum.valueOf(nbt.getString(name.name()+"_slot1"));
-//        this.slot2 = ItemsEnum.valueOf(nbt.getString(name.name()+"_slot2"));
-//        this.slot3 = ItemsEnum.valueOf(nbt.getString(name.name()+"_slot3"));
+
+        /** Items block */
+        String uniqueID = "", itemID = "";
+        Float healReserveBonus, healRegenBonus, defenceBonus, damageBonus;
+        ArrayList<String> slots   = new ArrayList<>();
+
+        slots.add(nbt.getString(name.name() + "_head"));
+        slots.add(nbt.getString(name.name() + "_chest"));
+        slots.add(nbt.getString(name.name() + "_legs"));
+        slots.add(nbt.getString(name.name() + "_boots"));
+        slots.add(nbt.getString(name.name() + "_slot1"));
+        slots.add(nbt.getString(name.name() + "_slot2"));
+        slots.add(nbt.getString(name.name() + "_slot3"));
+
+        for (int i = 0; i < slots.size(); i++) {
+            uniqueID = slots.get(i);
+            healReserveBonus = nbt.getFloat( "healReserveBonus" + uniqueID);
+            healRegenBonus   = nbt.getFloat( "healRegenBonus"   + uniqueID);
+            defenceBonus     = nbt.getFloat( "defenceBonus"     + uniqueID);
+            damageBonus      = nbt.getFloat( "damageBonus"      + uniqueID);
+            itemID           = nbt.getString("item_id"          + uniqueID);
+
+            switch (i) {
+                case 0 -> this.head  = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
+                case 1 -> this.chest = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
+                case 2 -> this.legs  = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
+                case 3 -> this.boots = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
+                case 4 -> this.slot1 = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
+                case 5 -> this.slot2 = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
+                case 6 -> this.slot3 = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
+            }
+        }
     }
 
     @Override
     public void writeToNbt(NbtCompound nbt) {
-        nbt.putFloat(name.name()+"_healReserve", healReserve);
-        nbt.putInt(name.name()+"_stars", stars);
-        nbt.putFloat(name.name()+"_stamina", stamina);
-        nbt.putInt(name.name()+"_strength", strength);
-        nbt.putFloat(name.name()+"_staminaRegen", staminaRegen);
-        nbt.putFloat(name.name()+"_healRegen", healRegen);
-        nbt.putInt(name.name()+"_defence", defence);
-        nbt.put(name.name()+"_path", NbtString.of(pathID.getPath().name()));
-//        nbt.putString(name.name()+"_head", head.name());
-//        nbt.putString(name.name()+"_chest", chest.name());
-//        nbt.putString(name.name()+"_legs", legs.name());
-//        nbt.putString(name.name()+"_boots", boots.name());
-//        nbt.putString(name.name()+"_slot1", slot1.name());
-//        nbt.putString(name.name()+"_slot2", slot2.name());
-//        nbt.putString(name.name()+"_slot3", slot3.name());
-        nbt.putString("name", name.name());
+        nbt.putInt   (name.name()+"_defence",      defence);
+        nbt.putInt   (name.name()+"_strength",     strength);
+        nbt.putInt   (name.name()+"_stars",        stars);
+        nbt.putFloat (name.name()+"_healReserve",  healReserve);
+        nbt.putFloat (name.name()+"_stamina",      stamina);
+        nbt.putFloat (name.name()+"_staminaRegen", staminaRegen);
+        nbt.putFloat (name.name()+"_healRegen",    healRegen);
+        nbt.putString(name.name()+"_head",         head.getUniqueID());
+        nbt.putString(name.name()+"_chest",        chest.getUniqueID());
+        nbt.putString(name.name()+"_legs",         legs.getUniqueID());
+        nbt.putString(name.name()+"_boots",        boots.getUniqueID());
+        nbt.putString(name.name()+"_slot1",        slot1.getUniqueID());
+        nbt.putString(name.name()+"_slot2",        slot2.getUniqueID());
+        nbt.putString(name.name()+"_slot3",        slot3.getUniqueID());
+
+        nbt.put( name.name()+"_path", NbtString.of(pathID.getPath().name()));
+        nbt.putString("name", name.name());// last line
     }
 }

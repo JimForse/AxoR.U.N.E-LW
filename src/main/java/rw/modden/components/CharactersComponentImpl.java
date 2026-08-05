@@ -34,8 +34,8 @@ public class CharactersComponentImpl implements CharactersComponent {
     }
 
     @Override
-    public void setCharacter(CharacterName name, ServerPlayerEntity player) {
-        new RealizingCharacters().realizingCharacterForPlayer(name, player);
+    public void setCharacter(CharacterName name) {
+        new RealizingCharacters().realizingCharacterForPlayer(name, (ServerPlayerEntity) player);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class CharactersComponentImpl implements CharactersComponent {
     }
 
     @Override
-    public int addCharacterToGroup(String groupName, CharacterName characterName, ServerPlayerEntity player) {
+    public int addCharacterToGroup(String groupName, CharacterName characterName) {
         try {
             if (charactersGroups.containsKey(groupName)) {
                 ArrayList<CharacterName> group = charactersGroups.get(groupName);

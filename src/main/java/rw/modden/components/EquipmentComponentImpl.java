@@ -3,6 +3,8 @@ package rw.modden.components;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import rw.modden.Axorunelostworlds;
+import rw.modden.characters.CharacterName;
+import rw.modden.items.ABEquip;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,9 +20,15 @@ public class EquipmentComponentImpl implements EquipmentComponent {
     public Map<String, String> getItemList() {
         return itemList;
     }
-//    public String getItem(String uniqueID) {
-//
-//    } TODO: придумать конкретный вид и работу, и реализовать
+    public ABEquip getItem(String uniqueID, CharacterName character) {
+        return ModComponents.CHARACTERS.get(player).getCharacter(character).getItem(uniqueID);
+    }
+    public boolean hasItem(String uniqueID) {
+        return itemList.containsValue(uniqueID);
+    }
+    public boolean hasItem(String uniqueID, CharacterName character) {
+        return ModComponents.CHARACTERS.get(player).getCharacter(character).hasItem(uniqueID);
+    }
     public void addItem(String itemID) {
         itemList.put(itemID, new Axorunelostworlds().getUniqueItemID());
     }
@@ -29,7 +37,7 @@ public class EquipmentComponentImpl implements EquipmentComponent {
     /** Registries.ITEM.getId(itemStack.getItem()).toString() */
 
     public void addItem(String itemID, String uniqueID) {
-        itemList.put(itemID,uniqueID);
+        itemList.put(itemID, uniqueID);
     }
     public void removeItem(String uniqueID) {
         String itemID = "";
