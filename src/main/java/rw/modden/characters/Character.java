@@ -41,6 +41,8 @@ public interface Character {
     public boolean hasItem(ABEquip item);
     public boolean hasItem(String uniqueID);
     public ABEquip getItem(String uniqueID);
+    public float getAllHealReserveBonus();
+    public float getAllHealRegenBonus();
 
     public void readFromNbt(NbtCompound nbt);
     public void writeToNbt(NbtCompound nbt);

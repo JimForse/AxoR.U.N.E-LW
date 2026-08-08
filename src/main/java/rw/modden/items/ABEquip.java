@@ -7,13 +7,9 @@ public class ABEquip {
     private String uniqueID, itemID;
     private float healReserveBonus, healRegenBonus, damageBonus, defenceBonus;
 
-    public ABEquip (String uniqueID, String itemID, float healReserveBonus, float healRegenBonus, float damageBonus, float defenceBonus) {
+    public ABEquip (String uniqueID, String itemID) {
         this.uniqueID = uniqueID;
         this.itemID = itemID;
-        this.damageBonus = damageBonus;
-        this.defenceBonus = defenceBonus;
-        this.healRegenBonus = healRegenBonus;
-        this.healReserveBonus = healReserveBonus;
     }
 
     public float getDamageBonus() {
@@ -64,11 +60,11 @@ public class ABEquip {
     }
 
     public void writeToNbt(NbtCompound nbt) {
-        nbt.putFloat ("healReserveBonus" + itemID, healReserveBonus);
-        nbt.putFloat ("healRegenBonus"   + itemID, healRegenBonus);
-        nbt.putFloat ("damageBonus"      + itemID, damageBonus);
-        nbt.putFloat ("defenceBonus"     + itemID, defenceBonus);
-        nbt.putString("item_id: "  + itemID, uniqueID);
-        nbt.putString("unique_id", itemID); // last line
+        nbt.putFloat ("healReserveBonus" + uniqueID, healReserveBonus);
+        nbt.putFloat ("healRegenBonus"   + uniqueID, healRegenBonus);
+        nbt.putFloat ("damageBonus"      + uniqueID, damageBonus);
+        nbt.putFloat ("defenceBonus"     + uniqueID, defenceBonus);
+        nbt.putString("item_id"          + uniqueID, itemID);
+        nbt.putString("unique_id", uniqueID); // last line
     }
 }

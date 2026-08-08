@@ -149,8 +149,10 @@ public class CharactersComponentImpl implements CharactersComponent {
         NbtList nList0 = new NbtList();
         NbtList nList1 = new NbtList();
 
-        for (Map.Entry<CharacterName, Character> entry: characters.entrySet())
+        for (Map.Entry<CharacterName, Character> entry: characters.entrySet()) {
             nKeyList.add(NbtString.of(entry.getKey().name()));
+            entry.getValue().writeToNbt(nbt);
+        }
         for (int i = 0; i < groupsList.size(); i++)
             nList0.add(NbtString.of(groupsList.get(i)));
         for (Map.Entry<String, ArrayList<CharacterName>> entry: charactersGroups.entrySet()) {

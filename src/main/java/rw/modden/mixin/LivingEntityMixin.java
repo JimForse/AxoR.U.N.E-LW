@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import rw.modden.characters.Character;
 import rw.modden.characters.CharacterName;
 import rw.modden.combat.Battle;
 import rw.modden.components.ModComponents;
@@ -75,15 +76,16 @@ public class LivingEntityMixin {
         battleA();
         if (battle) {
             doesDie = false;
-            healReserve = ModComponents.CHARACTERS.get(player).getCharacter(characterName).getHealReserve(); // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
-            healRegen = ModComponents.CHARACTERS.get(player).getCharacter(characterName).getHealRegen(); // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
+            Character character = ModComponents.CHARACTERS.get(player).getCharacter(characterName);
+            healReserve = character.getHealReserve(); // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
+            healRegen = character.getHealRegen(); // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
 
             if (currentHeal < healReserve) {
                 if (currentHeal <= 0) {
                     doesDie = true;
                     info.cancel();
                 } else {
-                    newHeal = currentHeal + (healReserve * healRegen); // TODO: исправить, когда будет выполнено задание #Tech.17
+                    newHeal = currentHeal + ((healReserve + character.getAllHealReserveBonus()) * (healRegen + character.getAllHealRegenBonus()));
                     currentHeal = newHeal;
                 }
             }

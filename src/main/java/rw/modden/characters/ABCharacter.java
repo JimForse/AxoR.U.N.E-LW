@@ -198,6 +198,32 @@ public abstract class ABCharacter implements Character {
     }
 
     @Override
+    public float getAllHealReserveBonus() {
+        float bonus = 0.0F;
+        if (head  != null) bonus += head.getHealReserveBonus();
+        if (chest != null) bonus += chest.getHealReserveBonus();
+        if (legs  != null) bonus += legs.getHealReserveBonus();
+        if (boots != null) bonus += boots.getHealReserveBonus();
+        if (slot1 != null) bonus += slot1.getHealReserveBonus();
+        if (slot2 != null) bonus += slot2.getHealReserveBonus();
+        if (slot3 != null) bonus += slot3.getHealReserveBonus();
+        return bonus;
+    }
+
+    @Override
+    public float getAllHealRegenBonus() {
+        float bonus = 0.0F;
+        if (head  != null) bonus += head.getHealRegenBonus();
+        if (chest != null) bonus += chest.getHealRegenBonus();
+        if (legs  != null) bonus += legs.getHealRegenBonus();
+        if (boots != null) bonus += boots.getHealRegenBonus();
+        if (slot1 != null) bonus += slot1.getHealRegenBonus();
+        if (slot2 != null) bonus += slot2.getHealRegenBonus();
+        if (slot3 != null) bonus += slot3.getHealRegenBonus();
+        return bonus;
+    }
+
+    @Override
     public void readFromNbt(NbtCompound nbt) {
         this.name = CharacterName.valueOf(nbt.getString("name")); // first line
         this.defence      = nbt.getInt(  name.name() + "_defence");
@@ -213,7 +239,6 @@ public abstract class ABCharacter implements Character {
 
         /** Items block */
         String uniqueID = "", itemID = "";
-        Float healReserveBonus, healRegenBonus, defenceBonus, damageBonus;
         ArrayList<String> slots   = new ArrayList<>();
 
         slots.add(nbt.getString(name.name() + "_head"));
@@ -226,20 +251,17 @@ public abstract class ABCharacter implements Character {
 
         for (int i = 0; i < slots.size(); i++) {
             uniqueID = slots.get(i);
-            healReserveBonus = nbt.getFloat( "healReserveBonus" + uniqueID);
-            healRegenBonus   = nbt.getFloat( "healRegenBonus"   + uniqueID);
-            defenceBonus     = nbt.getFloat( "defenceBonus"     + uniqueID);
-            damageBonus      = nbt.getFloat( "damageBonus"      + uniqueID);
+            if (uniqueID.isEmpty()) continue;
             itemID           = nbt.getString("item_id"          + uniqueID);
 
             switch (i) {
-                case 0 -> this.head  = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
-                case 1 -> this.chest = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
-                case 2 -> this.legs  = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
-                case 3 -> this.boots = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
-                case 4 -> this.slot1 = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
-                case 5 -> this.slot2 = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
-                case 6 -> this.slot3 = new ABEquip(uniqueID,itemID,healReserveBonus,healRegenBonus,damageBonus,defenceBonus);
+                case 0 -> this.head  = new ABEquip(uniqueID,itemID);
+                case 1 -> this.chest = new ABEquip(uniqueID,itemID);
+                case 2 -> this.legs  = new ABEquip(uniqueID,itemID);
+                case 3 -> this.boots = new ABEquip(uniqueID,itemID);
+                case 4 -> this.slot1 = new ABEquip(uniqueID,itemID);
+                case 5 -> this.slot2 = new ABEquip(uniqueID,itemID);
+                case 6 -> this.slot3 = new ABEquip(uniqueID,itemID);
             }
         }
     }
@@ -253,13 +275,24 @@ public abstract class ABCharacter implements Character {
         nbt.putFloat (name.name()+"_stamina",      stamina);
         nbt.putFloat (name.name()+"_staminaRegen", staminaRegen);
         nbt.putFloat (name.name()+"_healRegen",    healRegen);
-        nbt.putString(name.name()+"_head",         head.getUniqueID());
-        nbt.putString(name.name()+"_chest",        chest.getUniqueID());
-        nbt.putString(name.name()+"_legs",         legs.getUniqueID());
-        nbt.putString(name.name()+"_boots",        boots.getUniqueID());
-        nbt.putString(name.name()+"_slot1",        slot1.getUniqueID());
-        nbt.putString(name.name()+"_slot2",        slot2.getUniqueID());
-        nbt.putString(name.name()+"_slot3",        slot3.getUniqueID());
+
+        try {
+            nbt.putString(name.name() + "_head", head.getUniqueID());
+            nbt.putString(name.name() + "_chest", chest.getUniqueID());
+            nbt.putString(name.name() + "_legs", legs.getUniqueID());
+            nbt.putString(name.name() + "_boots", boots.getUniqueID());
+            nbt.putString(name.name() + "_slot1", slot1.getUniqueID());
+            nbt.putString(name.name() + "_slot2", slot2.getUniqueID());
+            nbt.putString(name.name() + "_slot3", slot3.getUniqueID());
+
+            head.writeToNbt(nbt);
+            chest.writeToNbt(nbt);
+            legs.writeToNbt(nbt);
+            boots.writeToNbt(nbt);
+            slot1.writeToNbt(nbt);
+            slot2.writeToNbt(nbt);
+            slot3.writeToNbt(nbt);
+        } catch (NullPointerException e) {}
 
         nbt.put( name.name()+"_path", NbtString.of(pathID.getPath().name()));
         nbt.putString("name", name.name());// last line
