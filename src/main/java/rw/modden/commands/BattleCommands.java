@@ -13,6 +13,7 @@ import net.minecraft.text.Text;
 import rw.modden.characters.CharacterName;
 import rw.modden.combat.Battle;
 import rw.modden.combat.CombatState;
+import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
 
 import java.util.ArrayList;
@@ -62,9 +63,12 @@ public class BattleCommands {
 
     private static int battleStartStandart(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
-        ArrayList<CharacterName> group = ModComponents.CHARACTERS.get(target).getCharactersGroup(StringArgumentType.getString(ctx, "group"));
+        CharactersComponent component = ModComponents.CHARACTERS.get(target);
+        String groupName = StringArgumentType.getString(ctx, "group");
+        ArrayList<CharacterName> group = component.getCharactersGroup(groupName);
+        component.setCurrentGroupName(groupName);
         ModComponents.BATTLE_STATE.get(target).setState(CombatState.STANDART);
-        new Battle().standartBattle(target, group);
+        new Battle(target).standartBattle(group);
         return 1;
     }
 
@@ -72,7 +76,7 @@ public class BattleCommands {
         ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
         String fileName = StringArgumentType.getString(ctx, "file_name");
         ModComponents.BATTLE_STATE.get(target).setState(CombatState.EVENT);
-        new Battle().eventBattle(target, fileName);
+        new Battle(target).eventBattle(fileName);
         return 1;
     }
 
@@ -92,7 +96,7 @@ public class BattleCommands {
     private static int battleStop(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
         ModComponents.BATTLE_STATE.get(target).setState(CombatState.NONE);
-        new Battle().stopBattle(target);
+        new Battle(target).stopBattle();
         return 1;
     }
 }

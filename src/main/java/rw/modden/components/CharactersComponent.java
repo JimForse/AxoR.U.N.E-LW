@@ -11,8 +11,17 @@ import java.util.Map;
 public interface CharactersComponent extends Component {
     Character getCharacter(CharacterName name);
     void setCharacter(CharacterName character);
+
+    void setCurrentCharacter(CharacterName name);
+    CharacterName getCurrentCharacter();
+
     void addCharacter(CharacterName character);
     Map<CharacterName, Character> getCharacters();
+
+    String getCurrentGroupName();
+    ArrayList<CharacterName> getCurrentGroup();
+    void setCurrentGroupName(String name);
+
     boolean hasCharacter(CharacterName name);
     void removeCharacter(CharacterName name);
 

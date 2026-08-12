@@ -25,21 +25,29 @@ public class Battle {
     private boolean battle;
     private File file;
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private CharacterName characterName; // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
+    private CharacterName characterName;
+    ArrayList<CharacterName> currentGroup;
+    private int chr;
+    ServerPlayerEntity player;
 
-    public void standartBattle(ServerPlayerEntity player, ArrayList<CharacterName> group) {
-        combatStateToBattle(player);
+    public Battle(ServerPlayerEntity player) {
+        this.player = player;
+    }
+
+    public void standartBattle(ArrayList<CharacterName> group) {
+        combatStateToBattle();
         if (battle) {
-            CharacterName character = group.get(0);
-            characterName = character; // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
+            currentGroup = group;
+            chr = 0;
+            CharacterName character = group.get(chr);
+            characterName = character;
             new RealizingCharacters().realizingCharacterForPlayer(character, player);
-            new ActiveBattle().staminaExpense(player); // TODO исправить заглушку
         }
     }
 
     @SuppressWarnings("unchecked")
-    public void eventBattle(ServerPlayerEntity player, String fileName) {
-        combatStateToBattle(player);
+    public void eventBattle(String fileName) {
+        combatStateToBattle();
         if (battle) {
             CharacterName character = new CharacterInitializer().getName(player.getEntityName());
             new RealizingCharacters().realizingCharacterForPlayer(character, player);
@@ -74,12 +82,12 @@ public class Battle {
                     Set.of() ,player.getYaw(), player.getPitch());
         }
     }
-    public void stopBattle(ServerPlayerEntity player) {
+    public void stopBattle() {
         battle = false;
         new RealizingCharacters().standartAttributesForPlayer(player);
     }
 
-    public void combatStateToBattle(ServerPlayerEntity player) {
+    public void combatStateToBattle() {
         CombatState state = ModComponents.BATTLE_STATE.get(player).getState();
         if (state == CombatState.STANDART || state == CombatState.EVENT)
             battle = true;
@@ -99,11 +107,19 @@ public class Battle {
         return map;
     }
 
-    public CharacterName getCharacterName() { // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
+    public CharacterName getCharacterName() {
         return characterName;
     }
 
     public boolean getBattle() {
         return battle;
+    }
+
+    public void switchCharacter() {
+        if (chr == currentGroup.size()-1) chr = 0;
+        else chr += 1;
+        CharacterName character = currentGroup.get(chr);
+        characterName = character;
+        new RealizingCharacters().realizingCharacterForPlayer(character, player);
     }
 }

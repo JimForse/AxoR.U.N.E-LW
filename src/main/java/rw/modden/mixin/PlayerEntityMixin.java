@@ -12,8 +12,8 @@ import rw.modden.combat.Battle;
 public class PlayerEntityMixin {
     @Inject(at = @At("HEAD"), method = "addExhaustion", cancellable = true)
     private void hunger(float exhaustion, CallbackInfo info) {
-        Battle battleClass = new Battle();
-        battleClass.combatStateToBattle((ServerPlayerEntity)(Object) this);
+        Battle battleClass = new Battle((ServerPlayerEntity)(Object) this);
+        battleClass.combatStateToBattle();
         boolean battle = battleClass.getBattle();
         if (battle)
             info.cancel();

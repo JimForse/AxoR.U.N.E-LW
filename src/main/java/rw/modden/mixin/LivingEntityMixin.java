@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import rw.modden.characters.Character;
 import rw.modden.characters.CharacterName;
 import rw.modden.combat.Battle;
+import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
 
 @Mixin(LivingEntity.class)
@@ -26,25 +27,25 @@ public class LivingEntityMixin {
     private int timer1 = 0;
     @Unique
     private boolean timerA, startedRun, doesDie;
-    @Unique
-    private CharacterName characterName; // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
 
     private void battleA() {
         if (!((Object) this instanceof ServerPlayerEntity)) return;
         player = (ServerPlayerEntity) (Object) this;
 
-        Battle battleClass = new Battle();
-        battleClass.combatStateToBattle(player);
+        Battle battleClass = new Battle(player);
+        battleClass.combatStateToBattle();
         battle = battleClass.getBattle();
-        battleClass.getCharacterName(); // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
+        battleClass.getCharacterName();
     }
 
     @Inject(at = @At("HEAD"), method = "setSprinting", cancellable = true)
     private void sprint(boolean sprinting, CallbackInfo info) {
         battleA();
         if (battle) {
-            stamina = ModComponents.CHARACTERS.get(player).getCharacter(characterName).getStamina(); // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
-            staminaRegen = ModComponents.CHARACTERS.get(player).getCharacter(characterName).getStaminaRegen(); // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
+            CharactersComponent component = ModComponents.CHARACTERS.get(player);
+
+            stamina = component.getCharacter(component.getCurrentCharacter()).getStamina();
+            staminaRegen = component.getCharacter(component.getCurrentCharacter()).getStaminaRegen();
             if (sprinting && newStamina <= 0.0)
                 info.cancel();
             else if (sprinting) {
@@ -76,9 +77,10 @@ public class LivingEntityMixin {
         battleA();
         if (battle) {
             doesDie = false;
-            Character character = ModComponents.CHARACTERS.get(player).getCharacter(characterName);
-            healReserve = character.getHealReserve(); // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
-            healRegen = character.getHealRegen(); // TODO: исправить, когда сделаю переключение персонажей, чтобы был именно текущий персонаж боя
+            CharactersComponent component = ModComponents.CHARACTERS.get(player);
+            Character character = component.getCharacter(component.getCurrentCharacter());
+            healReserve = character.getHealReserve();
+            healRegen = character.getHealRegen();
 
             if (currentHeal < healReserve) {
                 if (currentHeal <= 0) {

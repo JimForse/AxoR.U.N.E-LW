@@ -23,6 +23,8 @@ public class CharactersComponentImpl implements CharactersComponent {
     private final Map<String, ArrayList<CharacterName>> charactersGroups = new HashMap<>();
     private final ArrayList<String> groupsList = new ArrayList<>();
     private final PlayerEntity player;
+    private String currentGroupName;
+    private CharacterName currentCharacter;
 
     public CharactersComponentImpl(PlayerEntity player) {
         this.player = player;
@@ -32,10 +34,18 @@ public class CharactersComponentImpl implements CharactersComponent {
     public Character getCharacter(CharacterName name) {
         return characters.get(name);
     }
-
     @Override
     public void setCharacter(CharacterName name) {
         new RealizingCharacters().realizingCharacterForPlayer(name, (ServerPlayerEntity) player);
+    }
+
+    @Override
+    public void setCurrentCharacter(CharacterName name) {
+        currentCharacter = name;
+    }
+    @Override
+    public CharacterName getCurrentCharacter() {
+        return currentCharacter;
     }
 
     @Override
@@ -49,6 +59,19 @@ public class CharactersComponentImpl implements CharactersComponent {
     @Override
     public Map<CharacterName, Character> getCharacters() {
         return characters;
+    }
+
+    @Override
+    public String getCurrentGroupName() {
+        return currentGroupName;
+    }
+    @Override
+    public ArrayList<CharacterName> getCurrentGroup() {
+        return charactersGroups.get(currentGroupName);
+    }
+    @Override
+    public void setCurrentGroupName(String name) {
+        currentGroupName = name;
     }
 
     @Override

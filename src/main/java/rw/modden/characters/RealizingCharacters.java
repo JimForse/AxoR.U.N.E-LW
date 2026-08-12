@@ -22,6 +22,7 @@ public class RealizingCharacters {
             heal.setBaseValue((double) character.getHealReserve());
             strength.setBaseValue((double) character.getStrength());
         } catch (Exception e) {}
+        ModComponents.CHARACTERS.get(player).setCurrentCharacter(name);
     }
 
     public void standartAttributesForPlayer(ServerPlayerEntity player) {
