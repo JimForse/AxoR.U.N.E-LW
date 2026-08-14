@@ -30,37 +30,27 @@ public class CharactersComponentImpl implements CharactersComponent {
         this.player = player;
     }
 
+    // ==============  GET  ==================
     @Override
     public Character getCharacter(CharacterName name) {
         return characters.get(name);
     }
     @Override
-    public void setCharacter(CharacterName name) {
-        new RealizingCharacters().realizingCharacterForPlayer(name, (ServerPlayerEntity) player);
-    }
-
-    @Override
-    public void setCurrentCharacter(CharacterName name) {
-        currentCharacter = name;
-    }
-    @Override
     public CharacterName getCurrentCharacter() {
         return currentCharacter;
     }
-
-    @Override
-    public void addCharacter(CharacterName name) {
-        characters.put(name, new CharacterFactory().getCharacter(name));
-    }
-    public void addCharacters(float healReserve, int stars, float stamina, int strength, float staminaRegen, float healRegen, int defence, Path pathID, CharacterName name) {
-        characters.put(name, new CharacterFactory().getCharacter(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name));
-    }
-
     @Override
     public Map<CharacterName, Character> getCharacters() {
         return characters;
     }
-
+    @Override
+    public Map<String, ArrayList<CharacterName>> getAllCharactersGroups() {
+        return charactersGroups;
+    }
+    @Override
+    public ArrayList<CharacterName> getCharactersGroup(String groupName) {
+        return charactersGroups.get(groupName);
+    }
     @Override
     public String getCurrentGroupName() {
         return currentGroupName;
@@ -70,30 +60,54 @@ public class CharactersComponentImpl implements CharactersComponent {
         return charactersGroups.get(currentGroupName);
     }
     @Override
-    public void setCurrentGroupName(String name) {
-        currentGroupName = name;
+    public ArrayList<String> getGroupsList() {
+        return groupsList;
     }
 
+    // ==============  HAS  ==================
     @Override
     public boolean hasCharacter(CharacterName name) {
         return characters.containsKey(name);
     }
+    @Override
+    public boolean hasListGroup(String groupName) {
+        return groupsList.contains(groupName);
+    }
 
+
+    // ==============  REMOVE  ==================
     @Override
     public void removeCharacter(CharacterName name) {
         characters.remove(name);
     }
-
     @Override
-    public Map<String, ArrayList<CharacterName>> getAllCharactersGroups() {
-        return charactersGroups;
+    public void removeGroupFromGroupsList(String groupName) {
+        groupsList.remove(groupName);
     }
 
+    // ==============  SET  ==================
     @Override
-    public ArrayList<CharacterName> getCharactersGroup(String groupName) {
-        return charactersGroups.get(groupName);
+    public void setCurrentGroupName(String name) {
+        currentGroupName = name;
+    }
+    @Override
+    public void setCharacter(CharacterName name) {
+        new RealizingCharacters().realizingCharacterForPlayer(name, (ServerPlayerEntity) player);
+    }
+    @Override
+    public void setCurrentCharacter(CharacterName name) {
+        currentCharacter = name;
     }
 
+    // ==============  ADD  ==================
+    @Override
+    public void addCharacter(CharacterName name) {
+        characters.put(name, new CharacterFactory().getCharacter(name));
+    }
+    @Override
+    public void addCharacters(float healReserve, int stars, float stamina, int strength, float staminaRegen, float healRegen, int defence, Path pathID, CharacterName name) {
+        characters.put(name, new CharacterFactory().getCharacter(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name));
+    }
     @Override
     public int addCharacterToGroup(String groupName, CharacterName characterName) {
         try {
@@ -115,25 +129,13 @@ public class CharactersComponentImpl implements CharactersComponent {
             return 0;
         }
     }
-
     @Override
-    public ArrayList<String> getGroupsList() {
-        return groupsList;
+    public void addGroupToCharacterGroups(String groupName) {
+        if (!charactersGroups.containsKey(groupName)) charactersGroups.put(groupName, new ArrayList<>());
     }
-
     @Override
     public void addGroupToGroupsList(String groupName) {
         groupsList.add(groupName);
-    }
-
-    @Override
-    public boolean hasListGroup(String groupName) {
-        return groupsList.contains(groupName);
-    }
-
-    @Override
-    public void removeGroupFromGroupsList(String groupName) {
-        groupsList.remove(groupName);
     }
 
     @Override

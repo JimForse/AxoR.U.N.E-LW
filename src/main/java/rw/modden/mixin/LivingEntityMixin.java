@@ -33,9 +33,11 @@ public class LivingEntityMixin {
         player = (ServerPlayerEntity) (Object) this;
 
         Battle battleClass = new Battle(player);
-        battleClass.combatStateToBattle();
-        battle = battleClass.getBattle();
-        battleClass.getCharacterName();
+        if (battleClass!=null) {
+            battleClass.combatStateToBattle();
+            battle = battleClass.getBattle();
+            battleClass.getCharacterName();
+        }
     }
 
     @Inject(at = @At("HEAD"), method = "setSprinting", cancellable = true)

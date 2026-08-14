@@ -17,7 +17,7 @@ import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
+import java.util.Arrays;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -29,6 +29,11 @@ public class BattleCommands {
             battlestate(dispather);
         });
     }
+
+    private static String[] characters = Arrays.stream(CharacterName.values())
+            .map(Enum::name)
+            .toArray(String[]::new);
+
     private static void battlestate(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("battle")
             .requires(source -> source.hasPermissionLevel(4))
@@ -59,6 +64,29 @@ public class BattleCommands {
                 .then(argument("target", EntityArgumentType.player())
                     .executes(BattleCommands::battleStop)))
         );
+        dispatcher.register(literal("group")
+            .requires(source -> source.hasPermissionLevel(4))
+            .then(literal("create")
+                .then(argument("target", EntityArgumentType.player())
+                    .then(argument("group_name", StringArgumentType.word())
+                        .executes(BattleCommands::createGroup))))
+
+            .requires(source -> source.hasPermissionLevel(4))
+            .then(literal("edit")
+                .then(argument("target", EntityArgumentType.player())
+                    .then(argument("group_name", StringArgumentType.word())
+                        .suggests(((context, builder) -> CommandSource.suggestMatching(
+                                ModComponents.CHARACTERS.get(EntityArgumentType.getPlayer(context, "target")).getGroupsList() ,builder)))
+                            .then(argument("character1", StringArgumentType.word())
+                                .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
+                                    .executes(BattleCommands::editGroup)
+                                    .then(argument("character2", StringArgumentType.word())
+                                        .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
+                                            .executes(BattleCommands::editGroup)
+                                                .then(argument("character3", StringArgumentType.word())
+                                                        .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
+                                                            .executes(BattleCommands::editGroup))))
+        ))));
     }
 
     private static int battleStartStandart(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
@@ -97,6 +125,31 @@ public class BattleCommands {
         ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
         ModComponents.BATTLE_STATE.get(target).setState(CombatState.NONE);
         new Battle(target).stopBattle();
+        return 1;
+    }
+
+    private static int createGroup(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        String groupName = StringArgumentType.getString(ctx, "group_name");
+        ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
+        CharactersComponent component = ModComponents.CHARACTERS.get(target);
+        component.addGroupToGroupsList(groupName);
+        component.addGroupToCharacterGroups(groupName);
+        return 1;
+    }
+
+    private static int editGroup(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
+        String groupName = StringArgumentType.getString(ctx, "group_name");
+        CharactersComponent component = ModComponents.CHARACTERS.get(target);
+        component.addCharacterToGroup(groupName, CharacterName.valueOf(StringArgumentType.getString(ctx, "character1")));
+
+        ctx.getNodes().forEach(x -> {
+            if (x.getNode().getName().equals("character2"))
+                component.addCharacterToGroup(groupName, CharacterName.valueOf(StringArgumentType.getString(ctx, "character2")));
+            else if (x.getNode().getName().equals("character3"))
+                component.addCharacterToGroup(groupName, CharacterName.valueOf(StringArgumentType.getString(ctx, "character3")));
+        });
+
         return 1;
     }
 }

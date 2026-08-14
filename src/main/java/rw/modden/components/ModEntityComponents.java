@@ -7,8 +7,8 @@ import net.minecraft.entity.player.PlayerEntity;
 public class ModEntityComponents implements EntityComponentInitializer {
     @Override
     public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
-        registry.registerFor(PlayerEntity.class, ModComponents.BATTLE_STATE, (player -> new BattleStateComponentImpl(player)));
-        registry.registerFor(PlayerEntity.class, ModComponents.CHARACTERS, (player -> new CharactersComponentImpl(player)));
-        registry.registerFor(PlayerEntity.class, ModComponents.EQUIPMENT, (player -> new EquipmentComponentImpl(player)));
+        registry.registerFor(PlayerEntity.class, ModComponents.BATTLE_STATE, (BattleStateComponentImpl::new));
+        registry.registerFor(PlayerEntity.class, ModComponents.CHARACTERS, (CharactersComponentImpl::new));
+        registry.registerFor(PlayerEntity.class, ModComponents.EQUIPMENT, (EquipmentComponentImpl::new));
     }
 }

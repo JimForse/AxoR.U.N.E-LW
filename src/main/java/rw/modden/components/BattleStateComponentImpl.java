@@ -6,7 +6,7 @@ import net.minecraft.nbt.NbtCompound;
 import rw.modden.combat.CombatState;
 
 public class BattleStateComponentImpl implements BattleStateComponent {
-    CombatState state;
+    private CombatState state = CombatState.NONE;
     private final PlayerEntity player;
 
     public BattleStateComponentImpl(PlayerEntity player) {

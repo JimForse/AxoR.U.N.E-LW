@@ -15,6 +15,13 @@
 	"license": "CC0-1.0",
 	"icon": "assets/axorunelostworlds/icon.png",
 	"environment": "*",
+	"custom": {
+		"cardinal-components": [
+			"axorunelostworlds:battle_state",
+			"axorunelostworlds:characters",
+			"axorunelostworlds:equipment"
+		]
+	},
 	"entrypoints": {
 		"main": [
 			"rw.modden.Axorunelostworlds"
@@ -24,9 +31,6 @@
 		],
 		"cardinal-components-entity": [
 			"rw.modden.components.ModEntityComponents"
-		],
-		"cardinal-components-item": [
-			"rw.modden.components.ModItemComponents"
 		]
 	},
 	"mixins": [

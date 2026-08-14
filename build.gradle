@@ -14,6 +14,10 @@ repositories {
 		name = "Modrinth"
 		url = "https://api.modrinth.com/maven"
 	}
+	maven {
+		name = "CurseForge"
+		url = "https://www.cursemaven.com"
+	}
 }
 loom {
 	splitEnvironmentSourceSets()
@@ -43,15 +47,12 @@ dependencies {
 
 	//Mods
 	modImplementation "maven.modrinth:bK3Ubu9p:1.55.0-1.20.1" 			// Simply Swords     1.55.0
-	modImplementation "maven.modrinth:zhpyD8Y0:1.1.3" 					// Simply More       1.1.3
 	modImplementation "maven.modrinth:rrwQMaWQ:fabric-1.20.1-1.0.14"    // Camera Utils      1.0.14
 	modImplementation "maven.modrinth:gWu44BYU:1.3.8" 					// Motion Capture    1.3.8
 	modImplementation "maven.modrinth:5sy6g3kz:1.9.0+1.20.1-fabric"     // Better Combat     1.9.0
 	modImplementation "maven.modrinth:wGKYL7st:1.3.3+1.20.1-fabric"     // Combat Roll       1.3.3
-	modImplementation "maven.modrinth:P0Mu4wcQ:9.5.17"				    // Artifacts         9.5.17
 	modImplementation "maven.modrinth:R54NT4it:mc1.20.1-fabric-1.6.5"   // Cutscene API      1.6.5
 	modImplementation "maven.modrinth:lhGA9TYQ:9.2.14+fabric"           // Architectury API  9.2.14
-	modImplementation "maven.modrinth:5aaWibi9:3.7.2"                   // Trinkets          3.7.2
 	modImplementation "maven.modrinth:9s6osm5g:11.1.136+fabric"         // Cloth Config API  11.1.136
 	modImplementation "maven.modrinth:gedNE4y2:1.0.2-rc1+1.20-fabric"   // playerAnimator    1.0.2
 }

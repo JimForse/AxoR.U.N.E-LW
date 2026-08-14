@@ -89,10 +89,7 @@ public class Battle {
 
     public void combatStateToBattle() {
         CombatState state = ModComponents.BATTLE_STATE.get(player).getState();
-        if (state == CombatState.STANDART || state == CombatState.EVENT)
-            battle = true;
-        else
-            battle = false;
+        battle = state == CombatState.STANDART || state == CombatState.EVENT;
     }
 
     private Map<String, Object> readJson() {

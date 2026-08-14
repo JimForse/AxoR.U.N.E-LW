@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rw.modden.commands.BattleCommands;
 import rw.modden.commands.CharacterCommands;
+import rw.modden.components.ModComponents;
 
 import java.io.File;
 import java.io.FileReader;

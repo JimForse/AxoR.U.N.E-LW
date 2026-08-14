@@ -11,7 +11,8 @@ public class RealizingCharacters {
     public Character character;
     public void realizingCharacterForPlayer(CharacterName name, ServerPlayerEntity player) {
         EntityAttributeInstance heal = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH),
-            strength = player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+            strength = player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE),
+            defence = player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR);
 
         Character character = null;
         if (ModComponents.CHARACTERS.get(player).hasCharacter(name)) {
@@ -21,17 +22,20 @@ public class RealizingCharacters {
         try {
             heal.setBaseValue((double) character.getHealReserve());
             strength.setBaseValue((double) character.getStrength());
+            defence.setBaseValue((double) character.getDefence());
         } catch (Exception e) {}
         ModComponents.CHARACTERS.get(player).setCurrentCharacter(name);
     }
 
     public void standartAttributesForPlayer(ServerPlayerEntity player) {
         EntityAttributeInstance heal = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH),
-            strength = player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+                strength = player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE),
+                defence = player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR);
 
         try {
             heal.setBaseValue(20.0);
             strength.setBaseValue(1.0);
+            defence.setBaseValue(0.0);
         } catch (Exception e) {}
     }
 }

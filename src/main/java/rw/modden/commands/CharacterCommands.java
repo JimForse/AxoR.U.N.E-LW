@@ -13,12 +13,16 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import rw.modden.characters.Character;
 import rw.modden.characters.CharacterName;
+import rw.modden.combat.Battle;
+import rw.modden.combat.CombatState;
 import rw.modden.components.ModComponents;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static rw.modden.Axorunelostworlds.LOGGER;
 
 public class CharacterCommands {
     public static void initialize() {
@@ -60,8 +64,8 @@ public class CharacterCommands {
                     .then(argument("player", EntityArgumentType.player())
                         .then(argument("state", StringArgumentType.word())
                             .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"heal", "stars", "strength", "stamina", "staminaRegen", "defence"}, builder))
-                                .then(argument("value", DoubleArgumentType.doubleArg()))
-                                    .executes(CharacterCommands::editCharacter))))
+                                .then(argument("value", DoubleArgumentType.doubleArg())
+                                    .executes(CharacterCommands::editCharacter)))))
         );
         dispatcher.register(literal("checkCharacter")
             .requires(source -> source.hasPermissionLevel(4))
@@ -75,7 +79,9 @@ public class CharacterCommands {
             .then(argument("character", StringArgumentType.word())
                 .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
                     .then(argument("player", EntityArgumentType.player())
-                        .executes(CharacterCommands::checkCharacterState)))
+                        .then(argument("state", StringArgumentType.word())
+                            .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"heal", "stars", "strength", "stamina", "staminaRegen", "defence"}, builder))
+                                .executes(CharacterCommands::checkCharacterState))))
         );
     }
 
@@ -91,6 +97,10 @@ public class CharacterCommands {
         String argument = StringArgumentType.getString(ctx, "character");
         ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         ModComponents.CHARACTERS.get(player).setCharacter(CharacterName.valueOf(argument));
+        ArrayList<CharacterName> group = new ArrayList<>();
+        group.add(CharacterName.valueOf(argument));
+        CombatState state = ModComponents.BATTLE_STATE.get(player).getState();
+        if (state==CombatState.NONE) new Battle(player).standartBattle(group);
         return 1;
     }
 
@@ -105,7 +115,7 @@ public class CharacterCommands {
         String argument = StringArgumentType.getString(ctx, "character");
         ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         boolean checker = ModComponents.CHARACTERS.get(player).hasCharacter(CharacterName.valueOf(argument));
-        ctx.getSource().sendFeedback(() -> Text.literal(checker+": This player "+(checker?"has":"hasn`t")+"this character"), false);
+        ctx.getSource().sendFeedback(() -> Text.literal(checker+": This player "+(checker?"has":"hasn`t")+" this character"), false);
         return 1;
     }
 
@@ -114,7 +124,7 @@ public class CharacterCommands {
         String characteristic = StringArgumentType.getString(ctx, "state");
         ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         Character chr = ModComponents.CHARACTERS.get(player).getCharacter(CharacterName.valueOf(argument));
-        double state = 0;
+        double state = 0.0;
         switch (characteristic) {
             case "heal" -> {
                 state = (float)chr.getHealReserve();
