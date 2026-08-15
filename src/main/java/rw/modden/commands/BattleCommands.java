@@ -18,6 +18,7 @@ import rw.modden.components.ModComponents;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -26,7 +27,7 @@ import static rw.modden.Axorunelostworlds.LOGGER;
 public class BattleCommands {
     public static void initialize() {
         CommandRegistrationCallback.EVENT.register((dispather, registryAcess, environment) -> {
-            battlestate(dispather);
+            battle(dispather);
         });
     }
 
@@ -34,21 +35,15 @@ public class BattleCommands {
             .map(Enum::name)
             .toArray(String[]::new);
 
-    private static void battlestate(CommandDispatcher<ServerCommandSource> dispatcher) {
+    private static void battle(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("battle")
             .requires(source -> source.hasPermissionLevel(4))
             .then(literal("start")
                 .then(literal("standart")
                     .then(argument("target", EntityArgumentType.player())
                         .then(argument("group", StringArgumentType.word())
-                            .suggests((context, builder) -> {
-                                try {
-                                    ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "target");
-                                    return CommandSource.suggestMatching(ModComponents.CHARACTERS.get(player).getGroupsList().toArray(new String[0]), builder);
-                                } catch (Exception e) {
-                                    throw new RuntimeException(e);
-                                }
-                            })
+                            .suggests((context, builder) -> CommandSource.suggestMatching(
+                                ModComponents.CHARACTERS.get(EntityArgumentType.getPlayer(context, "target")).getGroupsList() ,builder))
                                 .executes(BattleCommands::battleStartStandart))))
                 .then(literal("event")
                     .then(argument("target", EntityArgumentType.player())
@@ -71,12 +66,11 @@ public class BattleCommands {
                     .then(argument("group_name", StringArgumentType.word())
                         .executes(BattleCommands::createGroup))))
 
-            .requires(source -> source.hasPermissionLevel(4))
             .then(literal("edit")
                 .then(argument("target", EntityArgumentType.player())
                     .then(argument("group_name", StringArgumentType.word())
-                        .suggests(((context, builder) -> CommandSource.suggestMatching(
-                                ModComponents.CHARACTERS.get(EntityArgumentType.getPlayer(context, "target")).getGroupsList() ,builder)))
+                        .suggests((context, builder) -> CommandSource.suggestMatching(
+                                ModComponents.CHARACTERS.get(EntityArgumentType.getPlayer(context, "target")).getGroupsList() ,builder))
                             .then(argument("character1", StringArgumentType.word())
                                 .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
                                     .executes(BattleCommands::editGroup)
@@ -85,8 +79,25 @@ public class BattleCommands {
                                             .executes(BattleCommands::editGroup)
                                                 .then(argument("character3", StringArgumentType.word())
                                                         .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
-                                                            .executes(BattleCommands::editGroup))))
-        ))));
+                                                            .executes(BattleCommands::editGroup)))))))
+            .then(literal("remove")
+                .then(argument("target", EntityArgumentType.player())
+                    .then(argument("group_name", StringArgumentType.word())
+                        .suggests((context, builder) -> CommandSource.suggestMatching(
+                            ModComponents.CHARACTERS.get(EntityArgumentType.getPlayer(context, "target")).getGroupsList() ,builder))
+                            .executes(BattleCommands::groupRemove)
+                            .then(argument("character", StringArgumentType.word())
+                                .suggests((context, builder) -> CommandSource.suggestMatching(
+                                    ModComponents.CHARACTERS.get(EntityArgumentType.getPlayer(context, "target")).getCharactersGroup(
+                                        StringArgumentType.getString(context, "group_name")).stream().map(CharacterName::name), builder))
+                                .executes(BattleCommands::groupRemove)))))
+            .then(literal("checkGroup")
+                .then(argument("target", EntityArgumentType.player())
+                    .then(argument("group_name", StringArgumentType.word())
+                        .suggests((context, builder) -> CommandSource.suggestMatching(
+                            ModComponents.CHARACTERS.get(EntityArgumentType.getPlayer(context, "target")).getGroupsList() ,builder))
+                            .executes(BattleCommands::checkGroup))))
+        );
     }
 
     private static int battleStartStandart(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
@@ -150,6 +161,30 @@ public class BattleCommands {
                 component.addCharacterToGroup(groupName, CharacterName.valueOf(StringArgumentType.getString(ctx, "character3")));
         });
 
+        return 1;
+    }
+
+    private static int groupRemove(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
+        String groupName = StringArgumentType.getString(ctx, "group_name");
+        final boolean[] deleteGroup = {true};
+        CharactersComponent component = ModComponents.CHARACTERS.get(target);
+
+        ctx.getNodes().forEach(x -> {
+            if (x.getNode().getName().equals("character")) {
+                component.removeCharacterFromGroup(CharacterName.valueOf(StringArgumentType.getString(ctx, "character")), groupName); ;
+                deleteGroup[0] = false;
+            }
+        });
+        if (deleteGroup[0]) component.removeGroup(groupName);
+        return 1;
+    }
+
+    private static int checkGroup(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
+        String groupName = StringArgumentType.getString(ctx, "group_name");
+        String s = ModComponents.CHARACTERS.get(target).getCharactersGroup(groupName).stream().map(CharacterName::name).collect(Collectors.joining(", "));
+        ctx.getSource().sendFeedback(() -> Text.literal("This group contains is: "+s), false);
         return 1;
     }
 }

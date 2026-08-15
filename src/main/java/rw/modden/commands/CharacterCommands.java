@@ -15,6 +15,7 @@ import rw.modden.characters.Character;
 import rw.modden.characters.CharacterName;
 import rw.modden.combat.Battle;
 import rw.modden.combat.CombatState;
+import rw.modden.components.BattleStateComponent;
 import rw.modden.components.ModComponents;
 
 import java.util.ArrayList;
@@ -99,8 +100,12 @@ public class CharacterCommands {
         ModComponents.CHARACTERS.get(player).setCharacter(CharacterName.valueOf(argument));
         ArrayList<CharacterName> group = new ArrayList<>();
         group.add(CharacterName.valueOf(argument));
-        CombatState state = ModComponents.BATTLE_STATE.get(player).getState();
-        if (state==CombatState.NONE) new Battle(player).standartBattle(group);
+        BattleStateComponent component = ModComponents.BATTLE_STATE.get(player);
+        CombatState state = component.getState();
+        if (state==CombatState.NONE) {
+            component.setState(CombatState.STANDART);
+            new Battle(player).standartBattle(group);
+        }
         return 1;
     }
 

@@ -84,6 +84,23 @@ public class CharactersComponentImpl implements CharactersComponent {
     public void removeGroupFromGroupsList(String groupName) {
         groupsList.remove(groupName);
     }
+    @Override
+    public void removeCharacterFromGroup(CharacterName name, String groupName) {
+        ArrayList<CharacterName> group = getCharactersGroup(groupName);
+        if (group.remove(name)) {
+            removeGroupFromCharacterGroups(groupName);
+            addGroupToCharacterGroups(groupName, group);
+        }
+    }
+    @Override
+    public void removeGroupFromCharacterGroups(String groupName) {
+        charactersGroups.remove(groupName);
+    }
+    @Override
+    public void removeGroup(String groupName) {
+        removeGroupFromCharacterGroups(groupName);
+        removeGroupFromGroupsList(groupName);
+    }
 
     // ==============  SET  ==================
     @Override
@@ -113,9 +130,14 @@ public class CharactersComponentImpl implements CharactersComponent {
         try {
             if (charactersGroups.containsKey(groupName)) {
                 ArrayList<CharacterName> group = charactersGroups.get(groupName);
-                if (group.size() < 3)
-                    if (ModComponents.CHARACTERS.get(player).hasCharacter(characterName))
-                        group.add(characterName);
+                if (group.size() < 3) {
+                    CharactersComponent component = ModComponents.CHARACTERS.get(player);
+                    if (component.hasCharacter(characterName)) {
+                        if (!group.contains(characterName))
+                            group.add(characterName);
+                        else return 0;
+                    } else return 0;
+                } else return 0;
                 charactersGroups.put(groupName, group);
                 return 1;
             } else {
@@ -132,6 +154,10 @@ public class CharactersComponentImpl implements CharactersComponent {
     @Override
     public void addGroupToCharacterGroups(String groupName) {
         if (!charactersGroups.containsKey(groupName)) charactersGroups.put(groupName, new ArrayList<>());
+    }
+    @Override
+    public void addGroupToCharacterGroups(String groupName, ArrayList<CharacterName> group) {
+        if (!charactersGroups.containsKey(groupName)) charactersGroups.put(groupName, group);
     }
     @Override
     public void addGroupToGroupsList(String groupName) {

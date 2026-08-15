@@ -2,9 +2,11 @@ package rw.modden.combat;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import rw.modden.characters.CharacterInitializer;
@@ -12,6 +14,7 @@ import rw.modden.characters.CharacterName;
 import rw.modden.characters.RealizingCharacters;
 import rw.modden.components.ModComponents;
 import rw.modden.effects.EffectsFactory;
+import rw.modden.network.ServerNetwork;
 
 import java.io.File;
 import java.io.FileReader;
@@ -42,6 +45,8 @@ public class Battle {
             CharacterName character = group.get(chr);
             characterName = character;
             new RealizingCharacters().realizingCharacterForPlayer(character, player);
+
+            serverSend();
         }
     }
 
@@ -81,10 +86,13 @@ public class Battle {
             player.teleport(world, position.get(0), position.get(1), position.get(2),
                     Set.of() ,player.getYaw(), player.getPitch());
         }
+
+        serverSend();
     }
     public void stopBattle() {
         battle = false;
         new RealizingCharacters().standartAttributesForPlayer(player);
+        serverSend();
     }
 
     public void combatStateToBattle() {
@@ -118,5 +126,11 @@ public class Battle {
         CharacterName character = currentGroup.get(chr);
         characterName = character;
         new RealizingCharacters().realizingCharacterForPlayer(character, player);
+    }
+
+    private void serverSend() {
+        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeBoolean(battle);
+        ServerNetwork.send(player, ServerNetwork.BATTLE_PACKET_ID, buf);
     }
 }

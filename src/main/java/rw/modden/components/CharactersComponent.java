@@ -21,6 +21,13 @@ public interface CharactersComponent extends Component {
 
     String getCurrentGroupName();
     ArrayList<CharacterName> getCurrentGroup();
+
+    void removeCharacterFromGroup(CharacterName name, String groupName);
+
+    void removeGroupFromCharacterGroups(String groupName);
+
+    void removeGroup(String groupName);
+
     void setCurrentGroupName(String name);
 
     boolean hasCharacter(CharacterName name);
@@ -36,6 +43,8 @@ public interface CharactersComponent extends Component {
     ArrayList<String> getGroupsList();
 
     void addGroupToCharacterGroups(String groupName);
+
+    void addGroupToCharacterGroups(String groupName, ArrayList<CharacterName> group);
 
     void addGroupToGroupsList(String groupName);
     boolean hasListGroup(String groupName);

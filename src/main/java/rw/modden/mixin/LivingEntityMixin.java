@@ -81,16 +81,18 @@ public class LivingEntityMixin {
             doesDie = false;
             CharactersComponent component = ModComponents.CHARACTERS.get(player);
             Character character = component.getCharacter(component.getCurrentCharacter());
-            healReserve = character.getHealReserve();
-            healRegen = character.getHealRegen();
+            if (character!=null) {
+                healReserve = character.getHealReserve();
+                healRegen = character.getHealRegen();
 
-            if (currentHeal < healReserve) {
-                if (currentHeal <= 0) {
-                    doesDie = true;
-                    info.cancel();
-                } else {
-                    newHeal = currentHeal + ((healReserve + character.getAllHealReserveBonus()) * (healRegen + character.getAllHealRegenBonus()));
-                    currentHeal = newHeal;
+                if (currentHeal < healReserve) {
+                    if (currentHeal <= 0) {
+                        doesDie = true;
+                        info.cancel();
+                    } else {
+                        newHeal = currentHeal + ((healReserve + character.getAllHealReserveBonus()) * (healRegen + character.getAllHealRegenBonus()));
+                        currentHeal = newHeal;
+                    }
                 }
             }
         }
