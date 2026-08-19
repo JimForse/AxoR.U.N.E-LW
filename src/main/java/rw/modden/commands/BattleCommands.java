@@ -91,7 +91,7 @@ public class BattleCommands {
                                     ModComponents.CHARACTERS.get(EntityArgumentType.getPlayer(context, "target")).getCharactersGroup(
                                         StringArgumentType.getString(context, "group_name")).stream().map(CharacterName::name), builder))
                                 .executes(BattleCommands::groupRemove)))))
-            .then(literal("checkGroup")
+            .then(literal("check")
                 .then(argument("target", EntityArgumentType.player())
                     .then(argument("group_name", StringArgumentType.word())
                         .suggests((context, builder) -> CommandSource.suggestMatching(
@@ -136,6 +136,7 @@ public class BattleCommands {
         ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
         ModComponents.BATTLE_STATE.get(target).setState(CombatState.NONE);
         new Battle(target).stopBattle();
+        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Battle state for player [%s] has been stoped", target.getDisplayName())), false);
         return 1;
     }
 
@@ -145,6 +146,7 @@ public class BattleCommands {
         CharactersComponent component = ModComponents.CHARACTERS.get(target);
         component.addGroupToGroupsList(groupName);
         component.addGroupToCharacterGroups(groupName);
+        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Group [%s] has been crated", groupName)), false);
         return 1;
     }
 
@@ -152,14 +154,26 @@ public class BattleCommands {
         ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
         String groupName = StringArgumentType.getString(ctx, "group_name");
         CharactersComponent component = ModComponents.CHARACTERS.get(target);
-        component.addCharacterToGroup(groupName, CharacterName.valueOf(StringArgumentType.getString(ctx, "character1")));
+        int[] characters = new int[3];
+        characters[0] = component.addCharacterToGroup(groupName, CharacterName.valueOf(StringArgumentType.getString(ctx, "character1")));
 
         ctx.getNodes().forEach(x -> {
             if (x.getNode().getName().equals("character2"))
-                component.addCharacterToGroup(groupName, CharacterName.valueOf(StringArgumentType.getString(ctx, "character2")));
+                characters[1] = component.addCharacterToGroup(groupName, CharacterName.valueOf(StringArgumentType.getString(ctx, "character2")));
             else if (x.getNode().getName().equals("character3"))
-                component.addCharacterToGroup(groupName, CharacterName.valueOf(StringArgumentType.getString(ctx, "character3")));
+                characters[2] = component.addCharacterToGroup(groupName, CharacterName.valueOf(StringArgumentType.getString(ctx, "character3")));
         });
+        for (int character: characters) {
+            if (character!=1) {
+                switch (character) {
+                    case 0  -> ctx.getSource().sendError(Text.literal("Unknown Exception"));
+                    case -1 -> ctx.getSource().sendError(Text.literal("Group size is maximum"));
+                    case -2 -> ctx.getSource().sendError(Text.literal("Player hasn`t this character"));
+                    case -3 -> ctx.getSource().sendError(Text.literal("Group already has this character"));
+                }
+            } else
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Character(s) has been add to group [%s]", groupName)), false);
+        }
 
         return 1;
     }
@@ -172,11 +186,16 @@ public class BattleCommands {
 
         ctx.getNodes().forEach(x -> {
             if (x.getNode().getName().equals("character")) {
-                component.removeCharacterFromGroup(CharacterName.valueOf(StringArgumentType.getString(ctx, "character")), groupName); ;
+                CharacterName name = CharacterName.valueOf(StringArgumentType.getString(ctx, "character"));
+                component.removeCharacterFromGroup((name), groupName);
                 deleteGroup[0] = false;
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Character [%s] has been deleted from group [%s]", name, groupName)), false);
             }
         });
-        if (deleteGroup[0]) component.removeGroup(groupName);
+        if (deleteGroup[0]) {
+            component.removeGroup(groupName);
+            ctx.getSource().sendFeedback(() -> Text.literal(String.format("Group [%s] has been deleted", groupName)), false);
+        }
         return 1;
     }
 

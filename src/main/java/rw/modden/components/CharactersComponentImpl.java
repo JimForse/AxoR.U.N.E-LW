@@ -125,6 +125,14 @@ public class CharactersComponentImpl implements CharactersComponent {
     public void addCharacters(float healReserve, int stars, float stamina, int strength, float staminaRegen, float healRegen, int defence, Path pathID, CharacterName name) {
         characters.put(name, new CharacterFactory().getCharacter(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name));
     }
+
+    /**
+     * error 0  — Exception
+     * error -1 — Group size is maximum
+     * error -2 — Player hasn't this character
+     * error -3 — Group already has this character
+     */
+
     @Override
     public int addCharacterToGroup(String groupName, CharacterName characterName) {
         try {
@@ -135,17 +143,19 @@ public class CharactersComponentImpl implements CharactersComponent {
                     if (component.hasCharacter(characterName)) {
                         if (!group.contains(characterName))
                             group.add(characterName);
-                        else return 0;
-                    } else return 0;
-                } else return 0;
+                        else return -3;
+                    } else return -2;
+                } else return -1;
                 charactersGroups.put(groupName, group);
                 return 1;
             } else {
                 ArrayList<CharacterName> group = new ArrayList<>();
-                if (ModComponents.CHARACTERS.get(player).hasCharacter(characterName))
+                if (ModComponents.CHARACTERS.get(player).hasCharacter(characterName)) {
                     group.add(characterName);
-                charactersGroups.put(groupName, group);
-                return 1;
+                    charactersGroups.put(groupName, group);
+                    return 1;
+                } else
+                    return -2;
             }
         } catch (Exception e) {
             return 0;
@@ -169,8 +179,8 @@ public class CharactersComponentImpl implements CharactersComponent {
         NbtList nKeyList = nbt.getList("CHARACTERNAME", NbtElement.STRING_TYPE);
         NbtList nList0 = nbt.getList("groupsList", NbtElement.STRING_TYPE);
 
-        for (int i = 0; i < nKeyList.size(); i++) {
-            CharacterName name = CharacterName.valueOf(nKeyList.get(i).asString());
+        for (NbtElement value: nKeyList) {
+            CharacterName name = CharacterName.valueOf(value.asString());
             int stars = nbt.getInt(name.name() + "_stars"),
                     strength = nbt.getInt(name.name() + "_strength"),
                     defence = nbt.getInt(name.name() + "_defence");
@@ -181,16 +191,16 @@ public class CharactersComponentImpl implements CharactersComponent {
             Path pathID = PathFactory.get(PathesName.valueOf(nbt.getString(name.name() + "_path")));
             addCharacters(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name);
         }
-        for (int i = 0; i < nList0.size(); i++) {
-          if (!groupsList.contains(nList0.get(i).asString()))
-              groupsList.add(nList0.get(i).asString());
-          String groupName = nList0.get(i).asString();
-          NbtList nList1 = nbt.getList(groupName+"_group", NbtElement.LIST_TYPE);
-          ArrayList<CharacterName> group = new ArrayList<>();
-            for (int j = 0; j < nList1.size(); j++) {
-                group.add(CharacterName.valueOf(nList1.get(j).asString()));
+        for (NbtElement nbtElement : nList0) {
+            if (!groupsList.contains(nbtElement.asString()))
+                groupsList.add(nbtElement.asString());
+            String groupName = nbtElement.asString();
+            NbtList nList1 = nbt.getList(groupName + "_group", NbtElement.LIST_TYPE);
+            ArrayList<CharacterName> group = new ArrayList<>();
+            for (NbtElement element: nList1) {
+                group.add(CharacterName.valueOf(element.asString()));
             }
-          charactersGroups.put(groupName, group);
+            charactersGroups.put(groupName, group);
         }
     }
 
@@ -204,12 +214,12 @@ public class CharactersComponentImpl implements CharactersComponent {
             nKeyList.add(NbtString.of(entry.getKey().name()));
             entry.getValue().writeToNbt(nbt);
         }
-        for (int i = 0; i < groupsList.size(); i++)
-            nList0.add(NbtString.of(groupsList.get(i)));
+        for (String s: groupsList)
+            nList0.add(NbtString.of(s));
         for (Map.Entry<String, ArrayList<CharacterName>> entry: charactersGroups.entrySet()) {
             ArrayList<CharacterName> group = entry.getValue();
-            for (int i = 0; i < group.size(); i++)
-                nList1.add(NbtString.of(group.get(i).name()));
+            for (CharacterName characterName: group)
+                nList1.add(NbtString.of(characterName.name()));
             String groupName = entry.getKey();
             nbt.put(groupName+"_group", nList1);
         }

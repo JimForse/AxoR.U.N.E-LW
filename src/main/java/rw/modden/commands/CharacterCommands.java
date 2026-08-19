@@ -23,7 +23,6 @@ import java.util.Arrays;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
-import static rw.modden.Axorunelostworlds.LOGGER;
 
 public class CharacterCommands {
     public static void initialize() {
@@ -32,7 +31,7 @@ public class CharacterCommands {
         });
     }
 
-    private static String[] characters = Arrays.stream(CharacterName.values())
+    private static final String[] characters = Arrays.stream(CharacterName.values())
             .map(Enum::name)
             .toArray(String[]::new);
 
@@ -91,6 +90,8 @@ public class CharacterCommands {
         String argument = StringArgumentType.getString(ctx, "character");
         ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         ModComponents.CHARACTERS.get(player).addCharacter(CharacterName.valueOf(argument));
+        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Character [%s] has been add to player inventory", argument)), false);
+        //ctx.getSource().sendFeedback(() -> Text.literal(String.format("")), false);
         return 1;
     }
 
@@ -113,6 +114,7 @@ public class CharacterCommands {
         String argument = StringArgumentType.getString(ctx, "character");
         ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         ModComponents.CHARACTERS.get(player).removeCharacter(CharacterName.valueOf(argument));
+        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Character [%s] has been removed", argument)), false);
         return 1;
     }
 
@@ -129,29 +131,32 @@ public class CharacterCommands {
         String characteristic = StringArgumentType.getString(ctx, "state");
         ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         Character chr = ModComponents.CHARACTERS.get(player).getCharacter(CharacterName.valueOf(argument));
-        double state = 0.0;
         switch (characteristic) {
             case "heal" -> {
-                state = (float)chr.getHealReserve();
+                float state = (float)chr.getHealReserve();
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %f", characteristic, state)), false);
             }
             case "stars" -> {
-                state = chr.getStars();
+                float state = chr.getStars();
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %f", characteristic, state)), false);
             }
             case "stamina" -> {
-                state = (float)chr.getStamina();
+                float state = (float)chr.getStamina();
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %f", characteristic, state)), false);
             }
             case "strength" -> {
-                state = chr.getStrength();
+                float state = chr.getStrength();
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %f", characteristic, state)), false);
             }
             case "staminaRegen" -> {
-                state = (float)chr.getStaminaRegen();
+                float state = (float)chr.getStaminaRegen();
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %f", characteristic, state)), false);
             }
             case "defence" -> {
-                state = chr.getDefence();
+                float state = chr.getDefence();
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %f", characteristic, state)), false);
             }
         }
-        double fstate = state;
-        ctx.getSource().sendFeedback(() -> Text.literal(characteristic+" ="+String.valueOf(fstate)), false);
         return 1;
     }
 
@@ -159,24 +164,31 @@ public class CharacterCommands {
         String argument = StringArgumentType.getString(ctx, "character");
         ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         Character chr = ModComponents.CHARACTERS.get(player).getCharacter(CharacterName.valueOf(argument));
-        switch (StringArgumentType.getString(ctx, "state")) {
+        String characteristic = StringArgumentType.getString(ctx, "state");
+        switch (characteristic) {
             case "heal" -> {
                 chr.setHealReserve((float) DoubleArgumentType.getDouble(ctx, "value"));
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s seted to %s", characteristic, argument)), false);
             }
             case "stars" -> {
                 chr.setStars((int) DoubleArgumentType.getDouble(ctx, "value"));
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s seted to %s", characteristic, argument)), false);
             }
             case "stamina" -> {
                 chr.setStamina((float) DoubleArgumentType.getDouble(ctx, "value"));
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s seted to %s", characteristic, argument)), false);
             }
             case "strength" -> {
                 chr.setStrength((int) DoubleArgumentType.getDouble(ctx, "value"));
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s seted to %s", characteristic, argument)), false);
             }
             case "staminaRegen" -> {
                 chr.setStaminaRegen((float) DoubleArgumentType.getDouble(ctx, "value"));
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s seted to %s", characteristic, argument)), false);
             }
             case "defence" -> {
                 chr.setDefence((int) DoubleArgumentType.getDouble(ctx, "value"));
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s seted to %s", characteristic, argument)), false);
             }
         }
         return 1;

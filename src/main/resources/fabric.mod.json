@@ -3,11 +3,8 @@
 	"id": "axorunelostworlds",
 	"version": "1.0",
 	"name": "AR: Lost Worlds",
-	"description": "Mod created specially for minecraft project: 'AxoRune'",
-	"authors": [
-		"JimForse",
-		"FIRrICE"
-	],
+	"description": "Mod created specially for minecraft project: 'AxoRune', season 'Lost Worlds'",
+	"authors": ["The Protocol Studio"],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
 		"sources": "https://github.com/JimForse/AxoR.U.N.E-LW"
