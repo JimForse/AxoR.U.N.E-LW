@@ -10,6 +10,8 @@ import java.io.IOException;
 public class RealizingCharacters {
     public Character character;
     public void realizingCharacterForPlayer(CharacterName name, ServerPlayerEntity player) {
+        standartAttributesForPlayer(player);
+
         EntityAttributeInstance heal = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH),
             strength = player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE),
             defence = player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR);

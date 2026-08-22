@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface CharactersComponent extends Component {
     Character getCharacter(CharacterName name);
-    void setCharacter(CharacterName character);
+    int setCharacter(CharacterName character);
     void setCurrentCharacter(CharacterName name);
     CharacterName getCurrentCharacter();
     void addCharacter(CharacterName character);

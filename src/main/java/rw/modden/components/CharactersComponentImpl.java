@@ -108,8 +108,11 @@ public class CharactersComponentImpl implements CharactersComponent {
         currentGroupName = name;
     }
     @Override
-    public void setCharacter(CharacterName name) {
-        new RealizingCharacters().realizingCharacterForPlayer(name, (ServerPlayerEntity) player);
+    public int setCharacter(CharacterName name) {
+        if (hasCharacter(name)) {
+            new RealizingCharacters().realizingCharacterForPlayer(name, (ServerPlayerEntity) player);
+            return 1;
+        } else return -2;
     }
     @Override
     public void setCurrentCharacter(CharacterName name) {
@@ -127,7 +130,7 @@ public class CharactersComponentImpl implements CharactersComponent {
     }
 
     /**
-     * error 0  — Exception
+     * error -4 — Unknown Exception
      * error -1 — Group size is maximum
      * error -2 — Player hasn't this character
      * error -3 — Group already has this character
@@ -146,6 +149,7 @@ public class CharactersComponentImpl implements CharactersComponent {
                         else return -3;
                     } else return -2;
                 } else return -1;
+                removeGroupFromCharacterGroups(groupName);
                 charactersGroups.put(groupName, group);
                 return 1;
             } else {
@@ -158,7 +162,7 @@ public class CharactersComponentImpl implements CharactersComponent {
                     return -2;
             }
         } catch (Exception e) {
-            return 0;
+            return -4;
         }
     }
     @Override
@@ -195,7 +199,7 @@ public class CharactersComponentImpl implements CharactersComponent {
             if (!groupsList.contains(nbtElement.asString()))
                 groupsList.add(nbtElement.asString());
             String groupName = nbtElement.asString();
-            NbtList nList1 = nbt.getList(groupName + "_group", NbtElement.LIST_TYPE);
+            NbtList nList1 = nbt.getList(groupName + "_group", NbtElement.STRING_TYPE);
             ArrayList<CharacterName> group = new ArrayList<>();
             for (NbtElement element: nList1) {
                 group.add(CharacterName.valueOf(element.asString()));
@@ -208,15 +212,15 @@ public class CharactersComponentImpl implements CharactersComponent {
     public void writeToNbt(NbtCompound nbt) {
         NbtList nKeyList = new NbtList();
         NbtList nList0 = new NbtList();
-        NbtList nList1 = new NbtList();
 
-        for (Map.Entry<CharacterName, Character> entry: characters.entrySet()) {
+        for (Map.Entry<CharacterName, Character> entry: characters.entrySet()) { // List all characters in player inventory
             nKeyList.add(NbtString.of(entry.getKey().name()));
             entry.getValue().writeToNbt(nbt);
         }
-        for (String s: groupsList)
+        for (String s: groupsList) // List all group names in player inventory
             nList0.add(NbtString.of(s));
-        for (Map.Entry<String, ArrayList<CharacterName>> entry: charactersGroups.entrySet()) {
+        for (Map.Entry<String, ArrayList<CharacterName>> entry: charactersGroups.entrySet()) { // List all groups in player inventory
+            NbtList nList1 = new NbtList();
             ArrayList<CharacterName> group = entry.getValue();
             for (CharacterName characterName: group)
                 nList1.add(NbtString.of(characterName.name()));

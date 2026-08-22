@@ -6,6 +6,7 @@ public class ClientNetwork {
     private static boolean battle;
 
     public static void registerGlobalReceiver() {
+        assert ServerNetwork.BATTLE_PACKET_ID != null;
         ClientPlayNetworking.registerGlobalReceiver(ServerNetwork.BATTLE_PACKET_ID, ((client, handler, buf, responseSender) -> {
             boolean battle = buf.readBoolean();
             ClientNetwork.setBattle(battle);

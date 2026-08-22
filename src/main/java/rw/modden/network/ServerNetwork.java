@@ -7,7 +7,7 @@ import net.minecraft.util.Identifier;
 import rw.modden.Axorunelostworlds;
 
 public class ServerNetwork {
-    public static final Identifier BATTLE_PACKET_ID = Identifier.of (Axorunelostworlds.MOD_ID, "battle");
+    public static final Identifier BATTLE_PACKET_ID = Identifier.of(Axorunelostworlds.MOD_ID, "battle");
     public static void send(ServerPlayerEntity player, Identifier channelName, PacketByteBuf buf) {
         ServerPlayNetworking.send(player, channelName, buf);
     }

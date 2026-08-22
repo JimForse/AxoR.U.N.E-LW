@@ -136,7 +136,7 @@ public class BattleCommands {
         ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
         ModComponents.BATTLE_STATE.get(target).setState(CombatState.NONE);
         new Battle(target).stopBattle();
-        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Battle state for player [%s] has been stoped", target.getDisplayName())), false);
+        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Battle state for player [%s] has been stoped", target.getEntityName())), false);
         return 1;
     }
 
@@ -166,7 +166,7 @@ public class BattleCommands {
         for (int character: characters) {
             if (character!=1) {
                 switch (character) {
-                    case 0  -> ctx.getSource().sendError(Text.literal("Unknown Exception"));
+                    case -4  -> ctx.getSource().sendError(Text.literal("Unknown Exception"));
                     case -1 -> ctx.getSource().sendError(Text.literal("Group size is maximum"));
                     case -2 -> ctx.getSource().sendError(Text.literal("Player hasn`t this character"));
                     case -3 -> ctx.getSource().sendError(Text.literal("Group already has this character"));

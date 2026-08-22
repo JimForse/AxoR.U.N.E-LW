@@ -98,7 +98,11 @@ public class CharacterCommands {
     private static int setCharacter(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         String argument = StringArgumentType.getString(ctx, "character");
         ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        ModComponents.CHARACTERS.get(player).setCharacter(CharacterName.valueOf(argument));
+        int result = ModComponents.CHARACTERS.get(player).setCharacter(CharacterName.valueOf(argument));
+        if (result !=1) {
+            ctx.getSource().sendError(Text.literal("Player hasn`t this character"));
+            return 0;
+        }
         ArrayList<CharacterName> group = new ArrayList<>();
         group.add(CharacterName.valueOf(argument));
         BattleStateComponent component = ModComponents.BATTLE_STATE.get(player);

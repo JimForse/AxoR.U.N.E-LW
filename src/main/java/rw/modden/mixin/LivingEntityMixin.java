@@ -72,13 +72,10 @@ public class LivingEntityMixin {
             timerA = false;
             timer1 = 0;
         }
-    }
 
-    @Inject(at = @At("HEAD"), method = "heal", cancellable = true)
-    private void healRegeneration(float amount, CallbackInfo info) {
         battleA();
         if (battle) {
-            doesDie = false;
+            currentHeal = player.getHealth();
             CharactersComponent component = ModComponents.CHARACTERS.get(player);
             Character character = component.getCharacter(component.getCurrentCharacter());
             if (character!=null) {
@@ -86,12 +83,28 @@ public class LivingEntityMixin {
                 healRegen = character.getHealRegen();
 
                 if (currentHeal < healReserve) {
+                    newHeal = currentHeal + ((healReserve + character.getAllHealReserveBonus()) * (healRegen + character.getAllHealRegenBonus()));
+                    currentHeal = newHeal;
+                    player.setHealth(newHeal);
+                }
+            }
+        }
+    }
+
+    @Inject(at = @At("HEAD"), method = "heal", cancellable = true)
+    private void healRegeneration(float amount, CallbackInfo info) {
+        battleA();
+        if (battle) {
+            doesDie = false;
+            currentHeal = player.getHealth();
+            CharactersComponent component = ModComponents.CHARACTERS.get(player);
+            Character character = component.getCharacter(component.getCurrentCharacter());
+            if (character!=null) {
+                healReserve = character.getHealReserve();
+                if (currentHeal < healReserve) {
                     if (currentHeal <= 0) {
                         doesDie = true;
                         info.cancel();
-                    } else {
-                        newHeal = currentHeal + ((healReserve + character.getAllHealReserveBonus()) * (healRegen + character.getAllHealRegenBonus()));
-                        currentHeal = newHeal;
                     }
                 }
             }
