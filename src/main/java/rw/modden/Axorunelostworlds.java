@@ -2,6 +2,7 @@ package rw.modden;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.combatroll.client.ClientNetwork;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.loader.api.FabricLoader;
@@ -17,6 +18,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -29,11 +31,12 @@ public class Axorunelostworlds implements ModInitializer {
 	}
 
 	File file = getConfigFile();
-	Path configDir = FabricLoader.getInstance().getConfigDir();
+	private static final Path configDir = FabricLoader.getInstance().getConfigDir();
 	private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
  	private static final Map<String, UUID> uuid = new HashMap<>();
 	public static final String MOD_ID = "axorunelostworlds";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+	public static ArrayList<String> permitted_equipment = new ArrayList<>();
 
 	public String getUniqueItemID() {
 		return UUID.randomUUID().toString();
@@ -43,6 +46,7 @@ public class Axorunelostworlds implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("Hello Gods Axo- worlds!");
         try {
+			readFromEquipmentsJson();
             Files.createDirectories(configDir.resolve("arlwEvents"));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -50,6 +54,24 @@ public class Axorunelostworlds implements ModInitializer {
 
 		CharacterCommands.initialize();
         BattleCommands.initialize();
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void readFromEquipmentsJson() {
+		ArrayList<String> list = new ArrayList<>();
+		File fileW = configDir.resolve("equipments.json").toFile();
+		if (fileW.exists()) {
+			try (FileReader reader = new FileReader(fileW)) {
+				list = gson.fromJson(reader, ArrayList.class);
+			} catch (IOException e) {
+				e.printStackTrace();
+				Axorunelostworlds config = new Axorunelostworlds();
+				config.createFile();
+			}
+		}
+		else
+			LOGGER.error("This file doesn`t exist");
+		permitted_equipment = list;
 	}
 
 	public void writeToJson(String name, UUID Uuid) {

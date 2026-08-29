@@ -9,9 +9,11 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import rw.modden.characters.Character;
 import rw.modden.characters.CharacterInitializer;
 import rw.modden.characters.CharacterName;
 import rw.modden.characters.RealizingCharacters;
+import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
 import rw.modden.effects.EffectsFactory;
 import rw.modden.network.ServerNetwork;
@@ -37,8 +39,8 @@ public class Battle {
         this.player = player;
     }
 
-    public void standartBattle(ArrayList<CharacterName> group) {
-        combatStateToBattle();
+    public int standartBattle(ArrayList<CharacterName> group) {
+        combatStateToBattle(group);
         if (battle) {
             currentGroup = group;
             chr = 0;
@@ -47,7 +49,9 @@ public class Battle {
             new RealizingCharacters().realizingCharacterForPlayer(character, player);
 
             serverSend();
+            return 1;
         }
+        return 0;
     }
 
     @SuppressWarnings("unchecked")
@@ -93,6 +97,25 @@ public class Battle {
         battle = false;
         new RealizingCharacters().standartAttributesForPlayer(player);
         serverSend();
+    }
+
+    public void combatStateToBattle(ArrayList<CharacterName> group) {
+        boolean can = true;
+        CharactersComponent component = ModComponents.CHARACTERS.get(player);
+        for (int i = 0; i < group.size(); i++) {
+            if (component.getCharacter(group.get(i)).getWeapon()==null) can = false;
+        }
+        if (can) {
+            CombatState state = ModComponents.BATTLE_STATE.get(player).getState();
+            battle = state == CombatState.STANDART || state == CombatState.EVENT;
+        }
+    }
+
+    public void combatStateToBattle(Character character) {
+        if (character.getWeapon()!=null) {
+            CombatState state = ModComponents.BATTLE_STATE.get(player).getState();
+            battle = state == CombatState.STANDART || state == CombatState.EVENT;
+        }
     }
 
     public void combatStateToBattle() {

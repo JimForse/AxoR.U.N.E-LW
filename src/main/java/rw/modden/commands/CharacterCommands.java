@@ -109,7 +109,8 @@ public class CharacterCommands {
         CombatState state = component.getState();
         if (state==CombatState.NONE) {
             component.setState(CombatState.STANDART);
-            new Battle(player).standartBattle(group);
+            if (new Battle(player).standartBattle(group)!=1)
+                ctx.getSource().sendError(Text.literal("This character hasn`t weapon"));
         }
         return 1;
     }

@@ -79,6 +79,7 @@ public class CharactersComponentImpl implements CharactersComponent {
     @Override
     public void removeCharacter(CharacterName name) {
         characters.remove(name);
+        removeCharacterFromGroup(name);
     }
     @Override
     public void removeGroupFromGroupsList(String groupName) {
@@ -93,6 +94,12 @@ public class CharactersComponentImpl implements CharactersComponent {
         }
     }
     @Override
+    public void removeCharacterFromGroup(CharacterName name) {
+        for(Map.Entry<String, ArrayList<CharacterName>> map: charactersGroups.entrySet())
+            if (map.getValue().contains(name))
+                removeCharacterFromGroup(name, map.getKey());
+    }
+    @Override
     public void removeGroupFromCharacterGroups(String groupName) {
         charactersGroups.remove(groupName);
     }
@@ -105,12 +112,13 @@ public class CharactersComponentImpl implements CharactersComponent {
     // ==============  SET  ==================
     @Override
     public void setCurrentGroupName(String name) {
-        currentGroupName = name;
+        if (groupsList.contains(name)) currentGroupName = name;
     }
     @Override
     public int setCharacter(CharacterName name) {
         if (hasCharacter(name)) {
             new RealizingCharacters().realizingCharacterForPlayer(name, (ServerPlayerEntity) player);
+            setCurrentCharacter(name);
             return 1;
         } else return -2;
     }
@@ -149,7 +157,6 @@ public class CharactersComponentImpl implements CharactersComponent {
                         else return -3;
                     } else return -2;
                 } else return -1;
-                removeGroupFromCharacterGroups(groupName);
                 charactersGroups.put(groupName, group);
                 return 1;
             } else {
@@ -175,7 +182,7 @@ public class CharactersComponentImpl implements CharactersComponent {
     }
     @Override
     public void addGroupToGroupsList(String groupName) {
-        groupsList.add(groupName);
+        if (!groupsList.contains(groupName)) groupsList.add(groupName);
     }
 
     @Override
@@ -195,7 +202,7 @@ public class CharactersComponentImpl implements CharactersComponent {
             Path pathID = PathFactory.get(PathesName.valueOf(nbt.getString(name.name() + "_path")));
             addCharacters(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name);
         }
-        for (NbtElement nbtElement : nList0) {
+        for (NbtElement nbtElement: nList0) {
             if (!groupsList.contains(nbtElement.asString()))
                 groupsList.add(nbtElement.asString());
             String groupName = nbtElement.asString();

@@ -18,6 +18,9 @@ public interface CharactersComponent extends Component {
     String getCurrentGroupName();
     ArrayList<CharacterName> getCurrentGroup();
     void removeCharacterFromGroup(CharacterName name, String groupName);
+
+    void removeCharacterFromGroup(CharacterName name);
+
     void removeGroupFromCharacterGroups(String groupName);
     void removeGroup(String groupName);
     void setCurrentGroupName(String name);

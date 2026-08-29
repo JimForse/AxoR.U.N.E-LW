@@ -2,6 +2,7 @@ package rw.modden.characters;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
+import rw.modden.Axorunelostworlds;
 import rw.modden.combat.path.Path;
 import rw.modden.combat.path.PathFactory;
 import rw.modden.combat.path.PathesName;
@@ -16,8 +17,8 @@ public abstract class ABCharacter implements Character {
     private float healReserve, staminaRegen, stamina, healRegen;
     private Path pathID;
     private CharacterName name;
-    private ABEquip head, chest, legs, boots, slot1, slot2, slot3;
-    private Map<String, ABEquip> equipMap = new HashMap<>();
+    private ABEquip head, chest, legs, boots, slot1, slot2, slot3, weapon;
+    private final Map<String, ABEquip> equipMap = new HashMap<>();
 
     public ABCharacter (float healReserve, int stars, float stamina, int strength, float staminaRegen, float healRegen, int defence, Path pathID, CharacterName name) {
         this.healReserve = healReserve;
@@ -95,6 +96,10 @@ public abstract class ABCharacter implements Character {
     public ABEquip getThirdSlot() {
         return slot3;
     }
+    @Override
+    public ABEquip getWeapon() {
+        return weapon;
+    }
 
     @Override
     public void setHealReserve(float value) {
@@ -130,52 +135,83 @@ public abstract class ABCharacter implements Character {
     }
     @Override
     public void setHead(ABEquip armor) {
-        if (this.head != null)
-            removeItem(this.head);
-        this.head = armor;
-        addItem(armor);
+        if (this.head != null) {
+            if (Axorunelostworlds.permitted_equipment.contains(armor.getItemID())) {
+                removeItem(this.head);
+                this.head = armor;
+                addItem(armor);
+            }
+        }
     }
     @Override
     public void setChest(ABEquip armor) {
-        if (this.chest != null)
-            removeItem(this.chest);
-        this.chest = armor;
-        addItem(armor);
+        if (this.chest != null) {
+            if (Axorunelostworlds.permitted_equipment.contains(armor.getItemID())) {
+                removeItem(this.chest);
+                this.chest = armor;
+                addItem(armor);
+            }
+        }
     }
     @Override
     public void setLegs(ABEquip armor) {
-        if (this.legs != null)
-            removeItem(this.legs);
-        this.legs = armor;
-        addItem(armor);
+        if (this.legs != null) {
+            if (Axorunelostworlds.permitted_equipment.contains(armor.getItemID())) {
+                removeItem(this.legs);
+                this.legs = armor;
+                addItem(armor);
+            }
+        }
     }
     @Override
     public void setBoots(ABEquip armor) {
-        if (this.boots != null)
-            removeItem(this.boots);
-        this.boots = armor;
-        addItem(armor);
+        if (this.boots != null) {
+            if (Axorunelostworlds.permitted_equipment.contains(armor.getItemID())) {
+                removeItem(this.boots);
+                this.boots = armor;
+                addItem(armor);
+            }
+        }
     }
     @Override
     public void setFirstSlot(ABEquip item) {
-        if (this.slot1 != null)
-            removeItem(this.slot1);
-        this.slot1 = item;
-        addItem(item);
+        if (this.slot1 != null) {
+            if (Axorunelostworlds.permitted_equipment.contains(item.getItemID())) {
+                removeItem(this.slot1);
+                this.slot1 = item;
+                addItem(item);
+            }
+        }
     }
     @Override
     public void setSecondSlot(ABEquip item) {
-        if (this.slot2 != null)
-            removeItem(this.slot2);
-        this.slot2 = item;
-        addItem(item);
+        if (this.slot2 != null) {
+            if (Axorunelostworlds.permitted_equipment.contains(item.getItemID())) {
+                removeItem(this.slot2);
+                this.slot2 = item;
+                addItem(item);
+            }
+        }
     }
     @Override
     public void setThirdSlot(ABEquip item) {
-        if (this.slot3 != null)
-            removeItem(this.slot3);
-        this.slot3 = item;
-        addItem(item);
+        if (this.slot3 != null) {
+            if (Axorunelostworlds.permitted_equipment.contains(item.getItemID())) {
+                removeItem(this.slot3);
+                this.slot3 = item;
+                addItem(item);
+            }
+        }
+    }
+    @Override
+    public void setWeapon(ABEquip item) {
+        if (this.weapon != null) {
+            if (Axorunelostworlds.permitted_equipment.contains(item.getItemID())) {
+                removeItem(this.weapon);
+                this.weapon = item;
+                addItem(weapon);
+            }
+        }
     }
 
     private void addItem(ABEquip item) {
@@ -196,7 +232,6 @@ public abstract class ABCharacter implements Character {
     public ABEquip getItem(String uniqueID) {
         return equipMap.get(uniqueID);
     }
-
     @Override
     public float getAllHealReserveBonus() {
         float bonus = 0.0F;
@@ -209,7 +244,6 @@ public abstract class ABCharacter implements Character {
         if (slot3 != null) bonus += slot3.getHealReserveBonus();
         return bonus;
     }
-
     @Override
     public float getAllHealRegenBonus() {
         float bonus = 0.0F;
@@ -248,20 +282,22 @@ public abstract class ABCharacter implements Character {
         slots.add(nbt.getString(name.name() + "_slot1"));
         slots.add(nbt.getString(name.name() + "_slot2"));
         slots.add(nbt.getString(name.name() + "_slot3"));
+        slots.add(nbt.getString(name.name() + "_weapon"));
 
         for (int i = 0; i < slots.size(); i++) {
             uniqueID = slots.get(i);
             if (uniqueID.isEmpty()) continue;
-            itemID           = nbt.getString("item_id"          + uniqueID);
+            itemID = nbt.getString("item_id" + uniqueID);
 
             switch (i) {
-                case 0 -> this.head  = new ABEquip(uniqueID,itemID);
-                case 1 -> this.chest = new ABEquip(uniqueID,itemID);
-                case 2 -> this.legs  = new ABEquip(uniqueID,itemID);
-                case 3 -> this.boots = new ABEquip(uniqueID,itemID);
-                case 4 -> this.slot1 = new ABEquip(uniqueID,itemID);
-                case 5 -> this.slot2 = new ABEquip(uniqueID,itemID);
-                case 6 -> this.slot3 = new ABEquip(uniqueID,itemID);
+                case 0 -> this.head   = new ABEquip(uniqueID,itemID);
+                case 1 -> this.chest  = new ABEquip(uniqueID,itemID);
+                case 2 -> this.legs   = new ABEquip(uniqueID,itemID);
+                case 3 -> this.boots  = new ABEquip(uniqueID,itemID);
+                case 4 -> this.slot1  = new ABEquip(uniqueID,itemID);
+                case 5 -> this.slot2  = new ABEquip(uniqueID,itemID);
+                case 6 -> this.slot3  = new ABEquip(uniqueID,itemID);
+                case 7 -> this.weapon = new ABEquip(uniqueID,itemID);
             }
         }
     }
@@ -284,6 +320,7 @@ public abstract class ABCharacter implements Character {
             nbt.putString(name.name() + "_slot1", slot1.getUniqueID());
             nbt.putString(name.name() + "_slot2", slot2.getUniqueID());
             nbt.putString(name.name() + "_slot3", slot3.getUniqueID());
+            nbt.putString(name.name() + "_weapon", weapon.getUniqueID());
 
             head.writeToNbt(nbt);
             chest.writeToNbt(nbt);
@@ -292,7 +329,10 @@ public abstract class ABCharacter implements Character {
             slot1.writeToNbt(nbt);
             slot2.writeToNbt(nbt);
             slot3.writeToNbt(nbt);
-        } catch (NullPointerException e) {}
+            weapon.writeToNbt(nbt);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         nbt.put( name.name()+"_path", NbtString.of(pathID.getPath().name()));
         nbt.putString("name", name.name());// last line

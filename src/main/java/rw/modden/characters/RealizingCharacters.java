@@ -2,6 +2,9 @@ package rw.modden.characters;
 
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageType;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import rw.modden.components.ModComponents;
 
@@ -27,6 +30,7 @@ public class RealizingCharacters {
             defence.setBaseValue((double) character.getDefence());
         } catch (Exception e) {}
         ModComponents.CHARACTERS.get(player).setCurrentCharacter(name);
+        player.damage(player.getDamageSources().generic(), 1.0F);
     }
 
     public void standartAttributesForPlayer(ServerPlayerEntity player) {
@@ -39,5 +43,6 @@ public class RealizingCharacters {
             strength.setBaseValue(1.0);
             defence.setBaseValue(0.0);
         } catch (Exception e) {}
+        player.damage(player.getDamageSources().generic(), 1.0F);
     }
 }

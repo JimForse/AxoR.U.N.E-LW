@@ -107,7 +107,8 @@ public class BattleCommands {
         ArrayList<CharacterName> group = component.getCharactersGroup(groupName);
         component.setCurrentGroupName(groupName);
         ModComponents.BATTLE_STATE.get(target).setState(CombatState.STANDART);
-        new Battle(target).standartBattle(group);
+        if (new Battle(target).standartBattle(group)!=1)
+            ctx.getSource().sendError(Text.literal("This character hasn`t weapon"));
         return 1;
     }
 
