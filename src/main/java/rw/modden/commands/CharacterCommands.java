@@ -108,9 +108,12 @@ public class CharacterCommands {
         BattleStateComponent component = ModComponents.BATTLE_STATE.get(player);
         CombatState state = component.getState();
         if (state==CombatState.NONE) {
-            component.setState(CombatState.STANDART);
-            if (new Battle(player).standartBattle(group)!=1)
+            if (!(new Battle(player).standartBattle(group)!=1))
+                component.setState(CombatState.STANDART);
+            else ctx.getSource().sendError(Text.literal("This character hasn`t weapon"));
+        } else if (new Battle(player).standartBattle(group)!=1) {
                 ctx.getSource().sendError(Text.literal("This character hasn`t weapon"));
+                component.setState(CombatState.NONE);
         }
         return 1;
     }

@@ -274,17 +274,33 @@ public abstract class ABCharacter implements Character {
         /** Items block */
         String uniqueID = "", itemID = "";
         ArrayList<String> slots   = new ArrayList<>();
-
-        slots.add(nbt.getString(name.name() + "_head"));
-        slots.add(nbt.getString(name.name() + "_chest"));
-        slots.add(nbt.getString(name.name() + "_legs"));
-        slots.add(nbt.getString(name.name() + "_boots"));
-        slots.add(nbt.getString(name.name() + "_slot1"));
-        slots.add(nbt.getString(name.name() + "_slot2"));
-        slots.add(nbt.getString(name.name() + "_slot3"));
-        slots.add(nbt.getString(name.name() + "_weapon"));
+        if (nbt.contains(name.name() + "_head"))
+            slots.add(nbt.getString(name.name() + "_head"));
+        else slots.add("0");
+        if (nbt.contains(name.name() + "_chest"))
+            slots.add(nbt.getString(name.name() + "_chest"));
+        else slots.add("0");
+        if (nbt.contains(name.name() + "_legs"))
+            slots.add(nbt.getString(name.name() + "_legs"));
+        else slots.add("0");
+        if (nbt.contains(name.name() + "_boots"))
+            slots.add(nbt.getString(name.name() + "_boots"));
+        else slots.add("0");
+        if (nbt.contains(name.name() + "_slot1"))
+            slots.add(nbt.getString(name.name() + "_slot1"));
+        else slots.add("0");
+        if (nbt.contains(name.name() + "_slot2"))
+            slots.add(nbt.getString(name.name() + "_slot2"));
+        else slots.add("0");
+        if (nbt.contains(name.name() + "_slot3"))
+            slots.add(nbt.getString(name.name() + "_slot3"));
+        else slots.add("0");
+        if (nbt.contains(name.name() + "_weapon"))
+            slots.add(nbt.getString(name.name() + "_weapon"));
+        else slots.add("0");
 
         for (int i = 0; i < slots.size(); i++) {
+            if (slots.get(i).equals("0")) continue;
             uniqueID = slots.get(i);
             if (uniqueID.isEmpty()) continue;
             itemID = nbt.getString("item_id" + uniqueID);
@@ -313,23 +329,30 @@ public abstract class ABCharacter implements Character {
         nbt.putFloat (name.name()+"_healRegen",    healRegen);
 
         try {
-            nbt.putString(name.name() + "_head", head.getUniqueID());
-            nbt.putString(name.name() + "_chest", chest.getUniqueID());
-            nbt.putString(name.name() + "_legs", legs.getUniqueID());
-            nbt.putString(name.name() + "_boots", boots.getUniqueID());
-            nbt.putString(name.name() + "_slot1", slot1.getUniqueID());
-            nbt.putString(name.name() + "_slot2", slot2.getUniqueID());
-            nbt.putString(name.name() + "_slot3", slot3.getUniqueID());
-            nbt.putString(name.name() + "_weapon", weapon.getUniqueID());
-
-            head.writeToNbt(nbt);
-            chest.writeToNbt(nbt);
-            legs.writeToNbt(nbt);
-            boots.writeToNbt(nbt);
-            slot1.writeToNbt(nbt);
-            slot2.writeToNbt(nbt);
-            slot3.writeToNbt(nbt);
-            weapon.writeToNbt(nbt);
+            if (head!=null) {
+                nbt.putString(name.name() + "_head", head.getUniqueID());
+                head.writeToNbt(nbt);}
+            if (chest!=null) {
+                nbt.putString(name.name() + "_chest", chest.getUniqueID());
+                chest.writeToNbt(nbt);}
+            if (legs!=null) {
+                nbt.putString(name.name() + "_legs", legs.getUniqueID());
+                legs.writeToNbt(nbt);}
+            if (boots!=null) {
+                nbt.putString(name.name() + "_boots", boots.getUniqueID());
+                boots.writeToNbt(nbt);}
+            if (slot1!=null) {
+                nbt.putString(name.name() + "_slot1", slot1.getUniqueID());
+                slot1.writeToNbt(nbt);}
+            if (slot2!=null) {
+                nbt.putString(name.name() + "_slot2", slot2.getUniqueID());
+                slot2.writeToNbt(nbt);}
+            if (slot3!=null) {
+                nbt.putString(name.name() + "_slot3", slot3.getUniqueID());
+                slot3.writeToNbt(nbt);}
+            if (weapon!=null) {
+                nbt.putString(name.name() + "_weapon", weapon.getUniqueID());
+                weapon.writeToNbt(nbt);}
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -1,6 +1,7 @@
 package rw.modden.network;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import rw.modden.AxorunelostworldsClient;
 
 public class ClientNetwork {
     private static boolean battle;
@@ -9,6 +10,7 @@ public class ClientNetwork {
         assert ServerNetwork.BATTLE_PACKET_ID != null;
         ClientPlayNetworking.registerGlobalReceiver(ServerNetwork.BATTLE_PACKET_ID, ((client, handler, buf, responseSender) -> {
             boolean battle = buf.readBoolean();
+            AxorunelostworldsClient.LOGGER.debug("CLIENT: received battle = " + battle);
             ClientNetwork.setBattle(battle);
         }) );
     }

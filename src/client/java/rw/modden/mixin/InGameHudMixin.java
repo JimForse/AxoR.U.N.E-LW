@@ -6,12 +6,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import rw.modden.AxorunelostworldsClient;
 import rw.modden.network.ClientNetwork;
 
 @Mixin(InGameHud.class)
 public class InGameHudMixin {
     @Inject(at = @At("HEAD"), method = "renderHotbar", cancellable = true)
     private void renderHotbar(float tickDelta, DrawContext context, CallbackInfo info) {
+        AxorunelostworldsClient.LOGGER.debug("HUD: battle = " + ClientNetwork.getBattle());
         if (ClientNetwork.getBattle()) {
             info.cancel();
         }

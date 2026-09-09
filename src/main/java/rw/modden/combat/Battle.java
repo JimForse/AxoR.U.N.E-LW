@@ -9,6 +9,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import rw.modden.Axorunelostworlds;
 import rw.modden.characters.Character;
 import rw.modden.characters.CharacterInitializer;
 import rw.modden.characters.CharacterName;
@@ -153,6 +154,7 @@ public class Battle {
 
     private void serverSend() {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+        Axorunelostworlds.LOGGER.debug("SERVER: sending battle = " + battle);
         buf.writeBoolean(battle);
         ServerNetwork.send(player, ServerNetwork.BATTLE_PACKET_ID, buf);
     }

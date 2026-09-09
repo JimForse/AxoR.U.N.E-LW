@@ -51,20 +51,24 @@ public class ABEquip {
     }
 
     public void readFromNbt(NbtCompound nbt) {
-        this.uniqueID         = nbt.getString("unique_id"); // first line
-        this.healReserveBonus = nbt.getFloat( "healReserveBonus" + uniqueID);
-        this.healRegenBonus   = nbt.getFloat( "healRegenBonus"   + uniqueID);
-        this.defenceBonus     = nbt.getFloat( "defenceBonus"     + uniqueID);
-        this.damageBonus      = nbt.getFloat( "damageBonus"      + uniqueID);
-        this.itemID           = nbt.getString("item_id"          + uniqueID);
+        this.uniqueID = nbt.getString("unique_id"); // first line
+        if (nbt.contains("healReserveBonus" + uniqueID))
+            this.healReserveBonus = nbt.getFloat( "healReserveBonus" + uniqueID);
+        if (nbt.contains("healRegenBonus" + uniqueID))
+            this.healRegenBonus = nbt.getFloat( "healRegenBonus" + uniqueID);
+        if (nbt.contains("defenceBonus" + uniqueID))
+            this.defenceBonus = nbt.getFloat( "defenceBonus" + uniqueID);
+        if (nbt.contains("damageBonus"+uniqueID))
+            this.damageBonus = nbt.getFloat( "damageBonus" + uniqueID);
+        this.itemID = nbt.getString("item_id" + uniqueID);
     }
 
     public void writeToNbt(NbtCompound nbt) {
-        nbt.putFloat ("healReserveBonus" + uniqueID, healReserveBonus);
-        nbt.putFloat ("healRegenBonus"   + uniqueID, healRegenBonus);
-        nbt.putFloat ("damageBonus"      + uniqueID, damageBonus);
-        nbt.putFloat ("defenceBonus"     + uniqueID, defenceBonus);
-        nbt.putString("item_id"          + uniqueID, itemID);
+        if (healReserveBonus!=0.0F) nbt.putFloat ("healReserveBonus" + uniqueID, healReserveBonus);
+        if (healRegenBonus!=0.0F) nbt.putFloat ("healRegenBonus" + uniqueID, healRegenBonus);
+        if (damageBonus!=0.0F) nbt.putFloat ("damageBonus" + uniqueID, damageBonus);
+        if (defenceBonus!=0.0F) nbt.putFloat ("defenceBonus" + uniqueID, defenceBonus);
+        nbt.putString("item_id" + uniqueID, itemID);
         nbt.putString("unique_id", uniqueID); // last line
     }
 }
