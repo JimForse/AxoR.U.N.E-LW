@@ -1,6 +1,7 @@
 package rw.modden.components;
 
 import dev.onyxstudios.cca.api.v3.component.Component;
+import net.minecraft.server.network.ServerPlayerEntity;
 import rw.modden.characters.Character;
 import rw.modden.characters.CharacterName;
 import rw.modden.combat.path.Path;
@@ -13,6 +14,12 @@ public interface CharactersComponent extends Component {
     int setCharacter(CharacterName character);
     void setCurrentCharacter(CharacterName name);
     CharacterName getCurrentCharacter();
+
+    int switcher();
+    int switcher(int value);
+    int switcher(ServerPlayerEntity player);
+    int switcher(ServerPlayerEntity player, int value);
+
     void addCharacter(CharacterName character);
     Map<CharacterName, Character> getCharacters();
     String getCurrentGroupName();

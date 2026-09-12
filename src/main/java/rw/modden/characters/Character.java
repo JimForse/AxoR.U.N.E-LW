@@ -39,6 +39,7 @@ public interface Character {
     void setSecondSlot(ABEquip item);
     void setThirdSlot(ABEquip item);
     void setWeapon(ABEquip item);
+    void setWeapon(String item);
 
     boolean hasItem(ABEquip item);
     boolean hasItem(String uniqueID);

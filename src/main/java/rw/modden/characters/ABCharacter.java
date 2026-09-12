@@ -205,12 +205,18 @@ public abstract class ABCharacter implements Character {
     }
     @Override
     public void setWeapon(ABEquip item) {
-        if (this.weapon != null) {
-            if (Axorunelostworlds.permitted_equipment.contains(item.getItemID())) {
-                removeItem(this.weapon);
-                this.weapon = item;
-                addItem(weapon);
-            }
+        if (Axorunelostworlds.permitted_equipment.contains(item.getItemID())) {
+            removeItem(this.weapon);
+            this.weapon = item;
+            addItem(weapon);
+       }
+    }
+    @Override
+    public void setWeapon(String item) {
+        if (Axorunelostworlds.permitted_equipment.contains(item)) {
+            if (this.weapon!=null) removeItem(this.weapon);
+            this.weapon = new ABEquip(new Axorunelostworlds().getUniqueItemID(), item);
+            addItem(weapon);
         }
     }
 

@@ -126,6 +126,82 @@ public class CharactersComponentImpl implements CharactersComponent {
     public void setCurrentCharacter(CharacterName name) {
         currentCharacter = name;
     }
+    @Override
+    public int switcher() {
+        ServerPlayerEntity pl = null;
+        if (this.player instanceof ServerPlayerEntity) pl = (ServerPlayerEntity) this.player;
+        ArrayList<CharacterName> group = getCurrentGroup();
+        if (group.size()==1) {
+            return -1;
+        } else {
+            if (group.get(0).name().equals(getCurrentCharacter().name())) {
+                setCurrentCharacter(group.get(1));
+                new RealizingCharacters().realizingCharacterForPlayer(group.get(1), pl);
+            } else if (group.size()==3) {
+                if (getCurrentCharacter().name().equals(group.get(1).name())) {
+                    setCurrentCharacter(group.get(2));
+                    new RealizingCharacters().realizingCharacterForPlayer(group.get(2), pl);
+                } else {
+                    setCurrentCharacter(group.get(0));
+                    new RealizingCharacters().realizingCharacterForPlayer(group.get(0), pl);
+                }
+            } else {
+                setCurrentCharacter(group.get(0));
+                new RealizingCharacters().realizingCharacterForPlayer(group.get(0), pl);
+            }
+        }
+        return 1;
+    }
+    @Override
+    public int switcher(int value) {
+        int res = value==1?0:value==2?1:2;
+        ServerPlayerEntity pl = null;
+        if (this.player instanceof ServerPlayerEntity) pl = (ServerPlayerEntity) this.player;
+        ArrayList<CharacterName> group = getCurrentGroup();
+        if (group.size()==1) {
+            return -1;
+        } else {
+            setCurrentCharacter(group.get(res));
+            new RealizingCharacters().realizingCharacterForPlayer(group.get(res), pl);
+        }
+        return 1;
+    }
+    @Override
+    public int switcher(ServerPlayerEntity player) {
+        ArrayList<CharacterName> group = getCurrentGroup();
+        if (group.size()==1) {
+            return -1;
+        } else {
+            if (group.get(0).name().equals(getCurrentCharacter().name())) {
+                setCurrentCharacter(group.get(1));
+                new RealizingCharacters().realizingCharacterForPlayer(group.get(1), player);
+            } else if (group.size()==3) {
+                if (getCurrentCharacter().name().equals(group.get(1).name())) {
+                    setCurrentCharacter(group.get(2));
+                    new RealizingCharacters().realizingCharacterForPlayer(group.get(2), player);
+                } else {
+                    setCurrentCharacter(group.get(0));
+                    new RealizingCharacters().realizingCharacterForPlayer(group.get(0), player);
+                }
+            } else {
+                setCurrentCharacter(group.get(0));
+                new RealizingCharacters().realizingCharacterForPlayer(group.get(0), player);
+            }
+        }
+        return 1;
+    }
+    @Override
+    public int switcher(ServerPlayerEntity player, int value) {
+        ArrayList<CharacterName> group = getCurrentGroup();
+        int res = value==1?0:value==2?1:2;
+        if (group.size()==1) {
+            return -1;
+        } else {
+            setCurrentCharacter(group.get(res));
+            new RealizingCharacters().realizingCharacterForPlayer(group.get(res), player);
+        }
+        return 1;
+    }
 
     // ==============  ADD  ==================
     @Override

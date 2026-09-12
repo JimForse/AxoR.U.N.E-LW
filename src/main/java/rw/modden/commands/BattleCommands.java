@@ -1,6 +1,7 @@
 package rw.modden.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -11,6 +12,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import rw.modden.characters.CharacterName;
+import rw.modden.characters.RealizingCharacters;
 import rw.modden.combat.Battle;
 import rw.modden.combat.CombatState;
 import rw.modden.components.CharactersComponent;
@@ -52,12 +54,14 @@ public class BattleCommands {
             )
 
             .then(literal("status")
+                .executes(BattleCommands::battleStop))
                 .then(argument("target", EntityArgumentType.player())
-                    .executes(BattleCommands::battleStatus)))
+                    .executes(BattleCommands::battleStatus))
 
             .then(literal("stop")
+                .executes(BattleCommands::battleStop))
                 .then(argument("target", EntityArgumentType.player())
-                    .executes(BattleCommands::battleStop)))
+                    .executes(BattleCommands::battleStop))
         );
         dispatcher.register(literal("group")
             .requires(source -> source.hasPermissionLevel(4))
@@ -98,6 +102,17 @@ public class BattleCommands {
                             ModComponents.CHARACTERS.get(EntityArgumentType.getPlayer(context, "target")).getGroupsList() ,builder))
                             .executes(BattleCommands::checkGroup))))
         );
+        dispatcher.register(literal("switch")
+            .requires(source -> source.hasPermissionLevel(4))
+                .executes(BattleCommands::switcher)
+                .then(argument("value", StringArgumentType.word())
+                    .executes(BattleCommands::switcher))
+                .then(argument("targetValue", EntityArgumentType.player())
+                    .then(argument("value", StringArgumentType.word())
+                        .executes(BattleCommands::switcher)))
+                .then(argument("target", EntityArgumentType.player())
+                    .executes(BattleCommands::switcher))
+        );
     }
 
     private static int battleStartStandart(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
@@ -120,7 +135,7 @@ public class BattleCommands {
         return 1;
     }
 
-    private static int battleStatus(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    private static int battleStatus(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException { //TODO: Реализовать исполнение команды без указания энтити
         ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
         CombatState state = ModComponents.BATTLE_STATE.get(target).getState();
 
@@ -133,7 +148,7 @@ public class BattleCommands {
         return 1;
     }
 
-    private static int battleStop(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    private static int battleStop(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException { //TODO: Реализовать исполнение команды без указания энтити
         ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
         ModComponents.BATTLE_STATE.get(target).setState(CombatState.NONE);
         new Battle(target).stopBattle();
@@ -206,5 +221,62 @@ public class BattleCommands {
         String s = ModComponents.CHARACTERS.get(target).getCharactersGroup(groupName).stream().map(CharacterName::name).collect(Collectors.joining(", "));
         ctx.getSource().sendFeedback(() -> Text.literal("This group contains is: "+s), false);
         return 1;
+    }
+
+    private static int switcher(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        int[] result = new int[]{1};
+        ServerPlayerEntity player = ctx.getSource().getPlayer();
+        CharactersComponent component = ModComponents.CHARACTERS.get(player);
+        ctx.getNodes().forEach(x -> {
+            if (x.getNode().getName().equals("targetValue")) {
+                try {
+                    ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "targetValue");
+                    int value = IntegerArgumentType.getInteger(ctx, "value");
+                    int r = component.switcher(target, value);
+                    if (r==-1) {
+                        ctx.getSource().sendError(Text.literal("Group has only one character"));
+                        result[0]=0;
+                    }
+                } catch (CommandSyntaxException e) {
+                    ctx.getSource().sendError(Text.literal(e.toString()));
+                }
+            }
+            else if (x.getNode().getName().equals("target")) {
+                try {
+                    ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
+                    int r = component.switcher(target);
+                    if (r==-1) {
+                        ctx.getSource().sendError(Text.literal("Group has only one character"));
+                        result[0]=0;
+                    }
+                } catch (CommandSyntaxException e) {
+                    ctx.getSource().sendError(Text.literal(e.toString()));
+                }
+            }
+            else if (x.getNode().getName().equals("value")) {
+                try {
+                    int value = IntegerArgumentType.getInteger(ctx, "value");
+                    int r = component.switcher(value);
+                    if (r==-1) {
+                        ctx.getSource().sendError(Text.literal("Group has only one character"));
+                        result[0]=0;
+                    }
+                } catch (Exception e) {
+                    ctx.getSource().sendError(Text.literal(e.toString()));
+                }
+            }
+            else {
+                try {
+                    int r = component.switcher();
+                    if (r==-1) {
+                        ctx.getSource().sendError(Text.literal("Group has only one character"));
+                        result[0]=0;
+                    }
+                } catch (Exception e) {
+                    ctx.getSource().sendError(Text.literal(e.toString()));
+                }
+            }
+        });
+        return result[0];
     }
 }
