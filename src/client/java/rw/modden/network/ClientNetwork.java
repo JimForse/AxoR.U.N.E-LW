@@ -1,16 +1,18 @@
 package rw.modden.network;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.util.Identifier;
+import rw.modden.Axorunelostworlds;
 import rw.modden.AxorunelostworldsClient;
 
 public class ClientNetwork {
     private static boolean battle;
+    public static final Identifier BATTLE_PACKET_ID = Identifier.of(Axorunelostworlds.MOD_ID, "battle");
 
     public static void registerGlobalReceiver() {
-        assert ServerNetwork.BATTLE_PACKET_ID != null;
-        ClientPlayNetworking.registerGlobalReceiver(ServerNetwork.BATTLE_PACKET_ID, ((client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(BATTLE_PACKET_ID, ((client, handler, buf, responseSender) -> {
             boolean battle = buf.readBoolean();
-            AxorunelostworldsClient.LOGGER.debug("CLIENT: received battle = " + battle);
+            AxorunelostworldsClient.LOGGER.info("CLIENT: received battle = {}", battle);
             ClientNetwork.setBattle(battle);
         }) );
     }

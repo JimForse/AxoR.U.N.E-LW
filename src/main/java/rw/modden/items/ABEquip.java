@@ -51,7 +51,6 @@ public class ABEquip {
     }
 
     public void readFromNbt(NbtCompound nbt) {
-        this.uniqueID = nbt.getString("unique_id"); // first line
         if (nbt.contains("healReserveBonus" + uniqueID))
             this.healReserveBonus = nbt.getFloat( "healReserveBonus" + uniqueID);
         if (nbt.contains("healRegenBonus" + uniqueID))
@@ -69,6 +68,5 @@ public class ABEquip {
         if (damageBonus!=0.0F) nbt.putFloat ("damageBonus" + uniqueID, damageBonus);
         if (defenceBonus!=0.0F) nbt.putFloat ("defenceBonus" + uniqueID, defenceBonus);
         nbt.putString("item_id" + uniqueID, itemID);
-        nbt.putString("unique_id", uniqueID); // last line
     }
 }

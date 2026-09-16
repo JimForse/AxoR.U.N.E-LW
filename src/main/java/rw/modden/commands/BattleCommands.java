@@ -33,7 +33,7 @@ public class BattleCommands {
         });
     }
 
-    private static String[] characters = Arrays.stream(CharacterName.values())
+    private static final String[] characters = Arrays.stream(CharacterName.values())
             .map(Enum::name)
             .toArray(String[]::new);
 
@@ -54,14 +54,14 @@ public class BattleCommands {
             )
 
             .then(literal("status")
-                .executes(BattleCommands::battleStop))
-                .then(argument("target", EntityArgumentType.player())
-                    .executes(BattleCommands::battleStatus))
+                .executes(BattleCommands::battleStatus)
+                    .then(argument("target", EntityArgumentType.player())
+                        .executes(BattleCommands::battleStatus)))
 
             .then(literal("stop")
-                .executes(BattleCommands::battleStop))
-                .then(argument("target", EntityArgumentType.player())
-                    .executes(BattleCommands::battleStop))
+                .executes(BattleCommands::battleStop)
+                    .then(argument("target", EntityArgumentType.player())
+                        .executes(BattleCommands::battleStop)))
         );
         dispatcher.register(literal("group")
             .requires(source -> source.hasPermissionLevel(4))
@@ -97,6 +97,7 @@ public class BattleCommands {
                                 .executes(BattleCommands::groupRemove)))))
             .then(literal("check")
                 .then(argument("target", EntityArgumentType.player())
+                    .executes(BattleCommands::checkGroup)
                     .then(argument("group_name", StringArgumentType.word())
                         .suggests((context, builder) -> CommandSource.suggestMatching(
                             ModComponents.CHARACTERS.get(EntityArgumentType.getPlayer(context, "target")).getGroupsList() ,builder))
@@ -135,25 +136,49 @@ public class BattleCommands {
         return 1;
     }
 
-    private static int battleStatus(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException { //TODO: Реализовать исполнение команды без указания энтити
-        ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
-        CombatState state = ModComponents.BATTLE_STATE.get(target).getState();
-
-        try {
-            ServerPlayerEntity player = ctx.getSource().getPlayer();
-            player.sendMessage(Text.literal(String.format("Your battle state is: {%s}", state)));
-        } catch (Exception e) {
-            LOGGER.error("BattleCommands.battlestate: You try check the battle status at console");
+    private static int battleStatus(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        int result = 1;
+        if (ctx.getNodes().get(ctx.getNodes().size() - 1).getNode().getName().equals("target")) {
+            try {
+                ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
+                CombatState state = ModComponents.BATTLE_STATE.get(target).getState();
+                target.sendMessage(Text.literal(String.format("Your battle state is: {%s}", state)));
+            } catch (Exception e) {
+                result=0;
+            }
         }
-        return 1;
+        else {
+            ServerPlayerEntity target = ctx.getSource().getPlayer();
+            CombatState state = ModComponents.BATTLE_STATE.get(target).getState();
+            target.sendMessage(Text.literal(String.format("Your battle state is: {%s}", state)));
+        }
+        return result;
     }
 
-    private static int battleStop(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException { //TODO: Реализовать исполнение команды без указания энтити
-        ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
-        ModComponents.BATTLE_STATE.get(target).setState(CombatState.NONE);
-        new Battle(target).stopBattle();
-        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Battle state for player [%s] has been stoped", target.getEntityName())), false);
-        return 1;
+    private static int battleStop(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        int result = 1;
+        if (ctx.getNodes().get(ctx.getNodes().size() - 1).getNode().getName().equals("target")) {
+            try {
+                ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
+                ModComponents.BATTLE_STATE.get(target).setState(CombatState.NONE);
+                new Battle(target).stopBattle();
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Battle state for player [%s] has been stoped", target.getEntityName())), false);
+            } catch (Exception e) {
+                result=0;
+                ctx.getSource().sendError(Text.literal(e.toString()));
+            }
+        } else {
+            ServerPlayerEntity target = ctx.getSource().getPlayer();
+            try {
+                ModComponents.BATTLE_STATE.get(target).setState(CombatState.NONE);
+                new Battle(target).stopBattle();
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Battle state for player [%s] has been stoped", target.getEntityName())), false);
+            } catch (Exception e) {
+                result=0;
+                ctx.getSource().sendError(Text.literal(e.toString()));
+            }
+        }
+        return result;
     }
 
     private static int createGroup(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
@@ -217,9 +242,19 @@ public class BattleCommands {
 
     private static int checkGroup(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
-        String groupName = StringArgumentType.getString(ctx, "group_name");
-        String s = ModComponents.CHARACTERS.get(target).getCharactersGroup(groupName).stream().map(CharacterName::name).collect(Collectors.joining(", "));
-        ctx.getSource().sendFeedback(() -> Text.literal("This group contains is: "+s), false);
+        CharactersComponent component = ModComponents.CHARACTERS.get(target);
+        if (ctx.getNodes().get(ctx.getNodes().size() - 1).getNode().getName().equals("group_name")) {
+            String groupName = StringArgumentType.getString(ctx, "group_name");
+            String s = component.getCharactersGroup(groupName).stream().map(CharacterName::name).collect(Collectors.joining(", "));
+            ctx.getSource().sendFeedback(() -> Text.literal("This group contains is: " + s), false);
+        } else {
+            ArrayList<String> groups = component.getGroupsList();
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < groups.size(); i++) {
+                stringBuilder.append(groups.get(i));
+                if (i!=groups.size()-1) stringBuilder.append(", "); }
+            ctx.getSource().sendFeedback(() -> Text.literal(String.format("This player has: [%s] groups", stringBuilder.toString())), false);
+        }
         return 1;
     }
 

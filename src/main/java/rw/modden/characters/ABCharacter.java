@@ -100,7 +100,6 @@ public abstract class ABCharacter implements Character {
     public ABEquip getWeapon() {
         return weapon;
     }
-
     @Override
     public void setHealReserve(float value) {
         this.healReserve = value;
@@ -206,7 +205,7 @@ public abstract class ABCharacter implements Character {
     @Override
     public void setWeapon(ABEquip item) {
         if (Axorunelostworlds.permitted_equipment.contains(item.getItemID())) {
-            removeItem(this.weapon);
+            if (this.weapon!=null) removeItem(this.weapon);
             this.weapon = item;
             addItem(weapon);
        }
@@ -219,7 +218,6 @@ public abstract class ABCharacter implements Character {
             addItem(weapon);
         }
     }
-
     private void addItem(ABEquip item) {
         equipMap.put(item.getUniqueID(), item);
     }
@@ -277,7 +275,7 @@ public abstract class ABCharacter implements Character {
                 PathesName.valueOf(nbt.getString(name.name() + "_path"))
         );
 
-        /** Items block */
+        /// Items block
         String uniqueID = "", itemID = "";
         ArrayList<String> slots   = new ArrayList<>();
         if (nbt.contains(name.name() + "_head"))
@@ -312,14 +310,38 @@ public abstract class ABCharacter implements Character {
             itemID = nbt.getString("item_id" + uniqueID);
 
             switch (i) {
-                case 0 -> this.head   = new ABEquip(uniqueID,itemID);
-                case 1 -> this.chest  = new ABEquip(uniqueID,itemID);
-                case 2 -> this.legs   = new ABEquip(uniqueID,itemID);
-                case 3 -> this.boots  = new ABEquip(uniqueID,itemID);
-                case 4 -> this.slot1  = new ABEquip(uniqueID,itemID);
-                case 5 -> this.slot2  = new ABEquip(uniqueID,itemID);
-                case 6 -> this.slot3  = new ABEquip(uniqueID,itemID);
-                case 7 -> this.weapon = new ABEquip(uniqueID,itemID);
+                case 0 -> {
+                    this.head   = new ABEquip(uniqueID,itemID);
+                    this.head.readFromNbt(nbt);
+                }
+                case 1 -> {
+                    this.chest  = new ABEquip(uniqueID,itemID);
+                    this.chest.readFromNbt(nbt);
+                }
+                case 2 -> {
+                    this.legs   = new ABEquip(uniqueID,itemID);
+                    this.legs.readFromNbt(nbt);
+                }
+                case 3 -> {
+                    this.boots  = new ABEquip(uniqueID,itemID);
+                    this.boots.readFromNbt(nbt);
+                }
+                case 4 -> {
+                    this.slot1  = new ABEquip(uniqueID,itemID);
+                    this.slot1.readFromNbt(nbt);
+                }
+                case 5 -> {
+                    this.slot2  = new ABEquip(uniqueID,itemID);
+                    this.slot2.readFromNbt(nbt);
+                }
+                case 6 -> {
+                    this.slot3  = new ABEquip(uniqueID,itemID);
+                    this.slot3.readFromNbt(nbt);
+                }
+                case 7 -> {
+                    this.weapon = new ABEquip(uniqueID,itemID);
+                    this.weapon.readFromNbt(nbt);
+                }
             }
         }
     }

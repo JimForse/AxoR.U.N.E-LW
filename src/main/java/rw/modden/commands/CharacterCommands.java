@@ -37,29 +37,27 @@ public class CharacterCommands {
             .toArray(String[]::new);
 
     private static void character(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(literal("addCharacter")
+        dispatcher.register(literal("character")
             .requires(source -> source.hasPermissionLevel(4))
+            .then(literal("add")
+                .then(argument("character", StringArgumentType.word())
+                    .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
+                        .then(argument("player", EntityArgumentType.player())
+                            .executes(CharacterCommands::addCharacter))))
+
+            .then(literal("set")
             .then(argument("character", StringArgumentType.word())
                 .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
                     .then(argument("player", EntityArgumentType.player())
-                       .executes(CharacterCommands::addCharacter)))
-        );
-        dispatcher.register(literal("setCharacter")
-            .requires(source -> source.hasPermissionLevel(4))
+                        .executes(CharacterCommands::setCharacter))))
+
+            .then(literal("remove")
             .then(argument("character", StringArgumentType.word())
                 .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
                     .then(argument("player", EntityArgumentType.player())
-                        .executes(CharacterCommands::setCharacter)))
-        );
-        dispatcher.register(literal("removeCharacter")
-            .requires(source -> source.hasPermissionLevel(4))
-            .then(argument("character", StringArgumentType.word())
-                .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
-                    .then(argument("player", EntityArgumentType.player())
-                        .executes(CharacterCommands::removeCharacter)))
-        );
-        dispatcher.register(literal("editCharacter")
-            .requires(source -> source.hasPermissionLevel(4))
+                        .executes(CharacterCommands::removeCharacter))))
+
+            .then(literal("edit")
             .then(argument("character", StringArgumentType.word())
                 .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
                     .then(argument("player", EntityArgumentType.player())
@@ -70,23 +68,21 @@ public class CharacterCommands {
                         .then(literal("weapon")
                             .then(argument("weaponID", StringArgumentType.greedyString())
                                 .suggests((context, builder) -> CommandSource.suggestMatching(Axorunelostworlds.permitted_equipment,builder))
-                                    .executes(CharacterCommands::editCharacter)))
-        )));
-        dispatcher.register(literal("checkCharacter")
-            .requires(source -> source.hasPermissionLevel(4))
-            .then(argument("character", StringArgumentType.word())
-                .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
-                    .then(argument("player", EntityArgumentType.player())
-                        .executes(CharacterCommands::checkCharacter)))
-        );
-        dispatcher.register(literal("checkCharacterState")
-            .requires(source -> source.hasPermissionLevel(4))
-            .then(argument("character", StringArgumentType.word())
-                .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
-                    .then(argument("player", EntityArgumentType.player())
-                        .then(argument("state", StringArgumentType.word())
-                            .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"heal", "stars", "strength", "stamina", "staminaRegen", "defence", "weapon"}, builder))
-                                .executes(CharacterCommands::checkCharacterState))))
+                                    .executes(CharacterCommands::editCharacter))))))
+
+            .then(literal("check")
+                .then(literal("character")
+                    .then(argument("character", StringArgumentType.word())
+                        .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
+                            .then(argument("player", EntityArgumentType.player())
+                                .executes(CharacterCommands::checkCharacter))))
+                    .then(literal("state")
+                        .then(argument("character", StringArgumentType.word())
+                            .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
+                                .then(argument("player", EntityArgumentType.player())
+                                    .then(argument("state", StringArgumentType.word())
+                                        .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"heal", "stars", "strength", "stamina", "staminaRegen", "defence", "weapon"}, builder))
+                                            .executes(CharacterCommands::checkCharacterState))))))
         );
     }
 
@@ -216,6 +212,7 @@ public class CharacterCommands {
                 }
             }
         });
+        ModComponents.CHARACTERS.sync(player);
         return 1;
     }
 }

@@ -13,7 +13,6 @@ import rw.modden.network.ClientNetwork;
 public class InGameHudMixin {
     @Inject(at = @At("HEAD"), method = "renderHotbar", cancellable = true)
     private void renderHotbar(float tickDelta, DrawContext context, CallbackInfo info) {
-        AxorunelostworldsClient.LOGGER.debug("HUD: battle = " + ClientNetwork.getBattle());
         if (ClientNetwork.getBattle()) {
             info.cancel();
         }

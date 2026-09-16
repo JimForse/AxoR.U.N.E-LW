@@ -44,7 +44,7 @@ public class Axorunelostworlds implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Hello Gods Axo- worlds!");
+		LOGGER.info("Server on initialized");
         try {
 			readFromEquipmentsJson();
             Files.createDirectories(configDir.resolve("arlwEvents"));

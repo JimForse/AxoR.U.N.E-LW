@@ -15,7 +15,7 @@ public class ClientKeyList {
 
     public static void initialize() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (ClientNetwork.getBattle()) { //TODO: добавить пакет с сервера на клиент, передающий текущее состояние боя игрока
+            if (ClientNetwork.getBattle()) { //TODO: добавить пакет с сервера на клиент, передающий текущее состояние боя игрока
                 if (characterSwitch.isPressed()) {
                     // TODO: реализовать пакет, передающийся с клиента на сервер, который заставит поменять персонажа
                 }

@@ -23,6 +23,9 @@
 		"main": [
 			"rw.modden.Axorunelostworlds"
 		],
+		"client": [
+			"rw.modden.AxorunelostworldsClient"
+		],
 		"fabric-datagen": [
 			"rw.modden.AxorunelostworldsDataGenerator"
 		],
@@ -31,7 +34,8 @@
 		]
 	},
 	"mixins": [
-		"axorunelostworlds.mixins.json"
+		"axorunelostworlds.mixins.json",
+		"axorunelostworldsclien.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.16.13",

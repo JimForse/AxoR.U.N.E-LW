@@ -33,7 +33,6 @@ public class Battle {
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private CharacterName characterName;
     ArrayList<CharacterName> currentGroup;
-    private int chr;
     ServerPlayerEntity player;
 
     public Battle(ServerPlayerEntity player) {
@@ -44,7 +43,7 @@ public class Battle {
         combatStateToBattle(group);
         if (battle) {
             currentGroup = group;
-            chr = 0;
+            int chr = 0;
             CharacterName character = group.get(chr);
             characterName = character;
             new RealizingCharacters().realizingCharacterForPlayer(character, player);
@@ -103,8 +102,8 @@ public class Battle {
     public void combatStateToBattle(ArrayList<CharacterName> group) {
         boolean can = true;
         CharactersComponent component = ModComponents.CHARACTERS.get(player);
-        for (int i = 0; i < group.size(); i++) {
-            if (component.getCharacter(group.get(i)).getWeapon()==null) can = false;
+        for (CharacterName name: group) {
+            if (component.getCharacter(name).getWeapon() == null) can = false;
         }
         if (can) {
             CombatState state = ModComponents.BATTLE_STATE.get(player).getState();
@@ -144,17 +143,9 @@ public class Battle {
         return battle;
     }
 
-    public void switchCharacter() {
-        if (chr == currentGroup.size()-1) chr = 0;
-        else chr += 1;
-        CharacterName character = currentGroup.get(chr);
-        characterName = character;
-        new RealizingCharacters().realizingCharacterForPlayer(character, player);
-    }
-
     private void serverSend() {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-        Axorunelostworlds.LOGGER.debug("SERVER: sending battle = " + battle);
+        Axorunelostworlds.LOGGER.info("SERVER: sending battle = {}",battle);
         buf.writeBoolean(battle);
         ServerNetwork.send(player, ServerNetwork.BATTLE_PACKET_ID, buf);
     }
