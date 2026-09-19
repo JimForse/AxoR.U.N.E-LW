@@ -160,7 +160,6 @@ public class BattleCommands {
         if (ctx.getNodes().get(ctx.getNodes().size() - 1).getNode().getName().equals("target")) {
             try {
                 ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
-                ModComponents.BATTLE_STATE.get(target).setState(CombatState.NONE);
                 new Battle(target).stopBattle();
                 ctx.getSource().sendFeedback(() -> Text.literal(String.format("Battle state for player [%s] has been stoped", target.getEntityName())), false);
             } catch (Exception e) {
@@ -170,7 +169,6 @@ public class BattleCommands {
         } else {
             ServerPlayerEntity target = ctx.getSource().getPlayer();
             try {
-                ModComponents.BATTLE_STATE.get(target).setState(CombatState.NONE);
                 new Battle(target).stopBattle();
                 ctx.getSource().sendFeedback(() -> Text.literal(String.format("Battle state for player [%s] has been stoped", target.getEntityName())), false);
             } catch (Exception e) {

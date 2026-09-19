@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static rw.modden.Axorunelostworlds.LOGGER;
+
 public class CharactersComponentImpl implements CharactersComponent {
     private final Map<CharacterName, Character> characters = new HashMap<>();
     private final Map<String, ArrayList<CharacterName>> charactersGroups = new HashMap<>();
@@ -209,8 +211,10 @@ public class CharactersComponentImpl implements CharactersComponent {
         characters.put(name, new CharacterFactory().getCharacter(name));
     }
     @Override
-    public void addCharacters(float healReserve, int stars, float stamina, int strength, float staminaRegen, float healRegen, int defence, Path pathID, CharacterName name) {
-        characters.put(name, new CharacterFactory().getCharacter(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name));
+    public Character addCharacters(float healReserve, int stars, float stamina, int strength, float staminaRegen, float healRegen, int defence, Path pathID, CharacterName name) {
+        Character character = new CharacterFactory().getCharacter(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name);
+        characters.put(name, character);
+        return character;
     }
 
     /**
@@ -276,7 +280,8 @@ public class CharactersComponentImpl implements CharactersComponent {
                     healRegen = nbt.getFloat(name.name() + "_healRegen"),
                     healReserve = nbt.getFloat(name.name() + "_healReserve");
             Path pathID = PathFactory.get(PathesName.valueOf(nbt.getString(name.name() + "_path")));
-            addCharacters(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name);
+            Character character = addCharacters(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name);
+            character.readFromNbt(nbt);
         }
         for (NbtElement nbtElement: nList0) {
             if (!groupsList.contains(nbtElement.asString()))

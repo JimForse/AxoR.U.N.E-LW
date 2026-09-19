@@ -3,6 +3,8 @@ package rw.modden.components;
 import dev.onyxstudios.cca.api.v3.component.Component;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.network.ServerPlayerEntity;
+import rw.modden.combat.Battle;
 import rw.modden.combat.CombatState;
 
 public class BattleStateComponentImpl implements BattleStateComponent {

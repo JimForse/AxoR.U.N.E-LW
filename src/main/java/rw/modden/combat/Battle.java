@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
+import static rw.modden.Axorunelostworlds.LOGGER;
 
 public class Battle {
     private boolean battle;
@@ -94,9 +95,11 @@ public class Battle {
         serverSend();
     }
     public void stopBattle() {
+        LOGGER.info("Battle mode is stoped");
         battle = false;
         new RealizingCharacters().standartAttributesForPlayer(player);
-        serverSend();
+        ModComponents.BATTLE_STATE.get(player).setState(CombatState.NONE);
+        if (player.networkHandler!=null) serverSend();
     }
 
     public void combatStateToBattle(ArrayList<CharacterName> group) {
@@ -113,13 +116,13 @@ public class Battle {
 
     public void combatStateToBattle(Character character) {
         if (character.getWeapon()!=null) {
-            CombatState state = ModComponents.BATTLE_STATE.get(player).getState();
+            CombatState state = getState();
             battle = state == CombatState.STANDART || state == CombatState.EVENT;
         }
     }
 
     public void combatStateToBattle() {
-        CombatState state = ModComponents.BATTLE_STATE.get(player).getState();
+        CombatState state = getState();
         battle = state == CombatState.STANDART || state == CombatState.EVENT;
     }
 
@@ -135,6 +138,10 @@ public class Battle {
         return map;
     }
 
+    private CombatState getState() {
+        return ModComponents.BATTLE_STATE.get(player).getState();
+    }
+
     public CharacterName getCharacterName() {
         return characterName;
     }
@@ -148,5 +155,9 @@ public class Battle {
         Axorunelostworlds.LOGGER.info("SERVER: sending battle = {}",battle);
         buf.writeBoolean(battle);
         ServerNetwork.send(player, ServerNetwork.BATTLE_PACKET_ID, buf);
+
+        Axorunelostworlds.LOGGER.info("SERVER: sending battle_state = "+ getState().name());
+        buf.writeString(getState().name());
+        ServerNetwork.send(player, ServerNetwork.BATTLE_STATE_PACKET_ID, buf);
     }
 }

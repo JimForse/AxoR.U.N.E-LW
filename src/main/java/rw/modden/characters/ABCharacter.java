@@ -11,6 +11,7 @@ import rw.modden.items.ABEquip;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import static rw.modden.Axorunelostworlds.LOGGER;
 
 public abstract class ABCharacter implements Character {
     private int stars, strength, defence;

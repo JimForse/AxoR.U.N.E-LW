@@ -8,6 +8,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rw.modden.characters.CharacterInitializer;
 import rw.modden.commands.BattleCommands;
 import rw.modden.commands.CharacterCommands;
 import rw.modden.components.ModComponents;
@@ -52,6 +53,7 @@ public class Axorunelostworlds implements ModInitializer {
             throw new RuntimeException(e);
         }
 
+		new CharacterInitializer().getOrCreate();
 		CharacterCommands.initialize();
         BattleCommands.initialize();
 	}
@@ -106,16 +108,19 @@ public class Axorunelostworlds implements ModInitializer {
 		return value;
 	}
 
-	public boolean checkJson(String name) {
+	public boolean checkJson(String name) throws NullPointerException {
 		Map<String, UUID> newUUID = readJson();
-		return newUUID.containsKey(name);
+		boolean result = false;
+		if (newUUID.containsKey(name)) result = true;
+		return result;
 	}
 
 	private Map<String, UUID> readJson() {
-		Map<String, UUID> newUUID = null;
+		Map<String, UUID> newUUID = new HashMap<>();
 		if (file.exists()) {
 			try (FileReader reader = new FileReader(file)) {
 				newUUID = gson.fromJson(reader, Map.class);
+				if (newUUID == null) newUUID = new HashMap<>();
 			} catch (IOException e) {
 				e.printStackTrace();
 				Axorunelostworlds config = new Axorunelostworlds();
