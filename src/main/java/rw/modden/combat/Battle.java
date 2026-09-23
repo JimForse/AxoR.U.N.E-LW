@@ -151,13 +151,12 @@ public class Battle {
     }
 
     private void serverSend() {
-        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-        Axorunelostworlds.LOGGER.info("SERVER: sending battle = {}",battle);
-        buf.writeBoolean(battle);
-        ServerNetwork.send(player, ServerNetwork.BATTLE_PACKET_ID, buf);
+        PacketByteBuf buf1 = new PacketByteBuf(Unpooled.buffer());
+        buf1.writeBoolean(battle);
+        ServerNetwork.send(player, ServerNetwork.BATTLE_PACKET_ID, buf1);
 
-        Axorunelostworlds.LOGGER.info("SERVER: sending battle_state = "+ getState().name());
-        buf.writeString(getState().name());
-        ServerNetwork.send(player, ServerNetwork.BATTLE_STATE_PACKET_ID, buf);
+        PacketByteBuf buf2 = new PacketByteBuf(Unpooled.buffer());
+        buf2.writeString(getState().name());
+        ServerNetwork.send(player, ServerNetwork.BATTLE_STATE_PACKET_ID, buf2);
     }
 }

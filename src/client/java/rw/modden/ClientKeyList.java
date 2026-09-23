@@ -19,12 +19,11 @@ public class ClientKeyList {
 
     public static void initialize() {
         register();
-        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (ClientNetwork.getBattle() &&
                     ClientNetwork.getBattleState().equals(CombatState.STANDART.name())) {
                 if (characterSwitch.isPressed()) {
-                    AxorunelostworldsClient.LOGGER.info("CLIENT: sending character_switch = true");
+                    PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
                     buf.writeBoolean(true);
                     ClientNetwork.send(ClientNetwork.CHARACTER_SWITCH_ID, buf);
                 }

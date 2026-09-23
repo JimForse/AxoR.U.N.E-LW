@@ -3,7 +3,9 @@
 	"package": "rw.modden.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"InGameHudMixin"
+		"InGameHudMixin",
+        "HudRenderHelperMixin",
+		"RollManagerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

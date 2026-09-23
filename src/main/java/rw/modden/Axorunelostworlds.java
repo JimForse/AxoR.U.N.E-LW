@@ -12,6 +12,7 @@ import rw.modden.characters.CharacterInitializer;
 import rw.modden.commands.BattleCommands;
 import rw.modden.commands.CharacterCommands;
 import rw.modden.components.ModComponents;
+import rw.modden.network.ServerNetwork;
 
 import java.io.File;
 import java.io.FileReader;
@@ -56,6 +57,7 @@ public class Axorunelostworlds implements ModInitializer {
 		new CharacterInitializer().getOrCreate();
 		CharacterCommands.initialize();
         BattleCommands.initialize();
+		ServerNetwork.registerGlobalRecevier();
 	}
 
 	@SuppressWarnings("unchecked")

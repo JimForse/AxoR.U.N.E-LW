@@ -15,10 +15,9 @@ public class ServerNetwork {
     public static void send(ServerPlayerEntity player, Identifier channelName, PacketByteBuf buf) {
         ServerPlayNetworking.send(player, channelName, buf);
     }
-    public void registerGlobalRecevier() {
+    public static void registerGlobalRecevier() {
         ServerPlayNetworking.registerGlobalReceiver(CHARACTER_SWITCH_ID, (server, player, handler, buf, responseSender) -> {
             if (buf.readBoolean()) {
-                Axorunelostworlds.LOGGER.info("SERVER: received character_switch = true");
                 ModComponents.CHARACTERS.get(player).switcher();
             }
         });

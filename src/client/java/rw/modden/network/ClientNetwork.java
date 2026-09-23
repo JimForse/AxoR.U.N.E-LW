@@ -16,13 +16,12 @@ public class ClientNetwork {
     public static void registerGlobalReceiver() {
         ClientPlayNetworking.registerGlobalReceiver(BATTLE_PACKET_ID, ((client, handler, buf, responseSender) -> {
             boolean battle = buf.readBoolean();
-            AxorunelostworldsClient.LOGGER.info("CLIENT: received battle = {}", battle);
             ClientNetwork.setBattle(battle);
         }) );
         ClientPlayNetworking.registerGlobalReceiver(BATTLE_STATE_PACKET_ID, ((client, handler, buf, responseSender) -> {
             String battle_state = buf.readString();
-            AxorunelostworldsClient.LOGGER.info("CLIENT: received battle_state = "+ battle_state);
-            ClientNetwork.setBattleState(battle_state);
+            if (battle_state!=null) ClientNetwork.setBattleState(battle_state);
+            else ClientNetwork.setBattleState("NONE");
         }) );
     }
 
