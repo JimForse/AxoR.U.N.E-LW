@@ -4,8 +4,8 @@
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
 		"InGameHudMixin",
-        "HudRenderHelperMixin",
-		"RollManagerMixin"
+		"CooldownHudMixin",
+		"MovementClientMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

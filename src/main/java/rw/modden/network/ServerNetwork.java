@@ -11,6 +11,7 @@ public class ServerNetwork {
     public static final Identifier CHARACTER_SWITCH_ID = Identifier.of(Axorunelostworlds.MOD_ID, "character_switch");
     public static final Identifier BATTLE_PACKET_ID = Identifier.of(Axorunelostworlds.MOD_ID, "battle");
     public static final Identifier BATTLE_STATE_PACKET_ID = Identifier.of(Axorunelostworlds.MOD_ID, "battle_state");
+    public static final Identifier STAMINA_PACKET_ID = Identifier.of(Axorunelostworlds.MOD_ID, "stamina");
 
     public static void send(ServerPlayerEntity player, Identifier channelName, PacketByteBuf buf) {
         ServerPlayNetworking.send(player, channelName, buf);
