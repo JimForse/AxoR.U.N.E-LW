@@ -33,9 +33,23 @@ public class LivingEntityMixin implements StaminaAccess {
     @Unique
     private boolean timerA;
     @Unique
-    private boolean startedRun;
-    @Unique
     private int dashStaminaCooldownTicks = 0;
+    @Unique
+    private boolean staminaInitialized = false;
+
+    @Unique
+    private void axorune$onStaminaSpent() {
+        timer1 = 0;
+        timerA = false;
+    }
+
+    @Inject(at = @At("HEAD"), method = "setSprinting", cancellable = true)
+    private void sprint(boolean sprinting, CallbackInfo info) {
+        battleA();
+        if (battle && sprinting && currentStamina <= 0.0) {
+            info.cancel();
+        }
+    }
 
     @Unique
     private void battleA() {
@@ -46,39 +60,17 @@ public class LivingEntityMixin implements StaminaAccess {
         battleClass.combatStateToBattle();
         battle = battleClass.getBattle();
 
-        if (battle && !wasInBattle) {
-            CharactersComponent component = ModComponents.CHARACTERS.get(player);
-            Character character = component.getCharacter(component.getCurrentCharacter());
-            if (character != null) {
-                currentStamina = character.getStamina();
-            }
-        }
-        wasInBattle = battle;
-    }
-
-    @Inject(at = @At("HEAD"), method = "setSprinting", cancellable = true)
-    private void sprint(boolean sprinting, CallbackInfo info) {
-        battleA();
         if (battle) {
-            CharactersComponent component = ModComponents.CHARACTERS.get(player);
-
-            stamina = component.getCharacter(component.getCurrentCharacter()).getStamina();
-            staminaRegen = component.getCharacter(component.getCurrentCharacter()).getStaminaRegen();
-            if (sprinting && currentStamina <= 0.0)
-                info.cancel();
-            else if (sprinting) {
-                newStamina = currentStamina - 0.5F;
-                currentStamina = newStamina;
-                startedRun = true;
-            }
-            else {
-                startedRun = false;
-                if (timerA) {
-                    newStamina = currentStamina + (stamina * staminaRegen);
-                    if (newStamina > stamina) newStamina = stamina;
-                    currentStamina = newStamina;
+            if (!staminaInitialized) {
+                CharactersComponent component = ModComponents.CHARACTERS.get(player);
+                Character character = component.getCharacter(component.getCurrentCharacter());
+                if (character != null) {
+                    currentStamina = character.getStamina();
+                    staminaInitialized = true;
                 }
             }
+        } else {
+            staminaInitialized = false;
         }
     }
 
@@ -86,19 +78,30 @@ public class LivingEntityMixin implements StaminaAccess {
     private void timer(CallbackInfo info) {
         if (dashStaminaCooldownTicks > 0) dashStaminaCooldownTicks--;
         timer1 += 1;
-        if (timer1>=80)
+        if (timer1 >= 80)
             timerA = true;
-        if (startedRun) {
-            timerA = false;
-            timer1 = 0;
-        }
 
         battleA();
         if (battle) {
-            currentHeal = player.getHealth();
             CharactersComponent component = ModComponents.CHARACTERS.get(player);
             Character character = component.getCharacter(component.getCurrentCharacter());
-            if (character!=null) {
+            if (character != null) {
+                stamina = character.getStamina();
+                staminaRegen = character.getStaminaRegen();
+
+                if (player.isSprinting()) {
+                    currentStamina -= 0.025F;
+                    if (currentStamina < 0.0F) {
+                        currentStamina = 0.0F;
+                        player.setSprinting(false);
+                    }
+                    axorune$onStaminaSpent();
+                } else if (timerA) {
+                    currentStamina += stamina * staminaRegen;
+                    if (currentStamina > stamina) currentStamina = stamina;
+                }
+
+                currentHeal = player.getHealth();
                 healReserve = character.getHealReserve();
                 healRegen = character.getHealRegen();
 
@@ -113,6 +116,30 @@ public class LivingEntityMixin implements StaminaAccess {
             buf.writeFloat(currentStamina);
             ServerNetwork.send(player, ServerNetwork.STAMINA_PACKET_ID, buf);
         }
+    }
+
+    @Override
+    public boolean axorune$trySpendStamina(float cost) {
+        battleA();
+        if (!battle) return true;
+        if (currentStamina < cost) return false;
+        currentStamina -= cost;
+        newStamina = currentStamina;
+        axorune$onStaminaSpent();
+        return true;
+    }
+
+    @Override
+    public boolean axorune$trySpendDashStamina(float cost, int cooldownTicks) {
+        battleA();
+        if (!battle) return true;
+        if (dashStaminaCooldownTicks > 0) return true;
+        if (currentStamina < cost) return false;
+        currentStamina -= cost;
+        newStamina = currentStamina;
+        dashStaminaCooldownTicks = cooldownTicks;
+        axorune$onStaminaSpent();
+        return true;
     }
 
     @Inject(at = @At("HEAD"), method = "heal", cancellable = true)
@@ -146,27 +173,5 @@ public class LivingEntityMixin implements StaminaAccess {
     @Override
     public float axorune$getCurrentStamina() {
         return currentStamina;
-    }
-
-    @Override
-    public boolean axorune$trySpendStamina(float cost) {
-        battleA();
-        if (!battle) return true;
-        if (currentStamina < cost) return false;
-        currentStamina -= cost;
-        newStamina = currentStamina;
-        return true;
-    }
-
-    @Override
-    public boolean axorune$trySpendDashStamina(float cost, int cooldownTicks) {
-        battleA();
-        if (!battle) return true;
-        if (dashStaminaCooldownTicks > 0) return true;
-        if (currentStamina < cost) return false;
-        currentStamina -= cost;
-        newStamina = currentStamina;
-        dashStaminaCooldownTicks = cooldownTicks;
-        return true;
     }
 }

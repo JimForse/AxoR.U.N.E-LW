@@ -5,7 +5,8 @@
 	"mixins": [
 		"InGameHudMixin",
 		"CooldownHudMixin",
-		"MovementClientMixin"
+		"MovementClientMixin",
+		"ClientPlayerEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
