@@ -78,7 +78,7 @@ public class LivingEntityMixin implements StaminaAccess {
     private void timer(CallbackInfo info) {
         if (dashStaminaCooldownTicks > 0) dashStaminaCooldownTicks--;
         timer1 += 1;
-        if (timer1 >= 80)
+        if (timer1 >= 140)
             timerA = true;
 
         battleA();
@@ -90,7 +90,7 @@ public class LivingEntityMixin implements StaminaAccess {
                 staminaRegen = character.getStaminaRegen();
 
                 if (player.isSprinting()) {
-                    currentStamina -= 0.025F;
+                    currentStamina -= 0.1F;
                     if (currentStamina < 0.0F) {
                         currentStamina = 0.0F;
                         player.setSprinting(false);

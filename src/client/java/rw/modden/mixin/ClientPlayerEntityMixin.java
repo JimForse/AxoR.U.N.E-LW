@@ -9,7 +9,7 @@ import rw.modden.network.ClientNetwork;
 
 @Mixin(ClientPlayerEntity.class)
 public class ClientPlayerEntityMixin {
-    @Inject(method = "tick", at = @At("HEAD"))
+    @Inject(method = "tick", at = @At("TAIL"))
     private void axorune$stopSprintWhenNoStamina(CallbackInfo ci) {
         ClientPlayerEntity self = (ClientPlayerEntity) (Object) this;
         if (ClientNetwork.getBattle() && ClientNetwork.getStamina() <= 0.0F && self.isSprinting()) {
