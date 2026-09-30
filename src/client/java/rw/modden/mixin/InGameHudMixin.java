@@ -16,4 +16,18 @@ public class InGameHudMixin {
             info.cancel();
         }
     }
+
+    @Inject(at = @At("HEAD"), method = "renderStatusBars", cancellable = true)
+    private void axorune$renderStatusBars(DrawContext context, CallbackInfo info) {
+        if (ClientNetwork.getBattle()) {
+            info.cancel();
+        }
+    }
+
+    @Inject(at = @At("HEAD"), method = "renderExperienceBar", cancellable = true)
+    private void axorune$renderExperienceBar(DrawContext context, int x, CallbackInfo info) {
+        if (ClientNetwork.getBattle()) {
+            info.cancel();
+        }
+    }
 }

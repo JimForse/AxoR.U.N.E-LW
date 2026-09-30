@@ -12,15 +12,13 @@ import static rw.modden.components.ModComponents.CHARACTERS;
 
 public class CharacterInitializer {
     public void getOrCreate() {
-        Axorunelostworlds arlw = new Axorunelostworlds();
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.getPlayer();
-            if (!arlw.checkJson(player.getEntityName())) {
-                arlw.writeToJson(player.getEntityName(), player.getUuid());
-                if (!CHARACTERS.get(player).hasCharacter(getName(player.getEntityName().toUpperCase()))) {
-                    CHARACTERS.get(player).addCharacter(getName((player.getEntityName().toUpperCase())));
-                }
-            }
+
+            CharacterName name = getName(player.getEntityName().toUpperCase());
+            if (name != null && !CHARACTERS.get(player).hasCharacter(name))
+                CHARACTERS.get(player).addCharacter(name);
+
             CombatState state = ModComponents.BATTLE_STATE.get(player).getState();
             if (state.equals(CombatState.STANDART)) new Battle(player).stopBattle();
         });

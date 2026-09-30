@@ -10,6 +10,7 @@ public class ClientNetwork {
     private static boolean battle;
     private static String battle_state;
     private static float stamina;
+    private static float maxStamina;
     public static final Identifier CHARACTER_SWITCH_ID = Identifier.of(Axorunelostworlds.MOD_ID, "character_switch");
     public static final Identifier BATTLE_PACKET_ID = Identifier.of(Axorunelostworlds.MOD_ID, "battle");
     public static final Identifier BATTLE_STATE_PACKET_ID = Identifier.of(Axorunelostworlds.MOD_ID, "battle_state");
@@ -26,7 +27,10 @@ public class ClientNetwork {
             else ClientNetwork.setBattleState("NONE");
         }));
         ClientPlayNetworking.registerGlobalReceiver(STAMINA_PACKET_ID, ((client, handler, buf, responseSender) -> {
-            ClientNetwork.setStamina(buf.readFloat());
+            float current = buf.readFloat();
+            float max = buf.readFloat();
+            ClientNetwork.setStamina(current);
+            ClientNetwork.setMaxStamina(max);
         }));
     }
 
@@ -53,5 +57,12 @@ public class ClientNetwork {
     }
     public static float getStamina() {
         return stamina;
+    }
+
+    public static void setMaxStamina(float s) {
+        maxStamina = s;
+    }
+    public static float getMaxStamina() {
+        return maxStamina;
     }
 }

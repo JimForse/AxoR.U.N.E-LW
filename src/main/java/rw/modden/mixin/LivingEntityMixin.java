@@ -114,6 +114,7 @@ public class LivingEntityMixin implements StaminaAccess {
 
             PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeFloat(currentStamina);
+            buf.writeFloat(stamina);
             ServerNetwork.send(player, ServerNetwork.STAMINA_PACKET_ID, buf);
         }
     }
