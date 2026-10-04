@@ -5,6 +5,7 @@ import rw.modden.combat.path.Path;
 import rw.modden.items.ABEquip;
 
 public interface Character {
+    // ==============  GET  ==================
     float getHealReserve();
     int getStars();
     float getStamina();
@@ -22,9 +23,16 @@ public interface Character {
     ABEquip getSecondSlot();
     ABEquip getThirdSlot();
     ABEquip getWeapon();
+    float getCurrentHeal();
+    ABEquip getItem(String uniqueID);
+    float getAllHealReserveBonus();
+    float getAllHealRegenBonus();
 
+    // ==============  SET  ==================
     void setHealReserve(float value);
     void setStars(int value);
+    void setActivatedThisBattle(boolean value);
+    void setCurrentHeal(float value);
     void setStamina(float value);
     void setStrength(int value);
     void setPath(Path pathID);
@@ -41,12 +49,12 @@ public interface Character {
     void setWeapon(ABEquip item);
     void setWeapon(String item);
 
+    // ==============  HAS  ==================
     boolean hasItem(ABEquip item);
     boolean hasItem(String uniqueID);
-    ABEquip getItem(String uniqueID);
-    float getAllHealReserveBonus();
-    float getAllHealRegenBonus();
+    boolean isActivatedThisBattle();
 
+    // ==============  OTHER  ==================
     void readFromNbt(NbtCompound nbt);
     void writeToNbt(NbtCompound nbt);
 }

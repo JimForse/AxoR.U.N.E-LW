@@ -77,30 +77,41 @@ public class Axorunelostworlds implements ModInitializer {
 		permitted_equipment = list;
 	}
 
+	public String findNickForUuid(UUID playerUuid) {
+		Map<String, String> map = readJson();
+		String target = playerUuid.toString();
+		for (Map.Entry<String, String> entry : map.entrySet()) {
+			if (entry.getValue().equals(target)) return entry.getKey();
+		}
+		return null;
+	}
+
 	public void writeToJson(String name, UUID Uuid) {
+		if (!file.exists()) {
+			Axorunelostworlds config = new Axorunelostworlds();
+			config.createFile();
+		}
+
+		Map<String, String> newUUID = readJson();
+		if (newUUID.containsKey(name)) {
+			LOGGER.error("In this file have written this user before");
+			return;
+		}
+
+		newUUID.put(name, Uuid.toString());
 		try (FileWriter writer = new FileWriter(file)) {
-			if (file.exists()) {
-				Map<String, UUID> newUUID = readJson();
-				if (!newUUID.containsKey(name)) {
-					uuid.put(name, Uuid);
-					gson.toJson(uuid, writer);
-				} else
-					LOGGER.error("In this file have written this user before");
-			} else {
-				Axorunelostworlds config = new Axorunelostworlds();
-				config.createFile();
-			}
+			gson.toJson(newUUID, writer);
 		} catch (Exception e) {
-			LOGGER.error("rw.modden.Axorunelostworlds.writeToJson");
+			LOGGER.error("rw.modden.Axorunelostworlds.writeToJson", e);
 		}
 	}
 
 	public UUID readFromJson(String name) {
 		UUID value = null;
 		try {
-			Map<String, UUID> newUUID = readJson();
+			Map<String, String> newUUID = readJson();
 			if (newUUID.containsKey(name))
-				value = newUUID.get(name);
+				value = UUID.fromString(newUUID.get(name));
 			else
 				LOGGER.error("In this file doesn`t have written this user before");
 		} catch (Exception e) {
@@ -110,17 +121,15 @@ public class Axorunelostworlds implements ModInitializer {
 	}
 
 	public boolean checkJson(String name) throws NullPointerException {
-		Map<String, UUID> newUUID = readJson();
-		boolean result = false;
-		if (newUUID.containsKey(name)) result = true;
-		return result;
+		Map<String, String> newUUID = readJson();
+		return newUUID.containsKey(name);
 	}
 
-	private Map<String, UUID> readJson() {
-		Map<String, UUID> newUUID = new HashMap<>();
+	private Map<String, String> readJson() {
+		Map<String, String> newUUID = new HashMap<>();
 		if (file.exists()) {
 			try (FileReader reader = new FileReader(file)) {
-				newUUID = gson.fromJson(reader, Map.class);
+				newUUID = gson.fromJson(reader, newUUID.getClass());
 				if (newUUID == null) newUUID = new HashMap<>();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -129,7 +138,7 @@ public class Axorunelostworlds implements ModInitializer {
 			}
 		}
 		else
-			LOGGER.error("This file doesn`t exist");;
+			LOGGER.error("This file doesn`t exist");
 		return newUUID;
 	}
 

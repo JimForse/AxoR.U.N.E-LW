@@ -44,6 +44,13 @@ public class Battle {
         combatStateToBattle(group);
         if (battle) {
             currentGroup = group;
+
+            CharactersComponent component = ModComponents.CHARACTERS.get(player);
+            for (CharacterName name: group) {
+                if (component.hasCharacter(name))
+                    component.getCharacter(name).setActivatedThisBattle(false);
+            }
+
             int chr = 0;
             CharacterName character = group.get(chr);
             characterName = character;
@@ -60,6 +67,11 @@ public class Battle {
         combatStateToBattle();
         if (battle) {
             CharacterName character = new CharacterInitializer().getName(player.getEntityName());
+
+            CharactersComponent component = ModComponents.CHARACTERS.get(player);
+            if (character != null && component.hasCharacter(character))
+                component.getCharacter(character).setActivatedThisBattle(false);
+
             new RealizingCharacters().realizingCharacterForPlayer(character, player);
 
             Path configDir = FabricLoader.getInstance().getConfigDir();
@@ -95,9 +107,11 @@ public class Battle {
         serverSend();
     }
     public void stopBattle() {
+        LOGGER.info("[ARLW-DEBUG] stopBattle: health before reset = {}/{}", player.getHealth(), player.getMaxHealth());
         LOGGER.info("Battle mode is stoped");
         battle = false;
         new RealizingCharacters().standartAttributesForPlayer(player);
+        LOGGER.info("[ARLW-DEBUG] stopBattle: health after reset = {}/{}", player.getHealth(), player.getMaxHealth());
         ModComponents.BATTLE_STATE.get(player).setState(CombatState.NONE);
         if (player.networkHandler!=null) serverSend();
     }

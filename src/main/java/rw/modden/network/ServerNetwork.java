@@ -18,9 +18,12 @@ public class ServerNetwork {
     }
     public static void registerGlobalRecevier() {
         ServerPlayNetworking.registerGlobalReceiver(CHARACTER_SWITCH_ID, (server, player, handler, buf, responseSender) -> {
-            if (buf.readBoolean()) {
-                ModComponents.CHARACTERS.get(player).switcher();
-            }
+            boolean pressed = buf.readBoolean();
+            server.execute(() -> {
+                if (pressed) {
+                    ModComponents.CHARACTERS.get(player).switcher();
+                }
+            });
         });
     }
 }

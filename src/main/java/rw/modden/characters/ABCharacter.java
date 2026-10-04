@@ -15,11 +15,12 @@ import static rw.modden.Axorunelostworlds.LOGGER;
 
 public abstract class ABCharacter implements Character {
     private int stars, strength, defence;
-    private float healReserve, staminaRegen, stamina, healRegen;
+    private float healReserve, staminaRegen, stamina, healRegen, currentHeal;;
     private Path pathID;
     private CharacterName name;
     private ABEquip head, chest, legs, boots, slot1, slot2, slot3, weapon;
     private final Map<String, ABEquip> equipMap = new HashMap<>();
+    private boolean activatedThisBattle;
 
     public ABCharacter (float healReserve, int stars, float stamina, int strength, float staminaRegen, float healRegen, int defence, Path pathID, CharacterName name) {
         this.healReserve = healReserve;
@@ -33,6 +34,7 @@ public abstract class ABCharacter implements Character {
         this.defence = defence;
     }
 
+    // ==============  GET  ==================
     @Override
     public float getHealReserve() {
         return healReserve;
@@ -101,6 +103,40 @@ public abstract class ABCharacter implements Character {
     public ABEquip getWeapon() {
         return weapon;
     }
+    @Override
+    public float getCurrentHeal() {
+        return currentHeal;
+    }
+    @Override
+    public ABEquip getItem(String uniqueID) {
+        return equipMap.get(uniqueID);
+    }
+    @Override
+    public float getAllHealReserveBonus() {
+        float bonus = 0.0F;
+        if (head  != null) bonus += head.getHealReserveBonus();
+        if (chest != null) bonus += chest.getHealReserveBonus();
+        if (legs  != null) bonus += legs.getHealReserveBonus();
+        if (boots != null) bonus += boots.getHealReserveBonus();
+        if (slot1 != null) bonus += slot1.getHealReserveBonus();
+        if (slot2 != null) bonus += slot2.getHealReserveBonus();
+        if (slot3 != null) bonus += slot3.getHealReserveBonus();
+        return bonus;
+    }
+    @Override
+    public float getAllHealRegenBonus() {
+        float bonus = 0.0F;
+        if (head  != null) bonus += head.getHealRegenBonus();
+        if (chest != null) bonus += chest.getHealRegenBonus();
+        if (legs  != null) bonus += legs.getHealRegenBonus();
+        if (boots != null) bonus += boots.getHealRegenBonus();
+        if (slot1 != null) bonus += slot1.getHealRegenBonus();
+        if (slot2 != null) bonus += slot2.getHealRegenBonus();
+        if (slot3 != null) bonus += slot3.getHealRegenBonus();
+        return bonus;
+    }
+
+    // ==============  SET  ==================
     @Override
     public void setHealReserve(float value) {
         this.healReserve = value;
@@ -222,9 +258,16 @@ public abstract class ABCharacter implements Character {
     private void addItem(ABEquip item) {
         equipMap.put(item.getUniqueID(), item);
     }
-    private void removeItem(ABEquip item) {
-        equipMap.remove(item.getUniqueID());
+    @Override
+    public void setCurrentHeal(float value) {
+        currentHeal = value;
     }
+    @Override
+    public void setActivatedThisBattle(boolean value) {
+        activatedThisBattle = value;
+    }
+
+    // ==============  HAS  ==================
     @Override
     public boolean hasItem(ABEquip item) {
         return hasItem(item.getUniqueID());
@@ -234,34 +277,14 @@ public abstract class ABCharacter implements Character {
         return equipMap.containsKey(uniqueID);
     }
     @Override
-    public ABEquip getItem(String uniqueID) {
-        return equipMap.get(uniqueID);
-    }
-    @Override
-    public float getAllHealReserveBonus() {
-        float bonus = 0.0F;
-        if (head  != null) bonus += head.getHealReserveBonus();
-        if (chest != null) bonus += chest.getHealReserveBonus();
-        if (legs  != null) bonus += legs.getHealReserveBonus();
-        if (boots != null) bonus += boots.getHealReserveBonus();
-        if (slot1 != null) bonus += slot1.getHealReserveBonus();
-        if (slot2 != null) bonus += slot2.getHealReserveBonus();
-        if (slot3 != null) bonus += slot3.getHealReserveBonus();
-        return bonus;
-    }
-    @Override
-    public float getAllHealRegenBonus() {
-        float bonus = 0.0F;
-        if (head  != null) bonus += head.getHealRegenBonus();
-        if (chest != null) bonus += chest.getHealRegenBonus();
-        if (legs  != null) bonus += legs.getHealRegenBonus();
-        if (boots != null) bonus += boots.getHealRegenBonus();
-        if (slot1 != null) bonus += slot1.getHealRegenBonus();
-        if (slot2 != null) bonus += slot2.getHealRegenBonus();
-        if (slot3 != null) bonus += slot3.getHealRegenBonus();
-        return bonus;
+    public boolean isActivatedThisBattle() {
+        return activatedThisBattle;
     }
 
+    // ==============  OTHER  ==================
+    private void removeItem(ABEquip item) {
+        equipMap.remove(item.getUniqueID());
+    }
     @Override
     public void readFromNbt(NbtCompound nbt) {
         this.name = CharacterName.valueOf(nbt.getString("name")); // first line

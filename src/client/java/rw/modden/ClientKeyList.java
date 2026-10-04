@@ -12,20 +12,27 @@ import rw.modden.network.ClientNetwork;
 
 public class ClientKeyList {
     private static final KeyBinding characterSwitch = new KeyBinding(
-                "Switch characters (battle)",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_Z,
-                "AxoRune");
+            "Switch characters (battle)",
+            InputUtil.Type.KEYSYM,
+            GLFW.GLFW_KEY_Z,
+            "AxoRune");
+
+    private static final int SWITCH_COOLDOWN_TICKS = 40;
+    private static int switchCooldown = 0;
 
     public static void initialize() {
         register();
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (ClientNetwork.getBattle() &&
-                    ClientNetwork.getBattleState().equals(CombatState.STANDART.name())) {
-                if (characterSwitch.isPressed()) {
+            if (switchCooldown > 0) switchCooldown--;
+
+            if (characterSwitch.wasPressed()) {
+                if (switchCooldown > 0) return;
+                if (ClientNetwork.getBattle() &&
+                        ClientNetwork.getBattleState().equals(CombatState.STANDART.name())) {
                     PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
                     buf.writeBoolean(true);
                     ClientNetwork.send(ClientNetwork.CHARACTER_SWITCH_ID, buf);
+                    switchCooldown = SWITCH_COOLDOWN_TICKS;
                 }
             }
         });

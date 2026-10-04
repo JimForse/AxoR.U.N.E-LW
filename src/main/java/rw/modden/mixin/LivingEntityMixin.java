@@ -35,6 +35,8 @@ public class LivingEntityMixin implements StaminaAccess {
     @Unique
     private int dashStaminaCooldownTicks = 0;
     @Unique
+    private int healCooldownTicks = 0;
+    @Unique
     private boolean staminaInitialized = false;
 
     @Unique
@@ -77,6 +79,7 @@ public class LivingEntityMixin implements StaminaAccess {
     @Inject(at = @At("HEAD"), method = "tick")
     private void timer(CallbackInfo info) {
         if (dashStaminaCooldownTicks > 0) dashStaminaCooldownTicks--;
+        if (healCooldownTicks > 0) healCooldownTicks--;
         timer1 += 1;
         if (timer1 >= 140)
             timerA = true;
@@ -106,9 +109,12 @@ public class LivingEntityMixin implements StaminaAccess {
                 healRegen = character.getHealRegen();
 
                 if (currentHeal < healReserve) {
-                    newHeal = currentHeal + ((healReserve + character.getAllHealReserveBonus()) * (healRegen + character.getAllHealRegenBonus()));
-                    currentHeal = newHeal;
-                    player.setHealth(newHeal);
+                    if (healCooldownTicks <= 0) {
+                        newHeal = currentHeal + ((healReserve + character.getAllHealReserveBonus()) * (healRegen + character.getAllHealRegenBonus()));
+                        if (newHeal > healReserve) newHeal = healReserve;
+                        currentHeal = newHeal;
+                        player.setHealth(newHeal);
+                    }
                 }
             }
 
@@ -167,10 +173,19 @@ public class LivingEntityMixin implements StaminaAccess {
     private void gettedDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         battleA();
         if (battle) {
+            CharactersComponent component = ModComponents.CHARACTERS.get(player);
+            Character character = component.getCharacter(component.getCurrentCharacter());
+            if (character != null) {
+                float a = (character.getHealReserve() + character.getAllHealReserveBonus())
+                        * (character.getHealRegen() + character.getAllHealRegenBonus());
+                healCooldownTicks = Math.round(20 + 15 * (float) Math.log(a + 1));
+            }
+
             if (healReserve != 0.0F)
-                currentHeal = healReserve-amount;
+                currentHeal = healReserve - amount;
         }
     }
+
     @Override
     public float axorune$getCurrentStamina() {
         return currentStamina;

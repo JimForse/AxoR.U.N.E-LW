@@ -128,7 +128,6 @@ public class CharactersComponentImpl implements CharactersComponent {
     public void setCurrentCharacter(CharacterName name) {
         currentCharacter = name;
     }
-    @Override
     public int switcher() {
         ServerPlayerEntity pl = null;
         if (this.player instanceof ServerPlayerEntity) pl = (ServerPlayerEntity) this.player;
@@ -137,18 +136,14 @@ public class CharactersComponentImpl implements CharactersComponent {
             return -1;
         } else {
             if (group.get(0).name().equals(getCurrentCharacter().name())) {
-                setCurrentCharacter(group.get(1));
                 new RealizingCharacters().realizingCharacterForPlayer(group.get(1), pl);
             } else if (group.size()==3) {
                 if (getCurrentCharacter().name().equals(group.get(1).name())) {
-                    setCurrentCharacter(group.get(2));
                     new RealizingCharacters().realizingCharacterForPlayer(group.get(2), pl);
                 } else {
-                    setCurrentCharacter(group.get(0));
                     new RealizingCharacters().realizingCharacterForPlayer(group.get(0), pl);
                 }
             } else {
-                setCurrentCharacter(group.get(0));
                 new RealizingCharacters().realizingCharacterForPlayer(group.get(0), pl);
             }
         }
@@ -163,7 +158,6 @@ public class CharactersComponentImpl implements CharactersComponent {
         if (group.size()==1) {
             return -1;
         } else {
-            setCurrentCharacter(group.get(res));
             new RealizingCharacters().realizingCharacterForPlayer(group.get(res), pl);
         }
         return 1;
@@ -175,18 +169,14 @@ public class CharactersComponentImpl implements CharactersComponent {
             return -1;
         } else {
             if (group.get(0).name().equals(getCurrentCharacter().name())) {
-                setCurrentCharacter(group.get(1));
                 new RealizingCharacters().realizingCharacterForPlayer(group.get(1), player);
             } else if (group.size()==3) {
                 if (getCurrentCharacter().name().equals(group.get(1).name())) {
-                    setCurrentCharacter(group.get(2));
                     new RealizingCharacters().realizingCharacterForPlayer(group.get(2), player);
                 } else {
-                    setCurrentCharacter(group.get(0));
                     new RealizingCharacters().realizingCharacterForPlayer(group.get(0), player);
                 }
             } else {
-                setCurrentCharacter(group.get(0));
                 new RealizingCharacters().realizingCharacterForPlayer(group.get(0), player);
             }
         }
@@ -199,7 +189,6 @@ public class CharactersComponentImpl implements CharactersComponent {
         if (group.size()==1) {
             return -1;
         } else {
-            setCurrentCharacter(group.get(res));
             new RealizingCharacters().realizingCharacterForPlayer(group.get(res), player);
         }
         return 1;
@@ -265,6 +254,7 @@ public class CharactersComponentImpl implements CharactersComponent {
         if (!groupsList.contains(groupName)) groupsList.add(groupName);
     }
 
+    // ==============  OTHER  ==================
     @Override
     public void readFromNbt(NbtCompound nbt) {
         NbtList nKeyList = nbt.getList("CHARACTERNAME", NbtElement.STRING_TYPE);
