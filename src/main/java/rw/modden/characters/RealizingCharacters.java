@@ -2,25 +2,24 @@ package rw.modden.characters;
 
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
+import rw.modden.access.StaminaAccess;
+import rw.modden.combat.Battle;
+import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
-
-import java.io.IOException;
 
 import static rw.modden.Axorunelostworlds.LOGGER;
 
 public class RealizingCharacters {
     public Character character;
     public void realizingCharacterForPlayer(CharacterName name, ServerPlayerEntity player) {
-        CharacterName previousName = ModComponents.CHARACTERS.get(player).getCurrentCharacter();
+        CharactersComponent component = ModComponents.CHARACTERS.get(player);
+        CharacterName previousName = component.getCurrentCharacter();
         LOGGER.info("[ARLW-DEBUG] realizing '{}' for {} | previous='{}' | health before={}/{}",
                 name, player.getEntityName(), previousName, player.getHealth(), player.getMaxHealth());
 
-        if (previousName != null && ModComponents.CHARACTERS.get(player).hasCharacter(previousName)) {
-            Character previous = ModComponents.CHARACTERS.get(player).getCharacter(previousName);
+        if (previousName != null && component.hasCharacter(previousName)) {
+            Character previous = component.getCharacter(previousName);
             LOGGER.info("[ARLW-DEBUG] saving '{}'.currentHeal = {} (was {})",
                     previousName, player.getHealth(), previous.getCurrentHeal());
             previous.setCurrentHeal(player.getHealth());
@@ -33,8 +32,8 @@ public class RealizingCharacters {
                 defence = player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR);
 
         Character character = null;
-        if (ModComponents.CHARACTERS.get(player).hasCharacter(name)) {
-            character = ModComponents.CHARACTERS.get(player).getCharacter(name);
+        if (component.hasCharacter(name)) {
+            character = component.getCharacter(name);
         }
 
         try {
@@ -44,12 +43,13 @@ public class RealizingCharacters {
         } catch (Exception e) {
             LOGGER.error("[ARLW-DEBUG] exception while setting attributes for '{}': {}", name, e.toString());
         }
-        ModComponents.CHARACTERS.get(player).setCurrentCharacter(name);
+        component.setCurrentCharacter(name);
         player.damage(player.getDamageSources().generic(), 1.0F);
 
         LOGGER.info("[ARLW-DEBUG] after attribute swap: maxHealth={} health={}", player.getMaxHealth(), player.getHealth());
 
         if (character != null) {
+            ((StaminaAccess) player).axorune$setCurrentStamina(character.getStamina());
             if (!character.isActivatedThisBattle()) {
                 LOGGER.info("[ARLW-DEBUG] '{}' first activation this battle -> full heal to {}", name, player.getMaxHealth());
                 player.setHealth(player.getMaxHealth());

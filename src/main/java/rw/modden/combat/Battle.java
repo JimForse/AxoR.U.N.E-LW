@@ -51,8 +51,7 @@ public class Battle {
                     component.getCharacter(name).setActivatedThisBattle(false);
             }
 
-            int chr = 0;
-            CharacterName character = group.get(chr);
+            CharacterName character = group.get(0);
             characterName = character;
             new RealizingCharacters().realizingCharacterForPlayer(character, player);
 

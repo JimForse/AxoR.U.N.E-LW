@@ -6,6 +6,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,13 +14,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import rw.modden.access.StaminaAccess;
 import rw.modden.characters.Character;
+import rw.modden.characters.RealizingCharacters;
 import rw.modden.combat.Battle;
 import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
 import rw.modden.network.ServerNetwork;
 
 @Mixin(LivingEntity.class)
-public class LivingEntityMixin implements StaminaAccess {
+public abstract class LivingEntityMixin implements StaminaAccess {
+    @Shadow
+    public abstract long getLootTableSeed();
+
     @Unique
     private float newStamina, currentStamina, newHeal, currentHeal, healReserve, healRegen, stamina, staminaRegen;
     @Unique
@@ -101,7 +106,9 @@ public class LivingEntityMixin implements StaminaAccess {
                     axorune$onStaminaSpent();
                 } else if (timerA) {
                     currentStamina += stamina * staminaRegen;
-                    if (currentStamina > stamina) currentStamina = stamina;
+                    if (currentStamina > stamina) {
+                        currentStamina = stamina;
+                    }
                 }
 
                 currentHeal = player.getHealth();
@@ -189,5 +196,10 @@ public class LivingEntityMixin implements StaminaAccess {
     @Override
     public float axorune$getCurrentStamina() {
         return currentStamina;
+    }
+
+    @Override
+    public void axorune$setCurrentStamina(float value) {
+        currentStamina = value;
     }
 }

@@ -27,7 +27,7 @@ public class CharacterInitializer {
                 Axorunelostworlds arlw = new Axorunelostworlds();
 
                 String recordedNick = arlw.findNickForUuid(player.getUuid());
-                CharacterName assigned = recordedNick != null ? getName(recordedNick.toUpperCase()) : null;
+                CharacterName assigned = recordedNick != null ? getName(recordedNick.toUpperCase()): null;
 
                 if (assigned != null) {
                     LOGGER.info("[ARLW] UUID {} matched recorded nick '{}' -> character {}",

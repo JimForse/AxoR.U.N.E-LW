@@ -3,60 +3,50 @@ package rw.modden.characters;
 import net.minecraft.nbt.NbtCompound;
 
 public class AbilitiesImprovement {
-    private int stars, stamina, strength, defence;
-    private float staminaRegen, healRegen, heal;
-    private CharacterName name;
+    private int stars, strength, defence;
+    private float staminaRegen, healRegen, heal, stamina;
+    private final Character character;
     private Runnable onChanged;
 
-    public void upHeal(CharacterName name, float value) {
-        this.name = name;
-        onChanged.run();
-        this.heal += value;
+    public AbilitiesImprovement(Character character) {
+        this.character = character;
+    }
+
+    public void upHeal(float value) {
+        this.heal = character.getHealReserve() + value;
         onChanged.run();
     }
 
-    public void upStars(CharacterName name, int value) {
-        this.name = name;
-        onChanged.run();
-        this.stars += value;
+    public void upStars(int value) {
+        this.stars = character.getStars() + value;
         onChanged.run();
     }
-    public void upStamina(CharacterName name, int value) {
-        this.name = name;
-        onChanged.run();
-        this.stamina += value;
+    public void upStamina(float value) {
+        this.stamina = character.getStamina() + value;
         onChanged.run();
     }
-    public void upStrength(CharacterName name, int value) {
-        this.name = name;
-        onChanged.run();
-        this.strength += value;
+    public void upStrength(int value) {
+        this.strength = character.getStrength() + value;
         onChanged.run();
     }
-    public void upStaminaRegen(CharacterName name, float value) {
-        this.name = name;
-        onChanged.run();
-        this.staminaRegen += value;
+    public void upStaminaRegen(float value) {
+        this.staminaRegen = character.getStaminaRegen() + value;
         onChanged.run();
     }
-    public void upHealRegen(CharacterName name, float value) {
-        this.name = name;
-        onChanged.run();
-        this.healRegen += value;
+    public void upHealRegen(float value) {
+        this.healRegen = character.getHealRegen() + value;
         onChanged.run();
     }
-    public void upDefence(CharacterName name, int value) {
-        this.name = name;
-        onChanged.run();
-        this.defence += value;
+    public void upDefence(int value) {
+        this.defence = character.getDefence() + value;
         onChanged.run();
     }
 
     public void readFromNbt(NbtCompound nbt) {
-        this.name = CharacterName.valueOf(nbt.getString("name"));
+        CharacterName name = character.getName();
         this.heal = nbt.getFloat(name.name()+"_heal");
         this.stars = nbt.getInt(name.name()+"_stars");
-        this.stamina = nbt.getInt(name.name()+"_stamina");
+        this.stamina = nbt.getFloat(name.name()+"_stamina");
         this.strength = nbt.getInt(name.name()+"_strength");
         this.staminaRegen = nbt.getFloat(name.name()+"_staminaRegen");
         this.healRegen = nbt.getFloat(name.name() + "_healRegen");
@@ -64,14 +54,14 @@ public class AbilitiesImprovement {
         this.healRegen = nbt.getFloat(name.name()+"_healRegen");
     }
     public void writeToNbt(NbtCompound nbt) {
+        CharacterName name = character.getName();
         nbt.putFloat(name.name()+"_heal", heal);
         nbt.putInt(name.name()+"_stars", stars);
-        nbt.putInt(name.name()+"_stamina", stamina);
+        nbt.putFloat(name.name()+"_stamina", stamina);
         nbt.putInt(name.name()+"_strength", strength);
         nbt.putFloat(name.name()+"_staminaRegen", staminaRegen);
         nbt.putFloat(name.name()+"_healRegen", healRegen);
         nbt.putInt(name.name()+"_defence", defence);
         nbt.putFloat(name.name()+"_healRegen", healRegen);
-        nbt.putString("name", name.name());
     }
 }

@@ -287,7 +287,6 @@ public abstract class ABCharacter implements Character {
     }
     @Override
     public void readFromNbt(NbtCompound nbt) {
-        this.name = CharacterName.valueOf(nbt.getString("name")); // first line
         this.defence      = nbt.getInt(  name.name() + "_defence");
         this.stars        = nbt.getInt(  name.name() + "_stars");
         this.strength     = nbt.getInt(  name.name() + "_strength");
@@ -410,6 +409,5 @@ public abstract class ABCharacter implements Character {
         }
 
         nbt.put( name.name()+"_path", NbtString.of(pathID.getPath().name()));
-        nbt.putString("name", name.name());// last line
     }
 }
