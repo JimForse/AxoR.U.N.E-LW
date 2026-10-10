@@ -255,9 +255,6 @@ public abstract class ABCharacter implements Character {
             addItem(weapon);
         }
     }
-    private void addItem(ABEquip item) {
-        equipMap.put(item.getUniqueID(), item);
-    }
     @Override
     public void setCurrentHeal(float value) {
         currentHeal = value;
@@ -282,6 +279,9 @@ public abstract class ABCharacter implements Character {
     }
 
     // ==============  OTHER  ==================
+    private void addItem(ABEquip item) {
+        equipMap.put(item.getUniqueID(), item);
+    }
     private void removeItem(ABEquip item) {
         equipMap.remove(item.getUniqueID());
     }

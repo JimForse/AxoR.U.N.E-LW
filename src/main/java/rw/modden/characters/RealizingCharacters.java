@@ -7,6 +7,7 @@ import rw.modden.access.StaminaAccess;
 import rw.modden.combat.Battle;
 import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
+import rw.modden.network.ServerNetwork;
 
 import static rw.modden.Axorunelostworlds.LOGGER;
 
@@ -63,6 +64,7 @@ public class RealizingCharacters {
         } else {
             LOGGER.error("[ARLW-DEBUG] character '{}' is NULL at restore step!", name);
         }
+        ServerNetwork.sendGroup(player);
     }
 
     public void standartAttributesForPlayer(ServerPlayerEntity player) {

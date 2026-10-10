@@ -3,7 +3,7 @@ package rw.modden;
 import net.fabricmc.api.ClientModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rw.modden.hud.StaminaHealthHud;
+import rw.modden.hud.CharacterGroupHud;
 import rw.modden.network.ClientNetwork;
 
 public class AxorunelostworldsClient implements ClientModInitializer {
@@ -16,6 +16,6 @@ public class AxorunelostworldsClient implements ClientModInitializer {
 
         ClientNetwork.registerGlobalReceiver();
         ClientKeyList.initialize();
-        StaminaHealthHud.register();
+        CharacterGroupHud.register();
     }
 }
