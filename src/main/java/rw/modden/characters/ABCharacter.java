@@ -20,7 +20,7 @@ public abstract class ABCharacter implements Character {
     private CharacterName name;
     private ABEquip head, chest, legs, boots, slot1, slot2, slot3, weapon;
     private final Map<String, ABEquip> equipMap = new HashMap<>();
-    private boolean activatedThisBattle;
+    private boolean activatedThisBattle, dead;
 
     public ABCharacter (float healReserve, int stars, float stamina, int strength, float staminaRegen, float healRegen, int defence, Path pathID, CharacterName name) {
         this.healReserve = healReserve;
@@ -263,8 +263,16 @@ public abstract class ABCharacter implements Character {
     public void setActivatedThisBattle(boolean value) {
         activatedThisBattle = value;
     }
+    @Override
+    public void setDead(boolean dead) {
+        this.dead = dead;
+    }
 
     // ==============  HAS  ==================
+    @Override
+    public boolean isDead() {
+        return dead;
+    }
     @Override
     public boolean hasItem(ABEquip item) {
         return hasItem(item.getUniqueID());

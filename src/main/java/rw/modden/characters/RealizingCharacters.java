@@ -45,6 +45,7 @@ public class RealizingCharacters {
             LOGGER.error("[ARLW-DEBUG] exception while setting attributes for '{}': {}", name, e.toString());
         }
         component.setCurrentCharacter(name);
+        player.setHealth(player.getMaxHealth());
         player.damage(player.getDamageSources().generic(), 1.0F);
 
         LOGGER.info("[ARLW-DEBUG] after attribute swap: maxHealth={} health={}", player.getMaxHealth(), player.getHealth());
@@ -77,6 +78,7 @@ public class RealizingCharacters {
             strength.setBaseValue(1.0);
             defence.setBaseValue(0.0);
         } catch (Exception e) {}
+        player.setHealth(player.getMaxHealth());
         player.damage(player.getDamageSources().generic(), 1.0F);
     }
 }

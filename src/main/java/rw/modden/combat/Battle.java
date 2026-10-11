@@ -14,6 +14,7 @@ import rw.modden.characters.Character;
 import rw.modden.characters.CharacterInitializer;
 import rw.modden.characters.CharacterName;
 import rw.modden.characters.RealizingCharacters;
+import rw.modden.components.BattleStateComponent;
 import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
 import rw.modden.effects.EffectsFactory;
@@ -45,10 +46,16 @@ public class Battle {
         if (battle) {
             currentGroup = group;
 
+            BattleStateComponent battleState = ModComponents.BATTLE_STATE.get(player);
+            if (battleState.getPreBattleHealth() < 0.0F)
+                battleState.setPreBattleHealth(player.getHealth());
+
             CharactersComponent component = ModComponents.CHARACTERS.get(player);
             for (CharacterName name: group) {
-                if (component.hasCharacter(name))
+                if (component.hasCharacter(name)) {
                     component.getCharacter(name).setActivatedThisBattle(false);
+                    component.getCharacter(name).setDead(false);
+                }
             }
 
             CharacterName character = group.get(0);
@@ -65,11 +72,16 @@ public class Battle {
     public void eventBattle(String fileName) {
         combatStateToBattle();
         if (battle) {
+            BattleStateComponent battleState = ModComponents.BATTLE_STATE.get(player);
+            if (battleState.getPreBattleHealth() < 0.0F)
+                battleState.setPreBattleHealth(player.getHealth());
             CharacterName character = new CharacterInitializer().getName(player.getEntityName());
 
             CharactersComponent component = ModComponents.CHARACTERS.get(player);
-            if (character != null && component.hasCharacter(character))
+            if (character != null && component.hasCharacter(character)) {
                 component.getCharacter(character).setActivatedThisBattle(false);
+                component.getCharacter(character).setDead(false);
+            }
 
             new RealizingCharacters().realizingCharacterForPlayer(character, player);
 
@@ -109,7 +121,17 @@ public class Battle {
         LOGGER.info("[ARLW-DEBUG] stopBattle: health before reset = {}/{}", player.getHealth(), player.getMaxHealth());
         LOGGER.info("Battle mode is stoped");
         battle = false;
+
+        float healthBefore = player.getHealth();
+        BattleStateComponent battleState = ModComponents.BATTLE_STATE.get(player);
+        float savedHealth = battleState.getPreBattleHealth();
+
         new RealizingCharacters().standartAttributesForPlayer(player);
+
+        float restore = savedHealth > 0.0F ? savedHealth : healthBefore;
+        player.setHealth(Math.max(1.0F, Math.min(restore, player.getMaxHealth())));
+        battleState.setPreBattleHealth(-1.0F);
+
         LOGGER.info("[ARLW-DEBUG] stopBattle: health after reset = {}/{}", player.getHealth(), player.getMaxHealth());
         ModComponents.BATTLE_STATE.get(player).setState(CombatState.NONE);
         if (player.networkHandler!=null) serverSend();

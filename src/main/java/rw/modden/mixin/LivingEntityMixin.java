@@ -19,6 +19,8 @@ import rw.modden.combat.Battle;
 import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
 import rw.modden.network.ServerNetwork;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import rw.modden.combat.CharacterDeath;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin implements StaminaAccess {
@@ -30,19 +32,9 @@ public abstract class LivingEntityMixin implements StaminaAccess {
     @Unique
     private ServerPlayerEntity player;
     @Unique
-    private boolean battle;
+    private int dashStaminaCooldownTicks = 0, healCooldownTicks = 0, timer1 = 0;
     @Unique
-    private boolean wasInBattle = false;
-    @Unique
-    private int timer1 = 0;
-    @Unique
-    private boolean timerA;
-    @Unique
-    private int dashStaminaCooldownTicks = 0;
-    @Unique
-    private int healCooldownTicks = 0;
-    @Unique
-    private boolean staminaInitialized = false;
+    private boolean staminaInitialized = false, deathPending = false, timerA, wasInBattle = false, battle;
 
     @Unique
     private void axorune$onStaminaSpent() {
@@ -83,6 +75,10 @@ public abstract class LivingEntityMixin implements StaminaAccess {
 
     @Inject(at = @At("HEAD"), method = "tick")
     private void timer(CallbackInfo info) {
+        if (deathPending && (Object) this instanceof ServerPlayerEntity deadPlayer) {
+            deathPending = false;
+            CharacterDeath.onCurrentCharacterDeath(deadPlayer);
+        }
         if (dashStaminaCooldownTicks > 0) dashStaminaCooldownTicks--;
         if (healCooldownTicks > 0) healCooldownTicks--;
         timer1 += 1;
@@ -201,5 +197,15 @@ public abstract class LivingEntityMixin implements StaminaAccess {
     @Override
     public void axorune$setCurrentStamina(float value) {
         currentStamina = value;
+    }
+
+    @ModifyVariable(method = "setHealth", at = @At("HEAD"), argsOnly = true)
+    private float axorune$preventLethalInBattle(float health) {
+        if (health > 0.0F) return health;
+
+        battleA();
+        if (!battle || !((Object) this instanceof ServerPlayerEntity)) return health;
+        deathPending = true;
+        return 1.0F;
     }
 }

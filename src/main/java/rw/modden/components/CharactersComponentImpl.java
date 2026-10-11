@@ -10,6 +10,7 @@ import rw.modden.characters.CharacterFactory;
 import rw.modden.characters.CharacterName;
 import rw.modden.characters.Character;
 import rw.modden.characters.RealizingCharacters;
+import rw.modden.combat.CharacterDeath;
 import rw.modden.combat.path.Path;
 import rw.modden.combat.path.PathFactory;
 import rw.modden.combat.path.PathesName;
@@ -128,69 +129,42 @@ public class CharactersComponentImpl implements CharactersComponent {
     public void setCurrentCharacter(CharacterName name) {
         currentCharacter = name;
     }
-    public int switcher() {
-        ServerPlayerEntity pl = null;
-        if (this.player instanceof ServerPlayerEntity) pl = (ServerPlayerEntity) this.player;
-        ArrayList<CharacterName> group = getCurrentGroup();
-        if (group.size()==1) {
-            return -1;
-        } else {
-            if (group.get(0).name().equals(getCurrentCharacter().name())) {
-                new RealizingCharacters().realizingCharacterForPlayer(group.get(1), pl);
-            } else if (group.size()==3) {
-                if (getCurrentCharacter().name().equals(group.get(1).name())) {
-                    new RealizingCharacters().realizingCharacterForPlayer(group.get(2), pl);
-                } else {
-                    new RealizingCharacters().realizingCharacterForPlayer(group.get(0), pl);
-                }
-            } else {
-                new RealizingCharacters().realizingCharacterForPlayer(group.get(0), pl);
-            }
-        }
-        return 1;
-    }
+
+    /**
+     * error -5 — Target character is dead (or there are no living characters to switch to)
+     */
+
     @Override
-    public int switcher(int value) {
-        int res = value==1?0:value==2?1:2;
-        ServerPlayerEntity pl = null;
-        if (this.player instanceof ServerPlayerEntity) pl = (ServerPlayerEntity) this.player;
-        ArrayList<CharacterName> group = getCurrentGroup();
-        if (group.size()==1) {
-            return -1;
-        } else {
-            new RealizingCharacters().realizingCharacterForPlayer(group.get(res), pl);
-        }
-        return 1;
+    public int switcher() {
+        if (!(this.player instanceof ServerPlayerEntity)) return -4;
+        return switcher((ServerPlayerEntity) this.player);
     }
     @Override
     public int switcher(ServerPlayerEntity player) {
         ArrayList<CharacterName> group = getCurrentGroup();
-        if (group.size()==1) {
-            return -1;
-        } else {
-            if (group.get(0).name().equals(getCurrentCharacter().name())) {
-                new RealizingCharacters().realizingCharacterForPlayer(group.get(1), player);
-            } else if (group.size()==3) {
-                if (getCurrentCharacter().name().equals(group.get(1).name())) {
-                    new RealizingCharacters().realizingCharacterForPlayer(group.get(2), player);
-                } else {
-                    new RealizingCharacters().realizingCharacterForPlayer(group.get(0), player);
-                }
-            } else {
-                new RealizingCharacters().realizingCharacterForPlayer(group.get(0), player);
-            }
-        }
+        if (group == null || group.size() == 1) return -1;
+
+        CharacterName next = CharacterDeath.nextAlive(this, group, getCurrentCharacter());
+        if (next == null) return -5;
+
+        new RealizingCharacters().realizingCharacterForPlayer(next, player);
         return 1;
+    }
+    @Override
+    public int switcher(int value) {
+        if (!(this.player instanceof ServerPlayerEntity)) return -4;
+        return switcher((ServerPlayerEntity) this.player, value);
     }
     @Override
     public int switcher(ServerPlayerEntity player, int value) {
         ArrayList<CharacterName> group = getCurrentGroup();
         int res = value==1?0:value==2?1:2;
-        if (group.size()==1) {
-            return -1;
-        } else {
-            new RealizingCharacters().realizingCharacterForPlayer(group.get(res), player);
-        }
+        if (group.size()==1) return -1;
+
+        CharacterName target = group.get(res);
+        if (!CharacterDeath.isAlive(this, target)) return -5;
+
+        new RealizingCharacters().realizingCharacterForPlayer(target, player);
         return 1;
     }
 
@@ -207,10 +181,10 @@ public class CharactersComponentImpl implements CharactersComponent {
     }
 
     /**
-     * error -4 — Unknown Exception
      * error -1 — Group size is maximum
      * error -2 — Player hasn't this character
      * error -3 — Group already has this character
+     * error -4 — Unknown Exception
      */
 
     @Override

@@ -270,6 +270,10 @@ public class BattleCommands {
                         ctx.getSource().sendError(Text.literal("Group has only one character"));
                         result[0]=0;
                     }
+                    if (r==-5) {
+                        ctx.getSource().sendError(Text.literal("This character is dead or no alive characters to switch to"));
+                        result[0]=0;
+                    }
                 } catch (CommandSyntaxException e) {
                     ctx.getSource().sendError(Text.literal(e.toString()));
                 }
@@ -280,6 +284,10 @@ public class BattleCommands {
                     int r = component.switcher(target);
                     if (r==-1) {
                         ctx.getSource().sendError(Text.literal("Group has only one character"));
+                        result[0]=0;
+                    }
+                    if (r==-5) {
+                        ctx.getSource().sendError(Text.literal("This character is dead or no alive characters to switch to"));
                         result[0]=0;
                     }
                 } catch (CommandSyntaxException e) {
@@ -294,6 +302,10 @@ public class BattleCommands {
                         ctx.getSource().sendError(Text.literal("Group has only one character"));
                         result[0]=0;
                     }
+                    if (r==-5) {
+                        ctx.getSource().sendError(Text.literal("This character is dead or no alive characters to switch to"));
+                        result[0]=0;
+                    }
                 } catch (Exception e) {
                     ctx.getSource().sendError(Text.literal(e.toString()));
                 }
@@ -303,6 +315,10 @@ public class BattleCommands {
                     int r = component.switcher();
                     if (r==-1) {
                         ctx.getSource().sendError(Text.literal("Group has only one character"));
+                        result[0]=0;
+                    }
+                    if (r==-5) {
+                        ctx.getSource().sendError(Text.literal("This character is dead or no alive characters to switch to"));
                         result[0]=0;
                     }
                 } catch (Exception e) {

@@ -10,6 +10,7 @@ import rw.modden.combat.CombatState;
 public class BattleStateComponentImpl implements BattleStateComponent {
     private CombatState state = CombatState.NONE;
     private final PlayerEntity player;
+    private float preBattleHealth = -1.0F;
 
     public BattleStateComponentImpl(PlayerEntity player) {
         this.player = player;
@@ -23,13 +24,23 @@ public class BattleStateComponentImpl implements BattleStateComponent {
     public void setState(CombatState state) {
         this.state = state;
     }
+    @Override
+    public float getPreBattleHealth() {
+        return preBattleHealth;
+    }
+    @Override
+    public void setPreBattleHealth(float health) {
+        this.preBattleHealth = health;
+    }
 
     @Override
     public void readFromNbt(NbtCompound nbt) {
         setState(CombatState.valueOf(nbt.getString("battle_state")));
+        preBattleHealth = nbt.contains("pre_battle_health") ? nbt.getFloat("pre_battle_health"):-1.0F;
     }
     @Override
     public void writeToNbt(NbtCompound nbt) {
         nbt.putString("battle_state", state.name());
+        nbt.putFloat("pre_battle_health", preBattleHealth);
     }
 }

@@ -57,8 +57,10 @@ public class ServerNetwork {
 
             Character character = component.hasCharacter(name)?component.getCharacter(name):null;
             float max = character != null ? character.getHealReserve():0.0F;
-            float hp = (character != null && character.isActivatedThisBattle())
-                    ? Math.min(character.getCurrentHeal(), max):max;
+            float hp = (character != null && character.isDead()) ? 0.0F
+                    : (character != null && character.isActivatedThisBattle())
+                    ? Math.min(character.getCurrentHeal(), max)
+                    : max;
 
             buf.writeString(name.name());
             buf.writeFloat(hp);

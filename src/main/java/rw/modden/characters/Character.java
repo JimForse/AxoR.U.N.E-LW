@@ -48,8 +48,10 @@ public interface Character {
     void setThirdSlot(ABEquip item);
     void setWeapon(ABEquip item);
     void setWeapon(String item);
+    void setDead(boolean dead);
 
     // ==============  HAS  ==================
+    boolean isDead();
     boolean hasItem(ABEquip item);
     boolean hasItem(String uniqueID);
     boolean isActivatedThisBattle();
