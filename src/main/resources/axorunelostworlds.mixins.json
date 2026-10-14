@@ -5,7 +5,8 @@
 	"mixins": [
 		"LivingEntityMixin",
 		"PlayerEntityMixin",
-		"MovementServerMixin"
+		"MovementServerMixin",
+		"StunMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

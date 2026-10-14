@@ -8,4 +8,6 @@ public interface BattleStateComponent extends Component {
     void setState(CombatState state);
     float getPreBattleHealth();
     void setPreBattleHealth(float health);
+    int getAssistPoints();
+    void setAssistPoints(int points);
 }

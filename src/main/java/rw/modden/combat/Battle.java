@@ -49,12 +49,15 @@ public class Battle {
             BattleStateComponent battleState = ModComponents.BATTLE_STATE.get(player);
             if (battleState.getPreBattleHealth() < 0.0F)
                 battleState.setPreBattleHealth(player.getHealth());
+            battleState.setAssistPoints(CombatConstants.ASSIST_POINTS_MAX);
 
             CharactersComponent component = ModComponents.CHARACTERS.get(player);
             for (CharacterName name: group) {
                 if (component.hasCharacter(name)) {
                     component.getCharacter(name).setActivatedThisBattle(false);
                     component.getCharacter(name).setDead(false);
+                    component.getCharacter(name).setEnergy(0);
+                    component.getCharacter(name).setEssence(0);
                 }
             }
 
@@ -73,6 +76,7 @@ public class Battle {
         combatStateToBattle();
         if (battle) {
             BattleStateComponent battleState = ModComponents.BATTLE_STATE.get(player);
+            battleState.setAssistPoints(0);
             if (battleState.getPreBattleHealth() < 0.0F)
                 battleState.setPreBattleHealth(player.getHealth());
             CharacterName character = new CharacterInitializer().getName(player.getEntityName());
@@ -81,6 +85,8 @@ public class Battle {
             if (character != null && component.hasCharacter(character)) {
                 component.getCharacter(character).setActivatedThisBattle(false);
                 component.getCharacter(character).setDead(false);
+                component.getCharacter(character).setEnergy(0);
+                component.getCharacter(character).setEssence(0);
             }
 
             new RealizingCharacters().realizingCharacterForPlayer(character, player);
@@ -131,6 +137,7 @@ public class Battle {
         float restore = savedHealth > 0.0F ? savedHealth : healthBefore;
         player.setHealth(Math.max(1.0F, Math.min(restore, player.getMaxHealth())));
         battleState.setPreBattleHealth(-1.0F);
+        battleState.setAssistPoints(0);
 
         LOGGER.info("[ARLW-DEBUG] stopBattle: health after reset = {}/{}", player.getHealth(), player.getMaxHealth());
         ModComponents.BATTLE_STATE.get(player).setState(CombatState.NONE);

@@ -27,6 +27,8 @@ public interface Character {
     ABEquip getItem(String uniqueID);
     float getAllHealReserveBonus();
     float getAllHealRegenBonus();
+    int getEnergy();
+    int getEssence();
 
     // ==============  SET  ==================
     void setHealReserve(float value);
@@ -49,6 +51,8 @@ public interface Character {
     void setWeapon(ABEquip item);
     void setWeapon(String item);
     void setDead(boolean dead);
+    void setEnergy(int energy);
+    void setEssence(int essence);
 
     // ==============  HAS  ==================
     boolean isDead();

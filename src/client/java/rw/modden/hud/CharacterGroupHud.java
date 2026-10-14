@@ -8,6 +8,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import rw.modden.Axorunelostworlds;
+import rw.modden.combat.CombatConstants;
 import rw.modden.network.ClientNetwork;
 import rw.modden.network.ClientNetwork.GroupMember;
 
@@ -21,6 +22,9 @@ public class CharacterGroupHud {
     private static final Identifier ULT_NULL = Identifier.of(Axorunelostworlds.MOD_ID, DIR + "ultimate_null.png");
     private static final Identifier STAMINA_FULL = Identifier.of(Axorunelostworlds.MOD_ID, DIR + "stamina_full.png");
     private static final Identifier STAMINA_NULL = Identifier.of(Axorunelostworlds.MOD_ID, DIR + "stamina_null.png");
+    private static final Identifier ENERGY_FULL = Identifier.of(Axorunelostworlds.MOD_ID, DIR + "energy_full.png");
+    private static final Identifier ENERGY_NULL = Identifier.of(Axorunelostworlds.MOD_ID, DIR + "energy_null.png");
+
 
     private record Style(float scale, float brightness) {}
 
@@ -74,10 +78,10 @@ public class CharacterGroupHud {
             int x;
             if (size >= 3) {
                 int slot = slotFor(i, current);
-                style = slot == 1 ? BIG : SMALL;
+                style = slot == 1 ? BIG:SMALL;
                 x = slotX[slot];
             } else if (size == 2) {
-                style = i == current ? BIG : SMALL;
+                style = i == current ? BIG:SMALL;
                 x = pairX[i] + (bigW - width(style)) / 2;
             } else {
                 style = BIG;
@@ -93,8 +97,11 @@ public class CharacterGroupHud {
                 hp = group.get(i).hp();
                 maxHp = group.get(i).maxHp();
             }
+            ClientNetwork.GroupMember m = group.get(i);
+            float energy = m.energy(), maxEnergy = m.maxEnergy();
+            float essence = m.essence(), maxEssence = m.maxEssence();
 
-            drawSlot(context, x, y, style, hp, maxHp);
+            drawSlot(context, x, y, style, hp, maxHp, energy, maxEnergy, essence, maxEssence);
         }
         drawStamina(context, client, leftmostX, screenH);
     }
@@ -111,13 +118,22 @@ public class CharacterGroupHud {
         return Math.round(TextureInfo.get(ULT_NULL).height() * s.scale());
     }
 
-    private static void drawSlot(DrawContext context, int x, int y, Style s, float hp, float maxHp) {
+    private static void drawSlot(DrawContext context, int x, int y, Style s, float hp, float maxHp, float energy, float maxEnergy, float essence, float maxEssence) {
         RenderSystem.enableBlend();
         float b = s.brightness();
         context.setShaderColor(b, b, b, 1.0F);
 
-        // Кольцо ульты (пока только пустое, заполнение добавим, когда будет логика ульты)
         drawRegion(context, ULT_NULL, x, y, TextureInfo.get(ULT_NULL).width(), s.scale());
+        if (maxEssence > 0.0F) {
+            float percent = Math.max(0.0F, Math.min(1.0F, essence / maxHp));
+
+            TextureInfo.Info bar = TextureInfo.get(ULT_NULL);
+            int visibleFilled = Math.round(bar.visibleWidth() * percent);
+            if (visibleFilled > 0) {
+                int regionW = bar.minX() + visibleFilled;
+                drawRegion(context, ULT_FULL, x, y, regionW, s.scale());
+            }
+        }
 
         drawRegion(context, HP_NULL, x, y, TextureInfo.get(HP_NULL).width(), s.scale());
         if (maxHp > 0.0F) {
@@ -128,6 +144,18 @@ public class CharacterGroupHud {
             if (visibleFilled > 0) {
                 int regionW = bar.minX() + visibleFilled;
                 drawRegion(context, HP_FULL, x, y, regionW, s.scale());
+            }
+        }
+
+        drawRegion(context, ENERGY_NULL, x, y, TextureInfo.get(ENERGY_NULL).width(), s.scale());
+        if (maxEnergy > 0.0F) {
+            float percent = Math.max(0.0F, Math.min(1.0F, energy / maxHp));
+
+            TextureInfo.Info bar = TextureInfo.get(ENERGY_NULL);
+            int visibleFilled = Math.round(bar.visibleWidth() * percent);
+            if (visibleFilled > 0) {
+                int regionW = bar.minX() + visibleFilled;
+                drawRegion(context, ENERGY_FULL, x, y, regionW, s.scale());
             }
         }
 

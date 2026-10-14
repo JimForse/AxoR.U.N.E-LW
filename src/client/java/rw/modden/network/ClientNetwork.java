@@ -11,9 +11,9 @@ import java.util.List;
 
 public class ClientNetwork {
     private static boolean battle;
+    private static int essence, maxEssence, energy, maxEnergy;
     private static String battle_state;
-    private static float stamina;
-    private static float maxStamina;
+    private static float stamina, maxStamina;
     private static volatile List<GroupMember> group = new ArrayList<>();
     private static volatile int groupCurrent = 0;
     public static final Identifier CHARACTER_SWITCH_ID = Identifier.of(Axorunelostworlds.MOD_ID, "character_switch");
@@ -42,7 +42,8 @@ public class ClientNetwork {
             int size = buf.readInt();
             List<GroupMember> members = new ArrayList<>();
             for (int i = 0; i < size; i++) {
-                members.add(new GroupMember(buf.readString(), buf.readFloat(), buf.readFloat()));
+                members.add(new GroupMember(buf.readString(), buf.readFloat(), buf.readFloat(),
+                        buf.readInt(), buf.readInt(), buf.readInt(), buf.readInt()));
             }
             int current = buf.readInt();
 
@@ -51,14 +52,14 @@ public class ClientNetwork {
                 ClientNetwork.groupCurrent = current;
             });
         }));
-
     }
 
     public static void send(Identifier channelName, PacketByteBuf buf) {
         ClientPlayNetworking.send(channelName, buf);
     }
 
-    public record GroupMember(String name, float hp, float maxHp) {}
+    public record GroupMember(String name, float hp, float maxHp,
+                              int energy, int maxEnergy, int essence, int maxEssence) {}
 
     public static void setBattle(boolean b) {
         battle = b;
@@ -87,6 +88,7 @@ public class ClientNetwork {
     public static float getMaxStamina() {
         return maxStamina;
     }
+
     public static List<GroupMember> getGroup() {
         return group;
     }

@@ -6,9 +6,11 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import rw.modden.Axorunelostworlds;
+import rw.modden.combat.CombatConstants;
 import rw.modden.combat.CombatState;
 import rw.modden.characters.Character;
 import rw.modden.characters.CharacterName;
+import rw.modden.components.BattleStateComponent;
 import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
 
@@ -28,9 +30,12 @@ public class ServerNetwork {
         ServerPlayNetworking.registerGlobalReceiver(CHARACTER_SWITCH_ID, (server, player, handler, buf, responseSender) -> {
             boolean pressed = buf.readBoolean();
             server.execute(() -> {
-                if (pressed) {
-                    ModComponents.CHARACTERS.get(player).switcher();
-                }
+                if (!pressed) return;
+                BattleStateComponent bs = ModComponents.BATTLE_STATE.get(player);
+                if (bs.getState() != CombatState.STANDART || bs.getAssistPoints() <= 0) return;
+
+                int result = ModComponents.CHARACTERS.get(player).switcher();
+                if (result == 1) bs.setAssistPoints(bs.getAssistPoints() - 1);
             });
         });
     }
@@ -65,6 +70,10 @@ public class ServerNetwork {
             buf.writeString(name.name());
             buf.writeFloat(hp);
             buf.writeFloat(max);
+            buf.writeInt(character != null ? character.getEnergy():0);
+            buf.writeInt(CombatConstants.ENERGY_MAX);
+            buf.writeInt(character != null ? character.getEssence():0);
+            buf.writeInt(CombatConstants.ESSENCE_MAX);
         }
         buf.writeInt(currentIndex);
 

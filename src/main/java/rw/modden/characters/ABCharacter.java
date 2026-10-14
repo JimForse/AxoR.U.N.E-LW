@@ -14,7 +14,7 @@ import java.util.Map;
 import static rw.modden.Axorunelostworlds.LOGGER;
 
 public abstract class ABCharacter implements Character {
-    private int stars, strength, defence;
+    private int stars, strength, defence, energy, essence;
     private float healReserve, staminaRegen, stamina, healRegen, currentHeal;;
     private Path pathID;
     private CharacterName name;
@@ -135,6 +135,8 @@ public abstract class ABCharacter implements Character {
         if (slot3 != null) bonus += slot3.getHealRegenBonus();
         return bonus;
     }
+    @Override public int getEnergy() { return energy; }
+    @Override public int getEssence() { return essence; }
 
     // ==============  SET  ==================
     @Override
@@ -267,6 +269,10 @@ public abstract class ABCharacter implements Character {
     public void setDead(boolean dead) {
         this.dead = dead;
     }
+    @Override public void setEnergy(int energy) {
+        this.energy = Math.max(0, energy);
+    }
+    @Override public void setEssence(int essence) { this.essence = Math.max(0, essence); }
 
     // ==============  HAS  ==================
     @Override
