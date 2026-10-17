@@ -18,17 +18,17 @@ public final class Energy {
         return 0;
     }
 
-    public static void add(ServerPlayerEntity player, int amount) {
+    public static boolean add(ServerPlayerEntity player, int amount) {
         CharactersComponent component = ModComponents.CHARACTERS.get(player);
         CharacterName name = component.getCurrentCharacter();
-        if (name == null || !component.hasCharacter(name)) return;
+        if (name == null || !component.hasCharacter(name)) return false;
 
         Character character = component.getCharacter(name);
         int before = character.getEnergy();
         int after = Math.min(CombatConstants.ENERGY_MAX, before + amount);
-        if (after == before) return;
+        if (after == before) return false;
 
         character.setEnergy(after);
-        LOGGER.info("[ARLW-DEBUG] energy of {}: {} -> {} (stage {})", name, before, after, stageOf(after));
+        return true;
     }
 }

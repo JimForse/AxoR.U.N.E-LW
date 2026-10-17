@@ -12,7 +12,7 @@ public class CharacterFactory {
             case THE_LOST ->      character = new The_lost321Character();
             case WAFEN ->         character = new Waffentrager_109Character();
             case SPECTORPROFM ->  character = new SpectorprofmCharacter();
-            case VLAD ->          character = new vlad8822Character();
+            case VLAD ->          character = new vlad888222Character();
             case GVALL ->         character = new Gvall_Character();
             case OMFAS ->         character = new OmfasCharacter();
             case KEEPFEE ->       character = new Keepfee3215Character();
@@ -32,7 +32,7 @@ public class CharacterFactory {
             case KEEPFEE ->      character = new Keepfee3215Character(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name);
             case OMFAS ->        character = new OmfasCharacter(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name);
             case GVALL ->        character = new Gvall_Character(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name);
-            case VLAD ->         character = new vlad8822Character(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name);
+            case VLAD ->         character = new vlad888222Character(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name);
         }
         return character;
     }

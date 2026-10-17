@@ -15,12 +15,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import rw.modden.access.StaminaAccess;
 import rw.modden.characters.Character;
 import rw.modden.characters.RealizingCharacters;
-import rw.modden.combat.Battle;
+import rw.modden.combat.*;
 import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
 import rw.modden.network.ServerNetwork;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import rw.modden.combat.CharacterDeath;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin implements StaminaAccess {
@@ -32,7 +31,7 @@ public abstract class LivingEntityMixin implements StaminaAccess {
     @Unique
     private ServerPlayerEntity player;
     @Unique
-    private int dashStaminaCooldownTicks = 0, healCooldownTicks = 0, timer1 = 0;
+    private int dashStaminaCooldownTicks = 0, healCooldownTicks = 0, timer1 = 0, energyPassiveTicks = 0;;
     @Unique
     private boolean staminaInitialized = false, deathPending = false, timerA, wasInBattle = false, battle;
 
@@ -88,6 +87,11 @@ public abstract class LivingEntityMixin implements StaminaAccess {
         battleA();
         if (battle) {
             CharactersComponent component = ModComponents.CHARACTERS.get(player);
+            energyPassiveTicks++;
+            if (energyPassiveTicks >= CombatConstants.ENERGY_PASSIVE_INTERVAL_TICKS) {
+                energyPassiveTicks = 0;
+                if (Energy.add(player, CombatConstants.ENERGY_PASSIVE_AMOUNT)) ServerNetwork.sendGroup(player);
+            }
             Character character = component.getCharacter(component.getCurrentCharacter());
             if (character != null) {
                 stamina = character.getStamina();
@@ -207,5 +211,17 @@ public abstract class LivingEntityMixin implements StaminaAccess {
         if (!battle || !((Object) this instanceof ServerPlayerEntity)) return health;
         deathPending = true;
         return 1.0F;
+    }
+
+    @Inject(at = @At("RETURN"), method = "damage")
+    private void axorune$essenceOnTakenDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        if (!cir.getReturnValueZ()) return;
+        if (RealizingCharacters.inServiceDamage) return;
+        if (!((Object) this instanceof ServerPlayerEntity hurtPlayer)) return;
+
+        battleA();
+        if (!battle) return;
+        if (Essence.tryGain(hurtPlayer, CombatConstants.ESSENCE_TAKEN_DAMAGE_PERCENT))
+            ServerNetwork.sendGroup(hurtPlayer);
     }
 }

@@ -65,9 +65,9 @@ public abstract class StunMixin implements StunAccess {
             stunReentry = false;
         }
         if (damaged) {
-            Energy.add(attacker, CombatConstants.ENERGY_PER_HIT);
-            Essence.tryGain(attacker);
-            ServerNetwork.sendGroup(attacker);
+            boolean changed = Energy.add(attacker, CombatConstants.ENERGY_PER_HIT);
+            changed |= Essence.tryGain(attacker, CombatConstants.ESSENCE_ENEMY_DAMAGE_PERCENT);
+            if (changed) ServerNetwork.sendGroup(attacker);
         }
         if (damaged && !wasStunned) {
             stun += CombatConstants.STUN_PER_HIT;

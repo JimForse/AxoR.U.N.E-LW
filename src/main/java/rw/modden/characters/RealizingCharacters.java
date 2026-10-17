@@ -13,16 +13,13 @@ import static rw.modden.Axorunelostworlds.LOGGER;
 
 public class RealizingCharacters {
     public Character character;
+    public static boolean inServiceDamage = false;
     public void realizingCharacterForPlayer(CharacterName name, ServerPlayerEntity player) {
         CharactersComponent component = ModComponents.CHARACTERS.get(player);
         CharacterName previousName = component.getCurrentCharacter();
-        LOGGER.info("[ARLW-DEBUG] realizing '{}' for {} | previous='{}' | health before={}/{}",
-                name, player.getEntityName(), previousName, player.getHealth(), player.getMaxHealth());
 
         if (previousName != null && component.hasCharacter(previousName)) {
             Character previous = component.getCharacter(previousName);
-            LOGGER.info("[ARLW-DEBUG] saving '{}'.currentHeal = {} (was {})",
-                    previousName, player.getHealth(), previous.getCurrentHeal());
             previous.setCurrentHeal(player.getHealth());
         }
 
@@ -46,20 +43,15 @@ public class RealizingCharacters {
         }
         component.setCurrentCharacter(name);
         player.setHealth(player.getMaxHealth());
-        player.damage(player.getDamageSources().generic(), 1.0F);
-
-        LOGGER.info("[ARLW-DEBUG] after attribute swap: maxHealth={} health={}", player.getMaxHealth(), player.getHealth());
+        serviceDamage(player);
 
         if (character != null) {
             ((StaminaAccess) player).axorune$setCurrentStamina(character.getStamina());
             if (!character.isActivatedThisBattle()) {
-                LOGGER.info("[ARLW-DEBUG] '{}' first activation this battle -> full heal to {}", name, player.getMaxHealth());
                 player.setHealth(player.getMaxHealth());
                 character.setActivatedThisBattle(true);
             } else {
                 float restore = Math.min(character.getCurrentHeal(), player.getMaxHealth());
-                LOGGER.info("[ARLW-DEBUG] '{}' already activated -> restoring {} (stored currentHeal={}, maxHealth={})",
-                        name, restore, character.getCurrentHeal(), player.getMaxHealth());
                 player.setHealth(restore);
             }
         } else {
@@ -79,6 +71,15 @@ public class RealizingCharacters {
             defence.setBaseValue(0.0);
         } catch (Exception e) {}
         player.setHealth(player.getMaxHealth());
-        player.damage(player.getDamageSources().generic(), 1.0F);
+        serviceDamage(player);
+    }
+
+    private static void serviceDamage(ServerPlayerEntity player) {
+        inServiceDamage = true;
+        try {
+            player.damage(player.getDamageSources().generic(), 1.0F);
+        } finally {
+            inServiceDamage = false;
+        }
     }
 }

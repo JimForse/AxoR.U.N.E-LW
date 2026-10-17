@@ -79,7 +79,7 @@ public class Battle {
             battleState.setAssistPoints(0);
             if (battleState.getPreBattleHealth() < 0.0F)
                 battleState.setPreBattleHealth(player.getHealth());
-            CharacterName character = new CharacterInitializer().getName(player.getEntityName());
+            CharacterName character = new CharacterInitializer().characterFor(player);
 
             CharactersComponent component = ModComponents.CHARACTERS.get(player);
             if (character != null && component.hasCharacter(character)) {
@@ -124,7 +124,6 @@ public class Battle {
         serverSend();
     }
     public void stopBattle() {
-        LOGGER.info("[ARLW-DEBUG] stopBattle: health before reset = {}/{}", player.getHealth(), player.getMaxHealth());
         LOGGER.info("Battle mode is stoped");
         battle = false;
 
@@ -139,7 +138,6 @@ public class Battle {
         battleState.setPreBattleHealth(-1.0F);
         battleState.setAssistPoints(0);
 
-        LOGGER.info("[ARLW-DEBUG] stopBattle: health after reset = {}/{}", player.getHealth(), player.getMaxHealth());
         ModComponents.BATTLE_STATE.get(player).setState(CombatState.NONE);
         if (player.networkHandler!=null) serverSend();
     }

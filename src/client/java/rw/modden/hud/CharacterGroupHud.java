@@ -125,7 +125,7 @@ public class CharacterGroupHud {
 
         drawRegion(context, ULT_NULL, x, y, TextureInfo.get(ULT_NULL).width(), s.scale());
         if (maxEssence > 0.0F) {
-            float percent = Math.max(0.0F, Math.min(1.0F, essence / maxHp));
+            float percent = Math.max(0.0F, Math.min(1.0F, essence / maxEssence));
 
             TextureInfo.Info bar = TextureInfo.get(ULT_NULL);
             int visibleFilled = Math.round(bar.visibleWidth() * percent);
@@ -149,7 +149,7 @@ public class CharacterGroupHud {
 
         drawRegion(context, ENERGY_NULL, x, y, TextureInfo.get(ENERGY_NULL).width(), s.scale());
         if (maxEnergy > 0.0F) {
-            float percent = Math.max(0.0F, Math.min(1.0F, energy / maxHp));
+            float percent = Math.max(0.0F, Math.min(1.0F, energy / maxEnergy));
 
             TextureInfo.Info bar = TextureInfo.get(ENERGY_NULL);
             int visibleFilled = Math.round(bar.visibleWidth() * percent);

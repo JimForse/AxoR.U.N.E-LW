@@ -3,6 +3,7 @@ package rw.modden.characters;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.network.ServerPlayerEntity;
 import rw.modden.Axorunelostworlds;
+import rw.modden.PlayerRegistry;
 import rw.modden.combat.Battle;
 import rw.modden.combat.CombatState;
 import rw.modden.components.CharactersComponent;
@@ -23,27 +24,14 @@ public class CharacterInitializer {
             ServerPlayerEntity player = handler.getPlayer();
             CharactersComponent component = CHARACTERS.get(player);
 
-            if (server.isSingleplayer() && component.getCharacters().isEmpty()) {
-                Axorunelostworlds arlw = new Axorunelostworlds();
+            if (component.getCharacters().isEmpty()) {
+                String recordedNick = PlayerRegistry.findNick(player.getUuid());
+                CharacterName assigned = recordedNick != null ? getName(recordedNick.toUpperCase()) : null;
 
-                String recordedNick = arlw.findNickForUuid(player.getUuid());
-                CharacterName assigned = recordedNick != null ? getName(recordedNick.toUpperCase()): null;
-
-                if (assigned != null) {
-                    LOGGER.info("[ARLW] UUID {} matched recorded nick '{}' -> character {}",
-                            player.getUuid(), recordedNick, assigned);
-                } else {
-                    int idx = Math.floorMod(player.getUuid().hashCode(), DEFAULT_STAT_CHARACTERS.length);
-                    assigned = DEFAULT_STAT_CHARACTERS[idx];
-                    LOGGER.info("[ARLW] UUID {} ({}) -> generic default character {}",
-                            player.getUuid(), player.getEntityName(), assigned);
+                if (assigned == null && server.isSingleplayer()) {
+                    assigned = DEFAULT_STAT_CHARACTERS[Math.floorMod(player.getUuid().hashCode(), DEFAULT_STAT_CHARACTERS.length)];
                 }
-
-                if (recordedNick == null) {
-                    arlw.writeToJson(player.getEntityName(), player.getUuid());
-                }
-
-                component.addCharacter(assigned);
+                if (assigned != null) component.addCharacter(assigned);
             }
 
             CombatState state = ModComponents.BATTLE_STATE.get(player).getState();
@@ -59,7 +47,7 @@ public class CharacterInitializer {
             case "KLLIMA777" ->        characterName = CharacterName.KLLIMA777;
             case "WAFFENTRAGER_109" -> characterName = CharacterName.WAFEN;
             case "SPECTORPROFM" ->     characterName = CharacterName.SPECTORPROFM;
-            case "VLAD8822" ->         characterName = CharacterName.VLAD;
+            case "VLAD888222" ->       characterName = CharacterName.VLAD;
             case "THE_LOST321" ->      characterName = CharacterName.THE_LOST;
             case "OMFAS" ->            characterName = CharacterName.OMFAS;
             case "GVALL_" ->           characterName = CharacterName.GVALL;
@@ -68,5 +56,10 @@ public class CharacterInitializer {
         }
 
         return characterName;
+    }
+
+    public CharacterName characterFor(ServerPlayerEntity player) {
+        String nick = PlayerRegistry.findNick(player.getUuid());
+        return nick != null?getName(nick.toUpperCase()):null;
     }
 }
