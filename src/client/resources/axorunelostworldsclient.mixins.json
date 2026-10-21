@@ -6,7 +6,10 @@
 		"InGameHudMixin",
 		"CooldownHudMixin",
 		"MovementClientMixin",
-		"ClientPlayerEntityMixin"
+		"ClientPlayerEntityMixin",
+		"PlayerInventoryMixin",
+		"KeyBindingAccessor",
+		"KeyBindingMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

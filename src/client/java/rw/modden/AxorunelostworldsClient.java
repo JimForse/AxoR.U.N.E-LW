@@ -16,6 +16,7 @@ public class AxorunelostworldsClient implements ClientModInitializer {
 
         ClientNetwork.registerGlobalReceiver();
         ClientKeyList.initialize();
+        BattleInputBlocker.initialize();
         CharacterGroupHud.register();
     }
 }
