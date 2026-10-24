@@ -35,13 +35,27 @@
 	},
 	"mixins": [
 		"axorunelostworlds.mixins.json",
-		"axorunelostworldsclient.mixins.json"
+		{
+			"config": "axorunelostworldsclient.mixins.json",
+			"environment": "client"
+		}
 	],
 	"depends": {
-		"fabricloader": ">=0.16.13",
+		"fabricloader": ">=0.17.2",
 		"minecraft": "~1.20.1",
 		"java": ">=17",
-		"fabric-api": "*"
+		"fabric-api": "*",
+		"mobilityimprovements": ">=1.0",
+		"simplyswords": ">=1.55.0-",
+		"bettercombat": "*",
+		"mocap": "*",
+		"cutscene_api": "*",
+		"architectury": "*",
+		"cloth-config": "*",
+		"player-animator": "*"
+	},
+	"recommends": {
+		"camerautils": "*"
 	},
 	"suggests": {
 		"another-mod": "*"

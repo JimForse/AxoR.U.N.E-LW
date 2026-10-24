@@ -8,6 +8,7 @@ public interface Character {
     // ==============  GET  ==================
     float getHealReserve();
     int getStars();
+    int getLevel();
     float getStamina();
     int getStrength();
     float getStaminaRegen();
@@ -33,6 +34,7 @@ public interface Character {
     // ==============  SET  ==================
     void setHealReserve(float value);
     void setStars(int value);
+    void setLevel(int value);
     void setActivatedThisBattle(boolean value);
     void setCurrentHeal(float value);
     void setStamina(float value);

@@ -62,7 +62,7 @@ public class CharacterCommands {
                 .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
                     .then(argument("player", EntityArgumentType.player())
                         .then(argument("state", StringArgumentType.word())
-                            .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"heal", "stars", "strength", "stamina", "staminaRegen", "defence", "weapon"}, builder))
+                            .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"heal", "stars", "level", "strength", "stamina", "staminaRegen", "healRegen", "defence", "weapon"}, builder))
                                 .then(argument("value", DoubleArgumentType.doubleArg())
                                     .executes(CharacterCommands::editCharacter)))
                         .then(literal("weapon")
@@ -81,7 +81,7 @@ public class CharacterCommands {
                             .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
                                 .then(argument("player", EntityArgumentType.player())
                                     .then(argument("state", StringArgumentType.word())
-                                        .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"heal", "stars", "strength", "stamina", "staminaRegen", "defence", "weapon"}, builder))
+                                        .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"heal", "stars", "level", "strength", "stamina", "staminaRegen", "healRegen", "defence", "weapon"}, builder))
                                             .executes(CharacterCommands::checkCharacterState))))))
         );
     }
@@ -135,41 +135,36 @@ public class CharacterCommands {
         return 1;
     }
 
+    private static String stateOf(Character chr, String characteristic) {
+        return switch (characteristic) {
+            case "heal" -> String.valueOf(chr.getHealReserve());
+            case "stars" -> String.valueOf(chr.getStars());
+            case "level" -> String.valueOf(chr.getLevel());
+            case "strength" -> String.valueOf(chr.getStrength());
+            case "stamina" -> String.valueOf(chr.getStamina());
+            case "staminaRegen" -> String.valueOf(chr.getStaminaRegen());
+            case "healRegen" -> String.valueOf(chr.getHealRegen());
+            case "defence" -> String.valueOf(chr.getDefence());
+            case "weapon" -> chr.getWeapon()!=null?chr.getWeapon().getItemID():"none";
+            default -> null;
+        };
+    }
+
     private static int checkCharacterState(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         String argument = StringArgumentType.getString(ctx, "character");
         String characteristic = StringArgumentType.getString(ctx, "state");
         ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         Character chr = ModComponents.CHARACTERS.get(player).getCharacter(CharacterName.valueOf(argument));
-        switch (characteristic) {
-            case "heal" -> {
-                float state = (float)chr.getHealReserve();
-                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %f", characteristic, state)), false);
-            }
-            case "stars" -> {
-                float state = chr.getStars();
-                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %f", characteristic, state)), false);
-            }
-            case "stamina" -> {
-                float state = (float)chr.getStamina();
-                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %f", characteristic, state)), false);
-            }
-            case "strength" -> {
-                float state = chr.getStrength();
-                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %f", characteristic, state)), false);
-            }
-            case "staminaRegen" -> {
-                float state = (float)chr.getStaminaRegen();
-                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %f", characteristic, state)), false);
-            }
-            case "defence" -> {
-                float state = chr.getDefence();
-                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %f", characteristic, state)), false);
-            }
-            case "weapon" -> {
-                String item = chr.getWeapon().getItemID();
-                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %s", characteristic, item)), false);
-            }
+        if (chr == null) {
+            ctx.getSource().sendError(Text.literal("Player hasn`t this character"));
+            return 0;
         }
+        String state = stateOf(chr, characteristic);
+        if (state == null) {
+            ctx.getSource().sendError(Text.literal("Unknown parameter: " + characteristic));
+            return 0;
+        }
+        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s is: %s", characteristic, state)), false);
         return 1;
     }
 
@@ -177,6 +172,10 @@ public class CharacterCommands {
         String argument = StringArgumentType.getString(ctx, "character");
         ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         Character chr = ModComponents.CHARACTERS.get(player).getCharacter(CharacterName.valueOf(argument));
+        if (chr == null) {
+            ctx.getSource().sendError(Text.literal("Player hasn`t this character"));
+            return 0;
+        }
         ctx.getNodes().forEach(x -> {
             if (x.getNode().getName().equals("weaponID")) {
                 String weaponID = StringArgumentType.getString(ctx, "weaponID");
@@ -184,32 +183,22 @@ public class CharacterCommands {
                 ctx.getSource().sendFeedback(() -> Text.literal(String.format("Weapon %s seted to %s", weaponID, argument)), false);
             } else if (x.getNode().getName().equals("state")) {
                 String characteristic = StringArgumentType.getString(ctx, "state");
+                double value = DoubleArgumentType.getDouble(ctx, "value");
                 switch (characteristic) {
-                    case "heal" -> {
-                        chr.setHealReserve((float) DoubleArgumentType.getDouble(ctx, "value"));
-                        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s seted to %s", characteristic, argument)), false);
-                    }
-                    case "stars" -> {
-                        chr.setStars((int) DoubleArgumentType.getDouble(ctx, "value"));
-                        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s seted to %s", characteristic, argument)), false);
-                    }
-                    case "stamina" -> {
-                        chr.setStamina((float) DoubleArgumentType.getDouble(ctx, "value"));
-                        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s seted to %s", characteristic, argument)), false);
-                    }
-                    case "strength" -> {
-                        chr.setStrength((int) DoubleArgumentType.getDouble(ctx, "value"));
-                        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s seted to %s", characteristic, argument)), false);
-                    }
-                    case "staminaRegen" -> {
-                        chr.setStaminaRegen((float) DoubleArgumentType.getDouble(ctx, "value"));
-                        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s seted to %s", characteristic, argument)), false);
-                    }
-                    case "defence" -> {
-                        chr.setDefence((int) DoubleArgumentType.getDouble(ctx, "value"));
-                        ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s seted to %s", characteristic, argument)), false);
+                    case "heal" -> chr.setHealReserve((float) value);
+                    case "stars" -> chr.setStars((int) value);
+                    case "level" -> chr.setLevel((int) value);
+                    case "strength" -> chr.setStrength((int) value);
+                    case "stamina" -> chr.setStamina((float) value);
+                    case "staminaRegen" -> chr.setStaminaRegen((float) value);
+                    case "healRegen" -> chr.setHealRegen((float) value);
+                    case "defence" -> chr.setDefence((int) value);
+                    default -> {
+                        ctx.getSource().sendError(Text.literal("Unknown parameter: " + characteristic));
+                        return;
                     }
                 }
+                ctx.getSource().sendFeedback(() -> Text.literal(String.format("Parameter %s of %s set to %s", characteristic, argument, stateOf(chr, characteristic))), false);
             }
         });
         ModComponents.CHARACTERS.sync(player);

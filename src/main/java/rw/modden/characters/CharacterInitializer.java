@@ -52,7 +52,7 @@ public class CharacterInitializer {
             case "OMFAS" ->            characterName = CharacterName.OMFAS;
             case "GVALL_" ->           characterName = CharacterName.GVALL;
             case "MATSVEI_V222" ->     characterName = CharacterName.MATSVEI;
-            case "KEEPFEE3215" ->      characterName = CharacterName.KEEPFEE;
+            case "KEEPFEEP3215" ->     characterName = CharacterName.KEEPFEE;
         }
 
         return characterName;

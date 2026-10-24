@@ -32,7 +32,7 @@ public class Axorunelostworlds implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static ArrayList<String> permitted_equipment = new ArrayList<>();
 
-	public String getUniqueItemID() {
+	public static String getUniqueItemID() {
 		return UUID.randomUUID().toString();
 	}
 

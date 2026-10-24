@@ -11,9 +11,6 @@ import rw.modden.characters.CharacterName;
 import rw.modden.characters.Character;
 import rw.modden.characters.RealizingCharacters;
 import rw.modden.combat.CharacterDeath;
-import rw.modden.combat.path.Path;
-import rw.modden.combat.path.PathFactory;
-import rw.modden.combat.path.PathesName;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -91,10 +88,7 @@ public class CharactersComponentImpl implements CharactersComponent {
     @Override
     public void removeCharacterFromGroup(CharacterName name, String groupName) {
         ArrayList<CharacterName> group = getCharactersGroup(groupName);
-        if (group.remove(name)) {
-            removeGroupFromCharacterGroups(groupName);
-            addGroupToCharacterGroups(groupName, group);
-        }
+        if (group != null) group.remove(name);
     }
     @Override
     public void removeCharacterFromGroup(CharacterName name) {
@@ -173,12 +167,6 @@ public class CharactersComponentImpl implements CharactersComponent {
     public void addCharacter(CharacterName name) {
         characters.put(name, new CharacterFactory().getCharacter(name));
     }
-    @Override
-    public Character addCharacters(float healReserve, int stars, float stamina, int strength, float staminaRegen, float healRegen, int defence, Path pathID, CharacterName name) {
-        Character character = new CharacterFactory().getCharacter(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name);
-        characters.put(name, character);
-        return character;
-    }
 
     /**
      * error -1 — Group size is maximum
@@ -236,16 +224,9 @@ public class CharactersComponentImpl implements CharactersComponent {
 
         for (NbtElement value: nKeyList) {
             CharacterName name = CharacterName.valueOf(value.asString());
-            int stars = nbt.getInt(name.name() + "_stars"),
-                    strength = nbt.getInt(name.name() + "_strength"),
-                    defence = nbt.getInt(name.name() + "_defence");
-            float staminaRegen = nbt.getFloat(name.name() + "_staminaRegen"),
-                    stamina = nbt.getFloat(name.name() + "_stamina"),
-                    healRegen = nbt.getFloat(name.name() + "_healRegen"),
-                    healReserve = nbt.getFloat(name.name() + "_healReserve");
-            Path pathID = PathFactory.get(PathesName.valueOf(nbt.getString(name.name() + "_path")));
-            Character character = addCharacters(healReserve, stars, stamina, strength, staminaRegen, healRegen, defence, pathID, name);
+            Character character = new CharacterFactory().getCharacter(name);
             character.readFromNbt(nbt);
+            characters.put(name, character);
         }
         for (NbtElement nbtElement: nList0) {
             if (!groupsList.contains(nbtElement.asString()))

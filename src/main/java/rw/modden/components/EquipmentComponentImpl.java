@@ -34,7 +34,7 @@ public class EquipmentComponentImpl implements EquipmentComponent {
         return ModComponents.CHARACTERS.get(player).getCharacter(character).hasItem(uniqueID);
     }
     public void addItem(String itemID) {
-        itemList.put(itemID, new Axorunelostworlds().getUniqueItemID());
+        itemList.put(itemID, Axorunelostworlds.getUniqueItemID());
     }
 
     // Для получения itemID нужно использовать:
