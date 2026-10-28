@@ -6,6 +6,8 @@ import rw.modden.combat.path.CreatePath;
 
 public class FIRrICECharacter extends ABCharacter {
     public FIRrICECharacter() {
-        super(500.0F, 5, 1000.0F, 10, 0.2F, 0.2F, 100, new CreatePath(), CharacterName.FIRRICE);
+        super(100.0F, 5, 100.0F, 1, 0.01F, 0.01F, 10, new CreatePath(), CharacterName.FIRRICE);
+        setAscension(5);
+        setLevel(100);
     }
 }

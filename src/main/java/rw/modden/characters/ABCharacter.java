@@ -14,15 +14,15 @@ import java.util.Map;
 import static rw.modden.Axorunelostworlds.LOGGER;
 
 public abstract class ABCharacter implements Character {
-    private int stars, strength, defence, energy, essence, level = 1;
-    private float healReserve, staminaRegen, stamina, healRegen, currentHeal;;
+    private int stars, energy, essence, level = 1, ascension = 1;
+    private float healReserve, staminaRegen, stamina, healRegen, currentHeal, strength, defence;
     private Path pathID;
     private CharacterName name;
     private ABEquip head, chest, legs, boots, slot1, slot2, slot3, weapon;
     private final Map<String, ABEquip> equipMap = new HashMap<>();
     private boolean activatedThisBattle, dead;
 
-    public ABCharacter (float healReserve, int stars, float stamina, int strength, float staminaRegen, float healRegen, int defence, Path pathID, CharacterName name) {
+    public ABCharacter (float healReserve, int stars, float stamina, float strength, float staminaRegen, float healRegen, float defence, Path pathID, CharacterName name) {
         this.healReserve = healReserve;
         this.stars = stars;
         this.stamina = stamina;
@@ -48,11 +48,19 @@ public abstract class ABCharacter implements Character {
         return level;
     }
     @Override
+    public int getAscension() {
+        return ascension;
+    }
+    @Override
+    public int getMaxLevel() {
+        return AbilitiesImprovement.maxLevel(ascension);
+    }
+    @Override
     public float getStamina() {
         return stamina;
     }
     @Override
-    public int getStrength() {
+    public float getStrength() {
         return strength;
     }
     @Override
@@ -72,7 +80,7 @@ public abstract class ABCharacter implements Character {
         return healRegen;
     }
     @Override
-    public int getDefence() {
+    public float getDefence() {
         return defence;
     }
     @Override
@@ -156,7 +164,7 @@ public abstract class ABCharacter implements Character {
         this.healRegen = value;
     }
     @Override
-    public void setDefence(int value) {
+    public void setDefence(float value) {
         this.defence = value;
     }
     @Override
@@ -165,14 +173,27 @@ public abstract class ABCharacter implements Character {
     }
     @Override
     public void setLevel(int value) {
-        this.level = Math.max(1, value);
+        int newLevel = Math.max(1, Math.min(getMaxLevel(), value));
+        AbilitiesImprovement.applyLevelChange(this, newLevel - level);
+        level = newLevel;
+    }
+    @Override
+    public void setAscension(int value) {
+        this.ascension = Math.max(1, Math.min(AbilitiesImprovement.MAX_ASCENSION, value));
+        setLevel(level);
+    }
+    @Override
+    public boolean ascend() {
+        if (ascension>=AbilitiesImprovement.MAX_ASCENSION || level<getMaxLevel()) return false;
+        ascension++;
+        return true;
     }
     @Override
     public void setStamina(float value) {
         this.stamina = value;
     }
     @Override
-    public void setStrength(int value) {
+    public void setStrength(float value) {
         this.strength = value;
     }
     @Override
@@ -295,10 +316,11 @@ public abstract class ABCharacter implements Character {
     }
     @Override
     public void readFromNbt(NbtCompound nbt) {
-        this.defence      = nbt.getInt(  name.name() + "_defence");
+        this.defence      = nbt.getFloat(name.name() + "_defence");
         this.stars        = nbt.getInt(  name.name() + "_stars");
-        this.level        = nbt.contains(name.name() + "_level")?nbt.getInt(name.name() + "_level"):1;
-        this.strength     = nbt.getInt(  name.name() + "_strength");
+        this.level        = nbt.contains(name.name() + "_level")?nbt.getInt(name.name() + "_level"):level;
+        this.ascension    = nbt.contains(name.name() + "_ascension")?nbt.getInt(name.name() + "_ascension"):ascension;
+        this.strength     = nbt.getFloat(name.name() + "_strength");
         this.healReserve  = nbt.getFloat(name.name() + "_healReserve");
         this.stamina      = nbt.getFloat(name.name() + "_stamina");
         this.staminaRegen = nbt.getFloat(name.name() + "_staminaRegen");
@@ -388,10 +410,11 @@ public abstract class ABCharacter implements Character {
 
     @Override
     public void writeToNbt(NbtCompound nbt) {
-        nbt.putInt   (name.name()+"_defence",      defence);
-        nbt.putInt   (name.name()+"_strength",     strength);
+        nbt.putFloat (name.name()+"_defence",      defence);
+        nbt.putFloat (name.name()+"_strength",     strength);
         nbt.putInt   (name.name()+"_stars",        stars);
         nbt.putInt   (name.name()+"_level",        level);
+        nbt.putInt   (name.name()+"_ascension",    ascension);
         nbt.putFloat (name.name()+"_healReserve",  healReserve);
         nbt.putFloat (name.name()+"_stamina",      stamina);
         nbt.putFloat (name.name()+"_staminaRegen", staminaRegen);

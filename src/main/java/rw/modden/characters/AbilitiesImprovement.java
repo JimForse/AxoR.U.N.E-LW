@@ -1,67 +1,28 @@
 package rw.modden.characters;
 
-import net.minecraft.nbt.NbtCompound;
+public final class AbilitiesImprovement {
+    public static final int LEVELS_PER_ASCENSION = 20, MAX_ASCENSION = 5;
+    private static final float MIN_HEAL_RESERVE = 100.0F, MIN_STAMINA = 100.0F, MIN_STRENGTH = 1.0F,
+            MIN_DEFENCE = 10.0F, MIN_STAMINA_REGEN = 0.01F, MIN_HEAL_REGEN = 0.01F;
+    private static final float MAX_HEAL_RESERVE = 500.0F, MAX_STAMINA = 1000.0F, MAX_STRENGTH = 10.0F,
+            MAX_DEFENCE = 100.0F, MAX_STAMINA_REGEN = 0.5F, MAX_HEAL_REGEN = 0.5F;
 
-public class AbilitiesImprovement {
-    private int stars, strength, defence;
-    private float staminaRegen, healRegen, heal, stamina;
-    private final Character character;
-    private Runnable onChanged;
+    private AbilitiesImprovement() {}
 
-    public AbilitiesImprovement(Character character) {
-        this.character = character;
-    }
-
-    public void upHeal(float value) {
-        this.heal = character.getHealReserve() + value;
-        onChanged.run();
+    public static int maxLevel(int ascension) {
+        return ascension*LEVELS_PER_ASCENSION;
     }
 
-    public void upStars(int value) {
-        this.stars = character.getStars() + value;
-        onChanged.run();
-    }
-    public void upStamina(float value) {
-        this.stamina = character.getStamina() + value;
-        onChanged.run();
-    }
-    public void upStrength(int value) {
-        this.strength = character.getStrength() + value;
-        onChanged.run();
-    }
-    public void upStaminaRegen(float value) {
-        this.staminaRegen = character.getStaminaRegen() + value;
-        onChanged.run();
-    }
-    public void upHealRegen(float value) {
-        this.healRegen = character.getHealRegen() + value;
-        onChanged.run();
-    }
-    public void upDefence(int value) {
-        this.defence = character.getDefence() + value;
-        onChanged.run();
+    public static void applyLevelChange(Character character, int diff) {
+        character.setHealReserve(character.getHealReserve() + step(MIN_HEAL_RESERVE, MAX_HEAL_RESERVE)*diff);
+        character.setStamina(character.getStamina() + step(MIN_STAMINA, MAX_STAMINA)*diff);
+        character.setStrength(character.getStrength() + step(MIN_STRENGTH, MAX_STRENGTH)*diff);
+        character.setDefence(character.getDefence() + step(MIN_DEFENCE, MAX_DEFENCE)*diff);
+        character.setStaminaRegen(character.getStaminaRegen() + step(MIN_STAMINA_REGEN, MAX_STAMINA_REGEN)*diff);
+        character.setHealRegen(character.getHealRegen() + step(MIN_HEAL_REGEN, MAX_HEAL_REGEN)*diff);
     }
 
-    public void readFromNbt(NbtCompound nbt) {
-        CharacterName name = character.getName();
-        this.heal = nbt.getFloat(name.name()+"_heal");
-        this.stars = nbt.getInt(name.name()+"_stars");
-        this.stamina = nbt.getFloat(name.name()+"_stamina");
-        this.strength = nbt.getInt(name.name()+"_strength");
-        this.staminaRegen = nbt.getFloat(name.name()+"_staminaRegen");
-        this.healRegen = nbt.getFloat(name.name() + "_healRegen");
-        this.defence = nbt.getInt(name.name()+"_defence");
-        this.healRegen = nbt.getFloat(name.name()+"_healRegen");
-    }
-    public void writeToNbt(NbtCompound nbt) {
-        CharacterName name = character.getName();
-        nbt.putFloat(name.name()+"_heal", heal);
-        nbt.putInt(name.name()+"_stars", stars);
-        nbt.putFloat(name.name()+"_stamina", stamina);
-        nbt.putInt(name.name()+"_strength", strength);
-        nbt.putFloat(name.name()+"_staminaRegen", staminaRegen);
-        nbt.putFloat(name.name()+"_healRegen", healRegen);
-        nbt.putInt(name.name()+"_defence", defence);
-        nbt.putFloat(name.name()+"_healRegen", healRegen);
+    private static float step(float min, float max) {
+        return (max - min) / (MAX_ASCENSION*LEVELS_PER_ASCENSION - 1);
     }
 }

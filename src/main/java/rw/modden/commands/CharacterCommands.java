@@ -62,7 +62,7 @@ public class CharacterCommands {
                 .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
                     .then(argument("player", EntityArgumentType.player())
                         .then(argument("state", StringArgumentType.word())
-                            .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"heal", "stars", "level", "strength", "stamina", "staminaRegen", "healRegen", "defence", "weapon"}, builder))
+                            .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"heal", "stars", "level", "ascension", "strength", "stamina", "staminaRegen", "healRegen", "defence", "weapon"}, builder))
                                 .then(argument("value", DoubleArgumentType.doubleArg())
                                     .executes(CharacterCommands::editCharacter)))
                         .then(literal("weapon")
@@ -81,7 +81,7 @@ public class CharacterCommands {
                             .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
                                 .then(argument("player", EntityArgumentType.player())
                                     .then(argument("state", StringArgumentType.word())
-                                        .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"heal", "stars", "level", "strength", "stamina", "staminaRegen", "healRegen", "defence", "weapon"}, builder))
+                                        .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"heal", "stars", "level", "ascension", "maxAscensionLevel", "strength", "stamina", "staminaRegen", "healRegen", "defence", "weapon"}, builder))
                                             .executes(CharacterCommands::checkCharacterState))))))
         );
     }
@@ -140,6 +140,8 @@ public class CharacterCommands {
             case "heal" -> String.valueOf(chr.getHealReserve());
             case "stars" -> String.valueOf(chr.getStars());
             case "level" -> String.valueOf(chr.getLevel());
+            case "ascension" -> String.valueOf(chr.getAscension());
+            case "maxAscensionLevel" -> String.valueOf(chr.getMaxLevel());
             case "strength" -> String.valueOf(chr.getStrength());
             case "stamina" -> String.valueOf(chr.getStamina());
             case "staminaRegen" -> String.valueOf(chr.getStaminaRegen());
@@ -188,11 +190,12 @@ public class CharacterCommands {
                     case "heal" -> chr.setHealReserve((float) value);
                     case "stars" -> chr.setStars((int) value);
                     case "level" -> chr.setLevel((int) value);
-                    case "strength" -> chr.setStrength((int) value);
+                    case "ascension" -> chr.setAscension((int) value);
+                    case "strength" -> chr.setStrength((float) value);
                     case "stamina" -> chr.setStamina((float) value);
                     case "staminaRegen" -> chr.setStaminaRegen((float) value);
                     case "healRegen" -> chr.setHealRegen((float) value);
-                    case "defence" -> chr.setDefence((int) value);
+                    case "defence" -> chr.setDefence((float) value);
                     default -> {
                         ctx.getSource().sendError(Text.literal("Unknown parameter: " + characteristic));
                         return;
