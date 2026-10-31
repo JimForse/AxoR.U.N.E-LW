@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import rw.modden.characters.CharacterInitializer;
 import rw.modden.commands.BattleCommands;
 import rw.modden.commands.CharacterCommands;
+import rw.modden.commands.NpcCommands;
+import rw.modden.npc.ModEntities;
 import rw.modden.network.ServerNetwork;
 
 import java.io.File;
@@ -47,7 +49,9 @@ public class Axorunelostworlds implements ModInitializer {
         }
 
 		new CharacterInitializer().getOrCreate();
+		ModEntities.initialize();
 		CharacterCommands.initialize();
+		NpcCommands.initialize();
         BattleCommands.initialize();
 		ServerNetwork.registerGlobalRecevier();
 	}

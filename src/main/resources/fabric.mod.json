@@ -9,7 +9,7 @@
 		"homepage": "https://fabricmc.net/",
 		"sources": "https://github.com/JimForse/AxoR.U.N.E-LW"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/axorunelostworlds/icon.png",
 	"environment": "*",
 	"custom": {
