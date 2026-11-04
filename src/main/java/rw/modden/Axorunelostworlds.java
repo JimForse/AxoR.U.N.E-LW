@@ -13,6 +13,7 @@ import rw.modden.commands.BattleCommands;
 import rw.modden.commands.CharacterCommands;
 import rw.modden.commands.NpcCommands;
 import rw.modden.npc.ModEntities;
+import rw.modden.npc.dialogue.DialogueManager;
 import rw.modden.network.ServerNetwork;
 
 import java.io.File;
@@ -52,6 +53,7 @@ public class Axorunelostworlds implements ModInitializer {
 		ModEntities.initialize();
 		CharacterCommands.initialize();
 		NpcCommands.initialize();
+		DialogueManager.initialize();
         BattleCommands.initialize();
 		ServerNetwork.registerGlobalRecevier();
 	}

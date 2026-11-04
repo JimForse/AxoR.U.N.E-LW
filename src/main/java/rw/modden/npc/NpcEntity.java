@@ -1,5 +1,6 @@
 package rw.modden.npc;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.GoToWalkTargetGoal;
 import net.minecraft.entity.ai.goal.LookAroundGoal;
@@ -17,21 +18,36 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import rw.modden.npc.dialogue.DialogueManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class NpcEntity extends PathAwareEntity {
     public enum AiMode { STILL, WALKING, PATROL }
+    private static final int CLICK_COOLDOWN = 20, REGISTRY_UPDATE_TICKS = 100;
 
-    private String npcId = "";
+    private String npcId = "", dialogue = "";
     private boolean infiniteHealth = true;
+    private float pushStrength;
     private AiMode aiMode = AiMode.STILL;
     private BlockPos home = BlockPos.ORIGIN;
     private int walkingRadius, patrolIndex;
     private final List<BlockPos> patrolPoints = new ArrayList<>();
+    private final List<String> clickCommands = new ArrayList<>();
+    private final Map<UUID, Integer> lastClick = new HashMap<>();
 
     public NpcEntity(EntityType<? extends PathAwareEntity> type, World world) {
         super(type, world);
@@ -127,19 +143,84 @@ public class NpcEntity extends PathAwareEntity {
     public BlockPos currentPatrolPoint() { return patrolPoints.get(patrolIndex % patrolPoints.size()); }
     public void nextPatrolPoint() { patrolIndex = (patrolIndex + 1) % patrolPoints.size(); }
 
+    public List<String> getClickCommands() { return clickCommands; }
+    public void addClickCommand(String command) { clickCommands.add(command); }
+    public void clearClickCommands() { clickCommands.clear(); }
+    public boolean removeClickCommand(int index) {
+        if (index<0 || index>=clickCommands.size()) return false;
+        clickCommands.remove(index);
+        return true;
+    }
+
+    public String getDialogue() { return dialogue; }
+    public void setDialogue(String dialogue) { this.dialogue = dialogue; }
+
+    @Override
+    protected ActionResult interactMob(PlayerEntity player, Hand hand) {
+        if (hand != Hand.MAIN_HAND) return ActionResult.PASS;
+        if (player instanceof ServerPlayerEntity serverPlayer) onClick(serverPlayer);
+        return ActionResult.success(getWorld().isClient);
+    }
+    @Override
+    public boolean canBeLeashedBy(PlayerEntity player) { return false; }
+
+    private void onClick(ServerPlayerEntity player) {
+        if (age - lastClick.getOrDefault(player.getUuid(), -CLICK_COOLDOWN)<CLICK_COOLDOWN) return;
+        lastClick.put(player.getUuid(), age);
+        runCommands(player, clickCommands);
+        if (!dialogue.isEmpty()) DialogueManager.start(player, dialogue, getDisplayName().getString());
+    }
+
+    public static void runCommands(ServerPlayerEntity player, List<String> commands) {
+        if (commands == null || commands.isEmpty()) return;
+        MinecraftServer server = player.getServer();
+        ServerCommandSource source = server.getCommandSource().withEntity(player).withPosition(player.getPos())
+                .withRotation(player.getRotationClient()).withWorld(player.getServerWorld()).withSilent();
+        for(String command: commands) server.getCommandManager().executeWithPrefix(source, command);
+    }
+
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
         if (infiniteHealth && !source.isOf(DamageTypes.GENERIC_KILL) && !source.isOf(DamageTypes.OUT_OF_WORLD)) return true;
         return super.isInvulnerableTo(source);
     }
+    public float getPushStrength() { return pushStrength; }
+    public void setPushStrength(float strength) { pushStrength = strength; }
+    public void setKnockbackStrength(float strength) { getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE).setBaseValue(1.0F - strength); }
+
     @Override
-    public boolean isPushable() { return false; }
+    public boolean isPushable() { return pushStrength>0; }
+    @Override
+    protected void pushAway(Entity entity) { pushAwayFrom(entity); }
+    @Override
+    public void pushAwayFrom(Entity entity) {
+        Vec3d before = getVelocity();
+        super.pushAwayFrom(entity);
+        setVelocity(before.add(getVelocity().subtract(before).multiply(pushStrength)));
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!getWorld().isClient && !npcId.isEmpty() && age % REGISTRY_UPDATE_TICKS==0) NpcRegistry.get(getServer()).update(this);
+    }
+    @Override
+    public void remove(RemovalReason reason) {
+        if (!getWorld().isClient && !npcId.isEmpty()) {
+            NpcRegistry registry = NpcRegistry.get(getServer());
+            if (reason.shouldDestroy()) registry.remove(this);
+            else registry.update(this);
+        }
+        super.remove(reason);
+    }
 
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
         nbt.putString("NpcId", npcId);
+        nbt.putString("Dialogue", dialogue);
         nbt.putBoolean("InfiniteHealth", infiniteHealth);
+        nbt.putFloat("PushStrength", pushStrength);
         nbt.putString("AiMode", aiMode.name());
         nbt.put("Home", NbtHelper.fromBlockPos(home));
         nbt.putInt("WalkingRadius", walkingRadius);
@@ -147,18 +228,25 @@ public class NpcEntity extends PathAwareEntity {
         for(BlockPos point: patrolPoints) points.add(NbtHelper.fromBlockPos(point));
         nbt.put("PatrolPoints", points);
         nbt.putInt("PatrolIndex", patrolIndex);
+        NbtList commands = new NbtList();
+        for(String command: clickCommands) commands.add(NbtString.of(command));
+        nbt.put("ClickCommands", commands);
     }
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
         npcId = nbt.getString("NpcId");
+        dialogue = nbt.getString("Dialogue");
         infiniteHealth = !nbt.contains("InfiniteHealth") || nbt.getBoolean("InfiniteHealth");
+        pushStrength = nbt.getFloat("PushStrength");
         aiMode = nbt.contains("AiMode")?AiMode.valueOf(nbt.getString("AiMode")):AiMode.STILL;
         home = nbt.contains("Home")?NbtHelper.toBlockPos(nbt.getCompound("Home")):getBlockPos();
         walkingRadius = nbt.getInt("WalkingRadius");
         patrolPoints.clear();
         for(NbtElement point: nbt.getList("PatrolPoints", NbtElement.COMPOUND_TYPE)) patrolPoints.add(NbtHelper.toBlockPos((NbtCompound) point));
         patrolIndex = nbt.getInt("PatrolIndex");
+        clickCommands.clear();
+        for(NbtElement command: nbt.getList("ClickCommands", NbtElement.STRING_TYPE)) clickCommands.add(command.asString());
         if (aiMode==AiMode.WALKING) setPositionTarget(home, walkingRadius);
     }
 }

@@ -10,7 +10,9 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.hit.EntityHitResult;
@@ -20,9 +22,13 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import rw.modden.npc.ModEntities;
 import rw.modden.npc.NpcEntity;
+import rw.modden.npc.NpcRegistry;
+import rw.modden.npc.dialogue.DialogueManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -85,13 +91,53 @@ public class NpcCommands {
                         .then(argument("number", IntegerArgumentType.integer(1))
                             .then(argument("to", IntegerArgumentType.integer(1))
                                 .executes(NpcCommands::patrolMove))))))
+            .then(literal("click")
+                .then(argument("id", StringArgumentType.word()).suggests(NpcCommands::suggestLookedAt)
+                    .then(literal("add")
+                        .fork(dispatcher.getRoot(), NpcCommands::clickAdd))
+                    .then(literal("list")
+                        .executes(NpcCommands::clickList))
+                    .then(literal("remove")
+                        .then(argument("number", IntegerArgumentType.integer(1))
+                            .executes(NpcCommands::clickRemove)))
+                    .then(literal("clear")
+                        .executes(NpcCommands::clickClear))))
+            .then(literal("push")
+                .then(argument("id", StringArgumentType.word()).suggests(NpcCommands::suggestLookedAt)
+                    .then(argument("strength", FloatArgumentType.floatArg(0.0F, 1.0F))
+                        .executes(NpcCommands::push))))
+            .then(literal("knockback")
+                .then(argument("id", StringArgumentType.word()).suggests(NpcCommands::suggestLookedAt)
+                    .then(argument("strength", FloatArgumentType.floatArg(0.0F, 1.0F))
+                        .executes(NpcCommands::knockback))))
+            .then(literal("dialogue")
+                .then(argument("id", StringArgumentType.word()).suggests(NpcCommands::suggestLookedAt)
+                    .then(literal("set")
+                        .then(argument("dialogue", StringArgumentType.word()).suggests((ctx, builder) -> CommandSource.suggestMatching(DialogueManager.getIds(), builder))
+                            .executes(NpcCommands::dialogueSet)))
+                    .then(literal("clear")
+                        .executes(NpcCommands::dialogueClear))))
+            .then(literal("reload")
+                .executes(NpcCommands::reload))
+            .then(literal("tp")
+                .then(argument("id", StringArgumentType.word()).suggests(NpcCommands::suggestAll)
+                    .executes(NpcCommands::tp)))
         );
+        dispatcher.register(literal("dialogue")
+            .then(argument("step", IntegerArgumentType.integer(0))
+                .then(argument("number", IntegerArgumentType.integer(1))
+                    .executes(ctx -> {
+                        ServerPlayerEntity player = ctx.getSource().getPlayer();
+                        if (player != null) DialogueManager.answer(player, IntegerArgumentType.getInteger(ctx, "step"), IntegerArgumentType.getInteger(ctx, "number"));
+                        return 1;
+                    }))));
     }
 
     private static int create(CommandContext<ServerCommandSource> ctx, String name) {
         String id = StringArgumentType.getString(ctx, "id");
         ServerCommandSource source = ctx.getSource();
-        if (find(source, id) != null) {
+        NpcRegistry registry = NpcRegistry.get(source.getServer());
+        if (find(source, id) != null || registry.get(id) != null) {
             source.sendError(Text.literal("NPC '" + id + "' already exists"));
             return 0;
         }
@@ -107,6 +153,7 @@ public class NpcCommands {
             npc.setCustomNameVisible(true);
         }
         source.getWorld().spawnEntity(npc);
+        registry.update(npc);
         source.sendFeedback(() -> Text.literal("NPC '" + id + "' created"), true);
         return 1;
     }
@@ -120,17 +167,21 @@ public class NpcCommands {
     }
 
     private static int list(CommandContext<ServerCommandSource> ctx) {
-        List<NpcEntity> npcs = all(ctx.getSource());
-        if (npcs.isEmpty()) {
-            ctx.getSource().sendFeedback(() -> Text.literal("No loaded NPCs"), false);
+        NpcRegistry registry = NpcRegistry.get(ctx.getSource().getServer());
+        List<String> loaded = new ArrayList<>();
+        for(NpcEntity npc: all(ctx.getSource())) {
+            registry.update(npc);
+            loaded.add(npc.getNpcId());
+        }
+        if (registry.getAll().isEmpty()) {
+            ctx.getSource().sendFeedback(() -> Text.literal("No NPCs"), false);
             return 0;
         }
-        for(NpcEntity npc: npcs) {
-            String line = String.format("%s — %s, %d %d %d", npc.getNpcId(), npc.getWorld().getRegistryKey().getValue(),
-                    npc.getBlockX(), npc.getBlockY(), npc.getBlockZ());
+        for(Map.Entry<String, NpcRegistry.Location> entry: registry.getAll().entrySet()) {
+            String line = describe(entry.getKey(), entry.getValue()) + (loaded.contains(entry.getKey())?"":" (not loaded)");
             ctx.getSource().sendFeedback(() -> Text.literal(line), false);
         }
-        return npcs.size();
+        return registry.getAll().size();
     }
 
     private static int name(CommandContext<ServerCommandSource> ctx) {
@@ -228,6 +279,114 @@ public class NpcCommands {
         return 1;
     }
 
+    private static Collection<ServerCommandSource> clickAdd(CommandContext<ServerCommandSource> ctx) {
+        NpcEntity npc = findOrError(ctx);
+        if (npc == null) return List.of();
+        String command = ctx.getInput().substring(ctx.getRange().getEnd()).trim();
+        npc.addClickCommand(command);
+        int number = npc.getClickCommands().size();
+        ctx.getSource().sendFeedback(() -> Text.literal("NPC '" + npc.getNpcId() + "' click command #" + number + ": " + command), true);
+        return List.of();
+    }
+
+    private static int clickList(CommandContext<ServerCommandSource> ctx) {
+        NpcEntity npc = findOrError(ctx);
+        if (npc == null) return 0;
+        List<String> commands = npc.getClickCommands();
+        if (commands.isEmpty()) {
+            ctx.getSource().sendFeedback(() -> Text.literal("NPC '" + npc.getNpcId() + "' has no click commands"), false);
+            return 0;
+        }
+        for(int i = 0; i<commands.size(); i++) {
+            String line = "#" + (i + 1) + ": " + commands.get(i);
+            ctx.getSource().sendFeedback(() -> Text.literal(line), false);
+        }
+        return commands.size();
+    }
+
+    private static int clickRemove(CommandContext<ServerCommandSource> ctx) {
+        NpcEntity npc = findOrError(ctx);
+        if (npc == null) return 0;
+        int number = IntegerArgumentType.getInteger(ctx, "number");
+        if (!npc.removeClickCommand(number - 1)) {
+            ctx.getSource().sendError(Text.literal("NPC '" + npc.getNpcId() + "' has " + npc.getClickCommands().size() + " click command(s)"));
+            return 0;
+        }
+        ctx.getSource().sendFeedback(() -> Text.literal("NPC '" + npc.getNpcId() + "' click command #" + number + " removed"), true);
+        return 1;
+    }
+
+    private static int clickClear(CommandContext<ServerCommandSource> ctx) {
+        NpcEntity npc = findOrError(ctx);
+        if (npc == null) return 0;
+        npc.clearClickCommands();
+        ctx.getSource().sendFeedback(() -> Text.literal("NPC '" + npc.getNpcId() + "' click commands cleared"), true);
+        return 1;
+    }
+
+    private static int push(CommandContext<ServerCommandSource> ctx) {
+        NpcEntity npc = findOrError(ctx);
+        if (npc == null) return 0;
+        float strength = FloatArgumentType.getFloat(ctx, "strength");
+        npc.setPushStrength(strength);
+        ctx.getSource().sendFeedback(() -> Text.literal("NPC '" + npc.getNpcId() + "' push strength: " + strength), true);
+        return 1;
+    }
+
+    private static int knockback(CommandContext<ServerCommandSource> ctx) {
+        NpcEntity npc = findOrError(ctx);
+        if (npc == null) return 0;
+        float strength = FloatArgumentType.getFloat(ctx, "strength");
+        npc.setKnockbackStrength(strength);
+        ctx.getSource().sendFeedback(() -> Text.literal("NPC '" + npc.getNpcId() + "' knockback strength: " + strength), true);
+        return 1;
+    }
+
+    private static int dialogueSet(CommandContext<ServerCommandSource> ctx) {
+        NpcEntity npc = findOrError(ctx);
+        if (npc == null) return 0;
+        String dialogue = StringArgumentType.getString(ctx, "dialogue");
+        if (!DialogueManager.exists(dialogue)) {
+            ctx.getSource().sendError(Text.literal("Dialogue '" + dialogue + "' not loaded"));
+            return 0;
+        }
+        npc.setDialogue(dialogue);
+        ctx.getSource().sendFeedback(() -> Text.literal("NPC '" + npc.getNpcId() + "' dialogue: " + dialogue), true);
+        return 1;
+    }
+
+    private static int dialogueClear(CommandContext<ServerCommandSource> ctx) {
+        NpcEntity npc = findOrError(ctx);
+        if (npc == null) return 0;
+        npc.setDialogue("");
+        ctx.getSource().sendFeedback(() -> Text.literal("NPC '" + npc.getNpcId() + "' dialogue cleared"), true);
+        return 1;
+    }
+
+    private static int reload(CommandContext<ServerCommandSource> ctx) {
+        List<String> errors = DialogueManager.reload();
+        for(String error: errors) ctx.getSource().sendError(Text.literal(error));
+        ctx.getSource().sendFeedback(() -> Text.literal("Dialogues loaded: " + DialogueManager.getIds().size() + ", errors: " + errors.size()), true);
+        return errors.isEmpty()?1:0;
+    }
+
+    private static int tp(CommandContext<ServerCommandSource> ctx) {
+        String id = StringArgumentType.getString(ctx, "id");
+        ServerPlayerEntity player = ctx.getSource().getPlayer();
+        if (player == null) return 0;
+        NpcEntity npc = find(ctx.getSource(), id);
+        NpcRegistry.Location location = npc != null?new NpcRegistry.Location(npc.getUuid(), npc.getWorld().getRegistryKey(), npc.getBlockPos()):NpcRegistry.get(ctx.getSource().getServer()).get(id);
+        ServerWorld world = location == null?null:ctx.getSource().getServer().getWorld(location.world());
+        if (world == null) {
+            ctx.getSource().sendError(Text.literal("NPC '" + id + "' not found"));
+            return 0;
+        }
+        BlockPos pos = location.pos();
+        player.teleport(world, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, player.getYaw(), player.getPitch());
+        ctx.getSource().sendFeedback(() -> Text.literal("Teleported to NPC '" + id + "'"), false);
+        return 1;
+    }
+
     private static int badNumber(CommandContext<ServerCommandSource> ctx, NpcEntity npc) {
         ctx.getSource().sendError(Text.literal("NPC '" + npc.getNpcId() + "' has " + npc.getPatrolPoints().size() + " patrol point(s)"));
         return 0;
@@ -246,8 +405,16 @@ public class NpcCommands {
     private static NpcEntity findOrError(CommandContext<ServerCommandSource> ctx) {
         String id = StringArgumentType.getString(ctx, "id");
         NpcEntity npc = find(ctx.getSource(), id);
-        if (npc == null) ctx.getSource().sendError(Text.literal("NPC '" + id + "' not found (or its chunk is not loaded)"));
-        return npc;
+        if (npc != null) return npc;
+        NpcRegistry.Location location = NpcRegistry.get(ctx.getSource().getServer()).get(id);
+        ctx.getSource().sendError(Text.literal(location == null?"NPC '" + id + "' not found"
+                :"NPC '" + id + "' is not loaded, last seen: " + describe(id, location) + ". Use /npc tp " + id));
+        return null;
+    }
+
+    private static String describe(String id, NpcRegistry.Location location) {
+        BlockPos pos = location.pos();
+        return String.format("%s — %s, %d %d %d", id, location.world().getValue(), pos.getX(), pos.getY(), pos.getZ());
     }
 
     public static NpcEntity find(ServerCommandSource source, String id) {
@@ -260,6 +427,10 @@ public class NpcCommands {
         for(ServerWorld world: source.getServer().getWorlds())
             result.addAll(world.getEntitiesByType(ModEntities.NPC, npc -> true));
         return result;
+    }
+
+    private static CompletableFuture<Suggestions> suggestAll(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+        return CommandSource.suggestMatching(NpcRegistry.get(ctx.getSource().getServer()).getAll().keySet(), builder);
     }
 
     private static CompletableFuture<Suggestions> suggestLookedAt(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
