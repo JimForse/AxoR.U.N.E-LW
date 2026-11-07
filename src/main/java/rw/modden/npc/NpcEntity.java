@@ -1,6 +1,8 @@
 package rw.modden.npc;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityDimensions;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.GoToWalkTargetGoal;
 import net.minecraft.entity.ai.goal.LookAroundGoal;
@@ -11,6 +13,9 @@ import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -38,6 +43,8 @@ import java.util.UUID;
 public class NpcEntity extends PathAwareEntity {
     public enum AiMode { STILL, WALKING, PATROL }
     private static final int CLICK_COOLDOWN = 20, REGISTRY_UPDATE_TICKS = 100;
+    private static final TrackedData<Float> WIDTH = DataTracker.registerData(NpcEntity.class, TrackedDataHandlerRegistry.FLOAT),
+            HEIGHT = DataTracker.registerData(NpcEntity.class, TrackedDataHandlerRegistry.FLOAT);
 
     private String npcId = "", dialogue = "";
     private boolean infiniteHealth = true;
@@ -59,6 +66,29 @@ public class NpcEntity extends PathAwareEntity {
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25);
     }
+
+    @Override
+    protected void initDataTracker() {
+        super.initDataTracker();
+        dataTracker.startTracking(WIDTH, 0.6F);
+        dataTracker.startTracking(HEIGHT, 1.8F);
+    }
+
+    public float getWidthSize() { return dataTracker.get(WIDTH); }
+    public float getHeightSize() { return dataTracker.get(HEIGHT); }
+    public void setSize(float width, float height) {
+        dataTracker.set(WIDTH, width);
+        dataTracker.set(HEIGHT, height);
+    }
+    @Override
+    public void onTrackedDataSet(TrackedData<?> data) {
+        super.onTrackedDataSet(data);
+        if (WIDTH.equals(data) || HEIGHT.equals(data)) calculateDimensions();
+    }
+    @Override
+    public EntityDimensions getDimensions(EntityPose pose) { return EntityDimensions.changing(getWidthSize(), getHeightSize()); }
+    @Override
+    protected float getActiveEyeHeight(EntityPose pose, EntityDimensions dimensions) { return dimensions.height*0.9F; }
 
     @Override
     protected void initGoals() {
@@ -221,6 +251,8 @@ public class NpcEntity extends PathAwareEntity {
         nbt.putString("Dialogue", dialogue);
         nbt.putBoolean("InfiniteHealth", infiniteHealth);
         nbt.putFloat("PushStrength", pushStrength);
+        nbt.putFloat("Width", getWidthSize());
+        nbt.putFloat("Height", getHeightSize());
         nbt.putString("AiMode", aiMode.name());
         nbt.put("Home", NbtHelper.fromBlockPos(home));
         nbt.putInt("WalkingRadius", walkingRadius);
@@ -239,6 +271,7 @@ public class NpcEntity extends PathAwareEntity {
         dialogue = nbt.getString("Dialogue");
         infiniteHealth = !nbt.contains("InfiniteHealth") || nbt.getBoolean("InfiniteHealth");
         pushStrength = nbt.getFloat("PushStrength");
+        if (nbt.contains("Width")) setSize(nbt.getFloat("Width"), nbt.getFloat("Height"));
         aiMode = nbt.contains("AiMode")?AiMode.valueOf(nbt.getString("AiMode")):AiMode.STILL;
         home = nbt.contains("Home")?NbtHelper.toBlockPos(nbt.getCompound("Home")):getBlockPos();
         walkingRadius = nbt.getInt("WalkingRadius");

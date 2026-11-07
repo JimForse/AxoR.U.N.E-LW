@@ -24,6 +24,7 @@ public class BattleInputBlocker {
             GameOptions options = client.options;
             drain(options.inventoryKey);
             drain(options.dropKey);
+            drain(options.swapHandsKey);
             drain(options.pickItemKey);
             for(KeyBinding hotbarKey: options.hotbarKeys) drain(hotbarKey);
 

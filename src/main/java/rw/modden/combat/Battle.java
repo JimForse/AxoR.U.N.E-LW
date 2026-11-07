@@ -126,6 +126,7 @@ public class Battle {
     public void stopBattle() {
         LOGGER.info("Battle mode is stoped");
         battle = false;
+        BattleWeapon.unequip(player);
 
         float healthBefore = player.getHealth();
         BattleStateComponent battleState = ModComponents.BATTLE_STATE.get(player);

@@ -119,6 +119,17 @@ public class NpcCommands {
                         .executes(NpcCommands::dialogueClear))))
             .then(literal("reload")
                 .executes(NpcCommands::reload))
+            .then(literal("size")
+                .then(argument("id", StringArgumentType.word()).suggests(NpcCommands::suggestLookedAt)
+                    .then(argument("width", FloatArgumentType.floatArg(0.1F, 16.0F))
+                        .then(argument("height", FloatArgumentType.floatArg(0.1F, 16.0F))
+                            .executes(NpcCommands::size)))))
+            .then(literal("gravity")
+                .then(argument("id", StringArgumentType.word()).suggests(NpcCommands::suggestLookedAt)
+                    .then(literal("on")
+                        .executes(ctx -> gravity(ctx, true)))
+                    .then(literal("off")
+                        .executes(ctx -> gravity(ctx, false)))))
             .then(literal("tp")
                 .then(argument("id", StringArgumentType.word()).suggests(NpcCommands::suggestAll)
                     .executes(NpcCommands::tp)))
@@ -368,6 +379,23 @@ public class NpcCommands {
         for(String error: errors) ctx.getSource().sendError(Text.literal(error));
         ctx.getSource().sendFeedback(() -> Text.literal("Dialogues loaded: " + DialogueManager.getIds().size() + ", errors: " + errors.size()), true);
         return errors.isEmpty()?1:0;
+    }
+
+    private static int size(CommandContext<ServerCommandSource> ctx) {
+        NpcEntity npc = findOrError(ctx);
+        if (npc == null) return 0;
+        float width = FloatArgumentType.getFloat(ctx, "width"), height = FloatArgumentType.getFloat(ctx, "height");
+        npc.setSize(width, height);
+        ctx.getSource().sendFeedback(() -> Text.literal("NPC '" + npc.getNpcId() + "' size: " + width + " x " + height), true);
+        return 1;
+    }
+
+    private static int gravity(CommandContext<ServerCommandSource> ctx, boolean gravity) {
+        NpcEntity npc = findOrError(ctx);
+        if (npc == null) return 0;
+        npc.setNoGravity(!gravity);
+        ctx.getSource().sendFeedback(() -> Text.literal("NPC '" + npc.getNpcId() + "' gravity: " + (gravity?"on":"off")), true);
+        return 1;
     }
 
     private static int tp(CommandContext<ServerCommandSource> ctx) {

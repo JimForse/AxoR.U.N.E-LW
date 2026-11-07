@@ -50,7 +50,7 @@ public class CharacterInitializer {
             case "VLAD888222" ->       characterName = CharacterName.VLAD;
             case "THE_LOST321" ->      characterName = CharacterName.THE_LOST;
             case "OMFAS" ->            characterName = CharacterName.OMFAS;
-            case "GVALL_" ->           characterName = CharacterName.GVALL;
+            case "GVALL" ->           characterName = CharacterName.GVALL;
             case "MATSVEI_V222" ->     characterName = CharacterName.MATSVEI;
             case "KEEPFEEP3215" ->     characterName = CharacterName.KEEPFEE;
         }

@@ -5,6 +5,8 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import rw.modden.access.StaminaAccess;
 import rw.modden.combat.Battle;
+import rw.modden.combat.BattleWeapon;
+import rw.modden.combat.CombatState;
 import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
 import rw.modden.network.ServerNetwork;
@@ -57,6 +59,7 @@ public class RealizingCharacters {
         } else {
             LOGGER.error("[ARLW-DEBUG] character '{}' is NULL at restore step!", name);
         }
+        if (character != null && ModComponents.BATTLE_STATE.get(player).getState() != CombatState.NONE) BattleWeapon.equip(player, character);
         ServerNetwork.sendGroup(player);
     }
 
