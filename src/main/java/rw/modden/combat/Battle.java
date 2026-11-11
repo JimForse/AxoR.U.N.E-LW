@@ -73,6 +73,13 @@ public class Battle {
 
     @SuppressWarnings("unchecked")
     public void eventBattle(String fileName) {
+        CharacterName own = new CharacterInitializer().characterFor(player);
+        CharactersComponent owner = ModComponents.CHARACTERS.get(player);
+        if (owner.hasCharacter(own) && owner.getCharacter(own).isLocked()) {
+            LOGGER.info("[ARLW-CHAR] {}: event battle not started - {} is locked", player.getName().getString(), own);
+            ModComponents.BATTLE_STATE.get(player).setState(CombatState.NONE);
+            return;
+        }
         combatStateToBattle();
         if (battle) {
             BattleStateComponent battleState = ModComponents.BATTLE_STATE.get(player);
@@ -141,6 +148,12 @@ public class Battle {
 
         ModComponents.BATTLE_STATE.get(player).setState(CombatState.NONE);
         if (player.networkHandler!=null) serverSend();
+    }
+
+    public static CharacterName lockedIn(CharactersComponent component, ArrayList<CharacterName> group) {
+        for(CharacterName name: group)
+            if (component.hasCharacter(name) && component.getCharacter(name).isLocked()) return name;
+        return null;
     }
 
     public void combatStateToBattle(ArrayList<CharacterName> group) {

@@ -20,7 +20,7 @@ public abstract class ABCharacter implements Character {
     private CharacterName name;
     private ABEquip head, chest, legs, boots, slot1, slot2, slot3, weapon;
     private final Map<String, ABEquip> equipMap = new HashMap<>();
-    private boolean activatedThisBattle, dead;
+    private boolean activatedThisBattle, dead, locked;
 
     public ABCharacter (float healReserve, int stars, float stamina, float strength, float staminaRegen, float healRegen, float defence, Path pathID, CharacterName name) {
         this.healReserve = healReserve;
@@ -288,6 +288,7 @@ public abstract class ABCharacter implements Character {
         this.energy = Math.max(0, energy);
     }
     @Override public void setEssence(int essence) { this.essence = Math.max(0, essence); }
+    @Override public void setLocked(boolean locked) { this.locked = locked; }
 
     // ==============  HAS  ==================
     @Override
@@ -306,6 +307,7 @@ public abstract class ABCharacter implements Character {
     public boolean isActivatedThisBattle() {
         return activatedThisBattle;
     }
+    @Override public boolean isLocked() { return locked; }
 
     // ==============  OTHER  ==================
     private void addItem(ABEquip item) {

@@ -11,7 +11,9 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import rw.modden.characters.CharacterInitializer;
 import rw.modden.characters.CharacterName;
+import rw.modden.characters.CharacterTemplates;
 import rw.modden.characters.RealizingCharacters;
 import rw.modden.combat.Battle;
 import rw.modden.combat.CombatState;
@@ -19,8 +21,8 @@ import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -33,9 +35,7 @@ public class BattleCommands {
         });
     }
 
-    private static final String[] characters = Arrays.stream(CharacterName.values())
-            .map(Enum::name)
-            .toArray(String[]::new);
+    private static Stream<String> characters() { return CharacterTemplates.names().stream().map(CharacterName::name); }
 
     private static void battle(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("battle")
@@ -76,13 +76,13 @@ public class BattleCommands {
                         .suggests((context, builder) -> CommandSource.suggestMatching(
                                 ModComponents.CHARACTERS.get(EntityArgumentType.getPlayer(context, "target")).getGroupsList() ,builder))
                             .then(argument("character1", StringArgumentType.word())
-                                .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
+                                .suggests((context, builder) -> CommandSource.suggestMatching(characters(), builder))
                                     .executes(BattleCommands::editGroup)
                                     .then(argument("character2", StringArgumentType.word())
-                                        .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
+                                        .suggests((context, builder) -> CommandSource.suggestMatching(characters(), builder))
                                             .executes(BattleCommands::editGroup)
                                                 .then(argument("character3", StringArgumentType.word())
-                                                        .suggests((context, builder) -> CommandSource.suggestMatching(characters, builder))
+                                                        .suggests((context, builder) -> CommandSource.suggestMatching(characters(), builder))
                                                             .executes(BattleCommands::editGroup)))))))
             .then(literal("remove")
                 .then(argument("target", EntityArgumentType.player())
@@ -121,6 +121,12 @@ public class BattleCommands {
         CharactersComponent component = ModComponents.CHARACTERS.get(target);
         String groupName = StringArgumentType.getString(ctx, "group");
         ArrayList<CharacterName> group = component.getCharactersGroup(groupName);
+        CharacterName locked = group == null?null:Battle.lockedIn(component, group);
+        if (locked != null) {
+            LOGGER.info("[ARLW-CHAR] {}: standart battle not started - {} is locked", target.getName().getString(), locked);
+            ctx.getSource().sendError(Text.literal("Character " + locked.name() + " is locked (no template)"));
+            return 0;
+        }
         component.setCurrentGroupName(groupName);
         ModComponents.BATTLE_STATE.get(target).setState(CombatState.STANDART);
         if (new Battle(target).standartBattle(group)!=1)
@@ -131,6 +137,13 @@ public class BattleCommands {
     private static int battleStartEvent(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
         String fileName = StringArgumentType.getString(ctx, "file_name");
+        CharacterName own = new CharacterInitializer().characterFor(target);
+        CharactersComponent component = ModComponents.CHARACTERS.get(target);
+        if (component.hasCharacter(own) && component.getCharacter(own).isLocked()) {
+            LOGGER.info("[ARLW-CHAR] {}: event battle not started - {} is locked", target.getName().getString(), own);
+            ctx.getSource().sendError(Text.literal("Character " + own.name() + " is locked (no template)"));
+            return 0;
+        }
         ModComponents.BATTLE_STATE.get(target).setState(CombatState.EVENT);
         new Battle(target).eventBattle(fileName);
         return 1;
@@ -194,13 +207,13 @@ public class BattleCommands {
         String groupName = StringArgumentType.getString(ctx, "group_name");
         CharactersComponent component = ModComponents.CHARACTERS.get(target);
         int[] characters = new int[3];
-        characters[0] = component.addCharacterToGroup(groupName, CharacterName.valueOf(StringArgumentType.getString(ctx, "character1")));
+        characters[0] = component.addCharacterToGroup(groupName, CharacterName.of(StringArgumentType.getString(ctx, "character1")));
 
         ctx.getNodes().forEach(x -> {
             if (x.getNode().getName().equals("character2"))
-                characters[1] = component.addCharacterToGroup(groupName, CharacterName.valueOf(StringArgumentType.getString(ctx, "character2")));
+                characters[1] = component.addCharacterToGroup(groupName, CharacterName.of(StringArgumentType.getString(ctx, "character2")));
             else if (x.getNode().getName().equals("character3"))
-                characters[2] = component.addCharacterToGroup(groupName, CharacterName.valueOf(StringArgumentType.getString(ctx, "character3")));
+                characters[2] = component.addCharacterToGroup(groupName, CharacterName.of(StringArgumentType.getString(ctx, "character3")));
         });
         for (int character: characters) {
             if (character!=1) {
@@ -209,6 +222,7 @@ public class BattleCommands {
                     case -1 -> ctx.getSource().sendError(Text.literal("Group size is maximum"));
                     case -2 -> ctx.getSource().sendError(Text.literal("Player hasn`t this character"));
                     case -3 -> ctx.getSource().sendError(Text.literal("Group already has this character"));
+                    case -5 -> ctx.getSource().sendError(Text.literal("Character is locked (no template)"));
                 }
             } else
                 ctx.getSource().sendFeedback(() -> Text.literal(String.format("Character(s) has been add to group [%s]", groupName)), false);
@@ -225,7 +239,7 @@ public class BattleCommands {
 
         ctx.getNodes().forEach(x -> {
             if (x.getNode().getName().equals("character")) {
-                CharacterName name = CharacterName.valueOf(StringArgumentType.getString(ctx, "character"));
+                CharacterName name = CharacterName.of(StringArgumentType.getString(ctx, "character"));
                 component.removeCharacterFromGroup((name), groupName);
                 deleteGroup[0] = false;
                 ctx.getSource().sendFeedback(() -> Text.literal(String.format("Character [%s] has been deleted from group [%s]", name, groupName)), false);

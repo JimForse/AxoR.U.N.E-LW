@@ -6,9 +6,11 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.server.network.ServerPlayerEntity;
-import rw.modden.characters.CharacterFactory;
 import rw.modden.characters.CharacterName;
 import rw.modden.characters.Character;
+import rw.modden.characters.CharacterTemplate;
+import rw.modden.characters.CharacterTemplates;
+import rw.modden.characters.CustomCharacter;
 import rw.modden.characters.RealizingCharacters;
 import rw.modden.combat.CharacterDeath;
 
@@ -113,6 +115,10 @@ public class CharactersComponentImpl implements CharactersComponent {
     }
     @Override
     public int setCharacter(CharacterName name) {
+        if (hasCharacter(name) && getCharacter(name).isLocked()) {
+            LOGGER.info("[ARLW-CHAR] {}: set {} refused - character is locked", player.getName().getString(), name);
+            return -6;
+        }
         if (hasCharacter(name)) {
             new RealizingCharacters().realizingCharacterForPlayer(name, (ServerPlayerEntity) player);
             setCurrentCharacter(name);
@@ -164,8 +170,25 @@ public class CharactersComponentImpl implements CharactersComponent {
 
     // ==============  ADD  ==================
     @Override
-    public void addCharacter(CharacterName name) {
-        characters.put(name, new CharacterFactory().getCharacter(name));
+    public boolean addCharacter(CharacterName name) {
+        CharacterTemplate template = CharacterTemplates.get(name);
+        if (template == null) {
+            LOGGER.warn("[ARLW-CHAR] {}: cannot add {} - no template", player.getName().getString(), name);
+            return false;
+        }
+        characters.put(name, new CustomCharacter(name, template));
+        LOGGER.info("[ARLW-CHAR] {}: character {} added", player.getName().getString(), name);
+        return true;
+    }
+
+    @Override
+    public void refreshLocks() {
+        for(Map.Entry<CharacterName, Character> entry: characters.entrySet()) {
+            boolean locked = !CharacterTemplates.exists(entry.getKey());
+            if (entry.getValue().isLocked() != locked)
+                LOGGER.info("[ARLW-CHAR] {}: {} is now {}", player.getName().getString(), entry.getKey(), locked?"locked":"unlocked");
+            entry.getValue().setLocked(locked);
+        }
     }
 
     /**
@@ -173,6 +196,7 @@ public class CharactersComponentImpl implements CharactersComponent {
      * error -2 — Player hasn't this character
      * error -3 — Group already has this character
      * error -4 — Unknown Exception
+     * error -5 — Character is locked (no template)
      */
 
     @Override
@@ -182,6 +206,7 @@ public class CharactersComponentImpl implements CharactersComponent {
                 ArrayList<CharacterName> group = charactersGroups.get(groupName);
                 if (group.size() < 3) {
                     CharactersComponent component = ModComponents.CHARACTERS.get(player);
+                    if (component.hasCharacter(characterName) && component.getCharacter(characterName).isLocked()) return -5;
                     if (component.hasCharacter(characterName)) {
                         if (!group.contains(characterName))
                             group.add(characterName);
@@ -192,6 +217,7 @@ public class CharactersComponentImpl implements CharactersComponent {
                 return 1;
             } else {
                 ArrayList<CharacterName> group = new ArrayList<>();
+                if (hasCharacter(characterName) && getCharacter(characterName).isLocked()) return -5;
                 if (ModComponents.CHARACTERS.get(player).hasCharacter(characterName)) {
                     group.add(characterName);
                     charactersGroups.put(groupName, group);
@@ -223,9 +249,12 @@ public class CharactersComponentImpl implements CharactersComponent {
         NbtList nList0 = nbt.getList("groupsList", NbtElement.STRING_TYPE);
 
         for (NbtElement value: nKeyList) {
-            CharacterName name = CharacterName.valueOf(value.asString());
-            Character character = new CharacterFactory().getCharacter(name);
+            CharacterName name = CharacterName.of(value.asString());
+            Character character = new CustomCharacter(name);
             character.readFromNbt(nbt);
+            boolean locked = player.getWorld().isClient?nbt.getBoolean(name.name() + "_locked"):!CharacterTemplates.exists(name);
+            character.setLocked(locked);
+            if (locked && !player.getWorld().isClient) LOGGER.info("[ARLW-CHAR] {}: loaded {} as locked (no template)", player.getName().getString(), name);
             characters.put(name, character);
         }
         for (NbtElement nbtElement: nList0) {
@@ -235,7 +264,7 @@ public class CharactersComponentImpl implements CharactersComponent {
             NbtList nList1 = nbt.getList(groupName + "_group", NbtElement.STRING_TYPE);
             ArrayList<CharacterName> group = new ArrayList<>();
             for (NbtElement element: nList1) {
-                group.add(CharacterName.valueOf(element.asString()));
+                group.add(CharacterName.of(element.asString()));
             }
             charactersGroups.put(groupName, group);
         }
@@ -249,6 +278,7 @@ public class CharactersComponentImpl implements CharactersComponent {
         for (Map.Entry<CharacterName, Character> entry: characters.entrySet()) { // List all characters in player inventory
             nKeyList.add(NbtString.of(entry.getKey().name()));
             entry.getValue().writeToNbt(nbt);
+            nbt.putBoolean(entry.getKey().name() + "_locked", entry.getValue().isLocked());
         }
         for (String s: groupsList) // List all group names in player inventory
             nList0.add(NbtString.of(s));

@@ -59,12 +59,14 @@ public interface Character {
     void setDead(boolean dead);
     void setEnergy(int energy);
     void setEssence(int essence);
+    void setLocked(boolean locked);
 
     // ==============  HAS  ==================
     boolean isDead();
     boolean hasItem(ABEquip item);
     boolean hasItem(String uniqueID);
     boolean isActivatedThisBattle();
+    boolean isLocked();
 
     // ==============  OTHER  ==================
     void readFromNbt(NbtCompound nbt);

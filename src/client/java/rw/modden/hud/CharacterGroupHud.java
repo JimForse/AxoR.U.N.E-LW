@@ -101,7 +101,7 @@ public class CharacterGroupHud {
             float energy = m.energy(), maxEnergy = m.maxEnergy();
             float essence = m.essence(), maxEssence = m.maxEssence();
 
-            drawSlot(context, x, y, style, hp, maxHp, energy, maxEnergy, essence, maxEssence);
+            drawSlot(context, x, y, style, m.name(), hp, maxHp, energy, maxEnergy, essence, maxEssence);
         }
         drawStamina(context, client, leftmostX, screenH);
     }
@@ -118,7 +118,7 @@ public class CharacterGroupHud {
         return Math.round(TextureInfo.get(ULT_NULL).height() * s.scale());
     }
 
-    private static void drawSlot(DrawContext context, int x, int y, Style s, float hp, float maxHp, float energy, float maxEnergy, float essence, float maxEssence) {
+    private static void drawSlot(DrawContext context, int x, int y, Style s, String name, float hp, float maxHp, float energy, float maxEnergy, float essence, float maxEssence) {
         RenderSystem.enableBlend();
         float b = s.brightness();
         context.setShaderColor(b, b, b, 1.0F);
@@ -134,6 +134,8 @@ public class CharacterGroupHud {
                 drawRegion(context, ULT_FULL, x, y, regionW, s.scale());
             }
         }
+
+        drawHead(context, x, y, s, name);
 
         drawRegion(context, HP_NULL, x, y, TextureInfo.get(HP_NULL).width(), s.scale());
         if (maxHp > 0.0F) {
@@ -160,6 +162,13 @@ public class CharacterGroupHud {
         }
 
         context.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    private static void drawHead(DrawContext context, int x, int y, Style s, String name) {
+        TextureInfo.Info hole = TextureInfo.dark(ULT_NULL);
+        float diameter = hole.visibleWidth()*s.scale(), side = diameter/(float) Math.sqrt(2.0);
+        float offset = (diameter - side)/2.0F;
+        CharacterHead.draw(context, name, Math.round(x + hole.minX()*s.scale() + offset), Math.round(y + hole.minY()*s.scale() + offset), Math.round(side));
     }
 
     private static void drawRegion(DrawContext context, Identifier texture, int x, int y, int srcW, float scale) {

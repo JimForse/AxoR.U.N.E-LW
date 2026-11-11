@@ -4,6 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rw.modden.hud.CharacterGroupHud;
+import rw.modden.hud.CharacterHead;
 import rw.modden.network.ClientNetwork;
 import rw.modden.npc.ModEntities;
 import rw.modden.npc.NpcRenderer;
@@ -21,6 +22,7 @@ public class AxorunelostworldsClient implements ClientModInitializer {
         ClientKeyList.initialize();
         BattleInputBlocker.initialize();
         CharacterGroupHud.register();
+        CharacterHead.registerReload();
         EntityRendererRegistry.register(ModEntities.NPC, NpcRenderer::new);
     }
 }

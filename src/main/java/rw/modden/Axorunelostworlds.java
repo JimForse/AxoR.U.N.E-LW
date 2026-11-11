@@ -9,6 +9,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rw.modden.characters.CharacterInitializer;
+import rw.modden.characters.CharacterTemplates;
 import rw.modden.commands.BattleCommands;
 import rw.modden.commands.CharacterCommands;
 import rw.modden.commands.NpcCommands;
@@ -49,6 +50,7 @@ public class Axorunelostworlds implements ModInitializer {
             throw new RuntimeException(e);
         }
 
+		CharacterTemplates.initialize();
 		new CharacterInitializer().getOrCreate();
 		ModEntities.initialize();
 		CharacterCommands.initialize();

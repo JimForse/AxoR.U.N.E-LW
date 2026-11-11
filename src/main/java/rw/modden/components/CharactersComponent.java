@@ -19,7 +19,8 @@ public interface CharactersComponent extends Component {
     int switcher(ServerPlayerEntity player);
     int switcher(ServerPlayerEntity player, int value);
 
-    void addCharacter(CharacterName character);
+    boolean addCharacter(CharacterName character);
+    void refreshLocks();
     Map<CharacterName, Character> getCharacters();
     String getCurrentGroupName();
     ArrayList<CharacterName> getCurrentGroup();

@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.IntPredicate;
 
 // Читает размеры текстуры из файла и находит, где в ней реально нарисовано что-то (не прозрачное).
 // Нужно, чтобы не прописывать размеры холста руками и резать заполнение по видимой части полоски.
@@ -24,12 +25,25 @@ public final class TextureInfo {
         }
     }
 
-    private static final Map<Identifier, Info> CACHE = new HashMap<>();
+    private static final Map<Identifier, Info> CACHE = new HashMap<>(), DARK = new HashMap<>();
     public static Info get(Identifier id) {
-        return CACHE.computeIfAbsent(id, TextureInfo::load);
+        return CACHE.computeIfAbsent(id, key -> load(key, color -> ((color >>> 24) & 0xFF) > 0));
     }
 
-    private static Info load(Identifier id) {
+    public static Info dark(Identifier id) {
+        return DARK.computeIfAbsent(id, key -> {
+            Info info = load(key, color -> ((color >>> 24) & 0xFF) > 200 && (color & 0xFF) < 20 && ((color >>> 8) & 0xFF) < 20 && ((color >>> 16) & 0xFF) < 20);
+            AxorunelostworldsClient.LOGGER.info("[ARLW-HEAD] Dark area of {}: x {}..{}, y {}..{}", key, info.minX(), info.maxX(), info.minY(), info.maxY());
+            return info;
+        });
+    }
+
+    public static void clear() {
+        CACHE.clear();
+        DARK.clear();
+    }
+
+    private static Info load(Identifier id, IntPredicate counts) {
         Optional<Resource> resource = MinecraftClient.getInstance().getResourceManager().getResource(id);
         if (resource.isEmpty()) {
             AxorunelostworldsClient.LOGGER.error("[ARLW] HUD texture not found: {}", id);
@@ -44,8 +58,7 @@ public final class TextureInfo {
 
             for (int x = 0; x < w; x++) {
                 for (int y = 0; y < h; y++) {
-                    int alpha = (image.getColor(x, y) >>> 24) & 0xFF;
-                    if (alpha > 0) {
+                    if (counts.test(image.getColor(x, y))) {
                         if (x < minX) minX = x;
                         if (x > maxX) maxX = x;
                         if (y < minY) minY = y;
