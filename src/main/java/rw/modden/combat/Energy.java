@@ -12,7 +12,6 @@ public final class Energy {
     private Energy() {}
 
     public static int stageOf(int energy) {
-        if (energy >= CombatConstants.ENERGY_MAX) return 3;
         if (energy >= CombatConstants.ENERGY_STAGE_2) return 2;
         if (energy >= CombatConstants.ENERGY_STAGE_1) return 1;
         return 0;

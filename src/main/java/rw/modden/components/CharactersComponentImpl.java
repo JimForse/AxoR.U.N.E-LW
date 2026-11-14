@@ -26,7 +26,7 @@ public class CharactersComponentImpl implements CharactersComponent {
     private final ArrayList<String> groupsList = new ArrayList<>();
     private final PlayerEntity player;
     private String currentGroupName;
-    private CharacterName currentCharacter;
+    private CharacterName currentCharacter, eventCharacter;
 
     public CharactersComponentImpl(PlayerEntity player) {
         this.player = player;
@@ -36,6 +36,13 @@ public class CharactersComponentImpl implements CharactersComponent {
     @Override
     public Character getCharacter(CharacterName name) {
         return characters.get(name);
+    }
+    @Override
+    public CharacterName getEventCharacter() { return eventCharacter; }
+    @Override
+    public void setEventCharacter(CharacterName name) {
+        eventCharacter = name;
+        LOGGER.info("[ARLW-CHAR] {}: event character is {}", player.getName().getString(), name);
     }
     @Override
     public CharacterName getCurrentCharacter() {
@@ -177,6 +184,7 @@ public class CharactersComponentImpl implements CharactersComponent {
             return false;
         }
         characters.put(name, new CustomCharacter(name, template));
+        if (eventCharacter == null) setEventCharacter(name);
         LOGGER.info("[ARLW-CHAR] {}: character {} added", player.getName().getString(), name);
         return true;
     }
@@ -247,6 +255,7 @@ public class CharactersComponentImpl implements CharactersComponent {
     public void readFromNbt(NbtCompound nbt) {
         NbtList nKeyList = nbt.getList("CHARACTERNAME", NbtElement.STRING_TYPE);
         NbtList nList0 = nbt.getList("groupsList", NbtElement.STRING_TYPE);
+        eventCharacter = nbt.contains("eventCharacter")?CharacterName.of(nbt.getString("eventCharacter")):null;
 
         for (NbtElement value: nKeyList) {
             CharacterName name = CharacterName.of(value.asString());
@@ -293,5 +302,6 @@ public class CharactersComponentImpl implements CharactersComponent {
 
         nbt.put("CHARACTERNAME", nKeyList);
         nbt.put("groupsList", nList0);
+        if (eventCharacter != null) nbt.putString("eventCharacter", eventCharacter.name());
     }
 }

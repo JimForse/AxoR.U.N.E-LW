@@ -75,7 +75,12 @@ public class Battle {
     public void eventBattle(String fileName) {
         CharacterName own = new CharacterInitializer().characterFor(player);
         CharactersComponent owner = ModComponents.CHARACTERS.get(player);
-        if (owner.hasCharacter(own) && owner.getCharacter(own).isLocked()) {
+        if (own == null || !owner.hasCharacter(own)) {
+            LOGGER.info("[ARLW-CHAR] {}: event battle not started - no event character", player.getName().getString());
+            ModComponents.BATTLE_STATE.get(player).setState(CombatState.NONE);
+            return;
+        }
+        if (owner.getCharacter(own).isLocked()) {
             LOGGER.info("[ARLW-CHAR] {}: event battle not started - {} is locked", player.getName().getString(), own);
             ModComponents.BATTLE_STATE.get(player).setState(CombatState.NONE);
             return;

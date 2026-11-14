@@ -16,7 +16,7 @@ public final class CombatConstants {
 
     public static final int ENERGY_STAGE_1 = 100;                   // "выстрел"
     public static final int ENERGY_STAGE_2 = 200;                   // "взрыв"
-    public static final int ENERGY_MAX = 200;                       // ульта на Q
+    public static final int ENERGY_MAX = 200;                       // максимум шкалы энергии
     public static final int ENERGY_PER_HIT = 10;                    // енергии в секунду
     public static final int ENERGY_PASSIVE_AMOUNT = 1;              // пассивная энергия
     public static final int ENERGY_PASSIVE_INTERVAL_TICKS = 20;     // раз в секунду

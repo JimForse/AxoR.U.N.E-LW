@@ -13,6 +13,8 @@ public interface CharactersComponent extends Component {
     int setCharacter(CharacterName character);
     void setCurrentCharacter(CharacterName name);
     CharacterName getCurrentCharacter();
+    CharacterName getEventCharacter();
+    void setEventCharacter(CharacterName name);
 
     int switcher();
     int switcher(int value);

@@ -24,6 +24,7 @@ import rw.modden.combat.CombatState;
 import rw.modden.combat.path.PathFactory;
 import rw.modden.combat.path.PathesName;
 import rw.modden.components.BattleStateComponent;
+import rw.modden.components.CharactersComponent;
 import rw.modden.components.ModComponents;
 
 import java.util.ArrayList;
@@ -130,7 +131,16 @@ public class CharacterCommands {
                 .then(literal("reload")
                     .executes(CharacterCommands::templateReload)))
 
+            .then(literal("event")
+                .then(argument("character", StringArgumentType.word())
+                    .suggests((context, builder) -> CommandSource.suggestMatching(characters(), builder))
+                        .then(argument("player", EntityArgumentType.player())
+                            .executes(CharacterCommands::setEventCharacter))))
+
             .then(literal("check")
+                .then(literal("event")
+                    .then(argument("player", EntityArgumentType.player())
+                        .executes(CharacterCommands::checkEventCharacter)))
                 .then(literal("characters")
                     .executes(ctx -> listCharacters(ctx, ctx.getSource().getPlayerOrThrow()))
                     .then(argument("player", EntityArgumentType.player())
@@ -218,6 +228,31 @@ public class CharacterCommands {
         for(Character chr: owned.values())
             ctx.getSource().sendFeedback(() -> Text.literal(String.format("  %s — level %d, ascension %d%s", chr.getName(), chr.getLevel(), chr.getAscension(), chr.isLocked()?" [locked]":"")), false);
         return owned.size();
+    }
+
+    private static int setEventCharacter(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        CharacterName name = CharacterName.of(StringArgumentType.getString(ctx, "character"));
+        ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+        CharactersComponent component = ModComponents.CHARACTERS.get(player);
+        if (!component.hasCharacter(name)) {
+            ctx.getSource().sendError(Text.literal("Player hasn`t this character"));
+            return 0;
+        }
+        if (component.getCharacter(name).isLocked()) {
+            ctx.getSource().sendError(Text.literal("This character is locked (no template)"));
+            return 0;
+        }
+        component.setEventCharacter(name);
+        ModComponents.CHARACTERS.sync(player);
+        ctx.getSource().sendFeedback(() -> Text.literal("Event character of " + player.getName().getString() + " set to " + name.name()), true);
+        return 1;
+    }
+
+    private static int checkEventCharacter(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+        CharacterName name = ModComponents.CHARACTERS.get(player).getEventCharacter();
+        ctx.getSource().sendFeedback(() -> Text.literal("Event character of " + player.getName().getString() + ": " + (name == null?"none":name.name())), false);
+        return name == null?0:1;
     }
 
     private static int listTemplates(CommandContext<ServerCommandSource> ctx) {

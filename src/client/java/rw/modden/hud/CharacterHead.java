@@ -8,6 +8,7 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 import rw.modden.Axorunelostworlds;
+import rw.modden.characters.CharacterName;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,6 +61,10 @@ public final class CharacterHead {
     }
 
     private static Optional<Identifier> findIcon(String character) {
+        if (!CharacterName.isValid(character)) {
+            LOGGER.warn("[ARLW-HEAD] Invalid character name '{}', no head icon", character);
+            return Optional.empty();
+        }
         Identifier id = Identifier.of(Axorunelostworlds.MOD_ID, "textures/gui/hud/heads/" + character.toLowerCase(Locale.ROOT) + ".png");
         boolean exists = MinecraftClient.getInstance().getResourceManager().getResource(id).isPresent();
         if (exists) LOGGER.info("[ARLW-HEAD] Head icon for {}: {}", character, id);

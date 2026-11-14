@@ -101,6 +101,10 @@ public final class CharacterTemplates {
     }
 
     private static boolean write(CharacterName name, CharacterTemplate template) {
+        if (!CharacterName.isValid(name.name())) {
+            LOGGER.error("[ARLW-CHAR] Refused to save template with invalid name '{}'", name);
+            return false;
+        }
         try {
             Files.createDirectories(DIR);
             try (Writer writer = Files.newBufferedWriter(DIR.resolve(name.fileName() + ".json"))) {
@@ -114,6 +118,10 @@ public final class CharacterTemplates {
     }
 
     public static boolean delete(CharacterName name) {
+        if (!CharacterName.isValid(name.name())) {
+            LOGGER.error("[ARLW-CHAR] Refused to delete template with invalid name '{}'", name);
+            return false;
+        }
         if (templates.remove(name) == null) return false;
         try {
             Files.deleteIfExists(DIR.resolve(name.fileName() + ".json"));

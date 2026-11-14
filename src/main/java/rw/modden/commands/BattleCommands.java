@@ -139,7 +139,12 @@ public class BattleCommands {
         String fileName = StringArgumentType.getString(ctx, "file_name");
         CharacterName own = new CharacterInitializer().characterFor(target);
         CharactersComponent component = ModComponents.CHARACTERS.get(target);
-        if (component.hasCharacter(own) && component.getCharacter(own).isLocked()) {
+        if (own == null || !component.hasCharacter(own)) {
+            LOGGER.info("[ARLW-CHAR] {}: event battle not started - no event character", target.getName().getString());
+            ctx.getSource().sendError(Text.literal("Player has no event character"));
+            return 0;
+        }
+        if (component.getCharacter(own).isLocked()) {
             LOGGER.info("[ARLW-CHAR] {}: event battle not started - {} is locked", target.getName().getString(), own);
             ctx.getSource().sendError(Text.literal("Character " + own.name() + " is locked (no template)"));
             return 0;
